@@ -2,949 +2,466 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pelada do Faraó v17 - Aleatório</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        farao: {
-                            gold: '#FFD700',
-                            black: '#1a1a1a',
-                            dark: '#000000',
-                            gray: '#2d2d2d'
-                        }
-                    }
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FutBalance - V7.1 Final</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #38bdf8;
+            --accent-hover: #0ea5e9;
+            --text-main: #f1f5f9;
+            --text-sec: #94a3b8;
+            --border: #334155;
+            --coringa-color: #fbbf24;
+            --danger: #ef4444;
+            --success: #22c55e;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 20px; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        header { text-align: center; margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
+        h1 { color: var(--accent); text-transform: uppercase; letter-spacing: 2px; font-size: 1.8rem; font-weight: 800; }
+        .badge { background: var(--accent); color: #0f172a; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; vertical-align: middle; }
+
+        .input-section { background: var(--card-bg); padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid var(--border); }
+        label { display: block; margin-bottom: 10px; font-weight: bold; color: var(--text-sec); }
+        
+        textarea {
+            width: 100%; height: 150px; background: #0f172a; border: 1px solid var(--border);
+            color: white; padding: 15px; border-radius: 8px; font-size: 14px; resize: vertical; font-family: monospace;
+        }
+        textarea:focus { outline: 2px solid var(--accent); border-color: transparent; }
+
+        .status-bar { display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.85rem; color: var(--text-sec); }
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
+
+        button {
+            flex: 1; padding: 14px; border: none; border-radius: 8px; font-weight: bold;
+            cursor: pointer; transition: all 0.2s; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        button:active { transform: scale(0.98); }
+        .btn-primary { background: var(--accent); color: #0f172a; }
+        .btn-primary:hover { background: var(--accent-hover); box-shadow: 0 0 15px rgba(56, 189, 248, 0.3); }
+        .btn-outline { background: transparent; border: 1px solid var(--text-sec); color: var(--text-sec); }
+        .btn-outline:hover { border-color: var(--text-main); color: var(--text-main); }
+
+        /* Grid */
+        .teams-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-top: 30px; display: none; }
+
+        .team-card {
+            background: var(--card-bg); border-radius: 12px; overflow: hidden;
+            border: 1px solid var(--border); display: flex; flex-direction: column;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .team-header { background: #1e293b; padding: 15px; border-bottom: 1px solid var(--border); text-align: center; position: relative; }
+        .team-name { font-weight: 800; color: var(--accent); display: block; font-size: 1.2rem; }
+        .team-stats { font-size: 0.85rem; color: var(--text-sec); margin-top: 5px; }
+
+        .player-count-badge {
+            background: #334155; color: #fff; font-size: 0.7rem; padding: 3px 8px;
+            border-radius: 12px; margin-top: 8px; display: inline-block; font-weight: 600;
+        }
+        .count-ok { color: var(--success); background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2); }
+        .count-error { background: var(--danger); color: white; }
+
+        .player-list { list-style: none; padding: 0; flex-grow: 1; }
+        .player-item {
+            display: flex; justify-content: space-between; padding: 12px 15px;
+            border-bottom: 1px solid #334155; align-items: center; font-size: 0.95rem;
+        }
+        .player-item:last-child { border-bottom: none; }
+        
+        .player-info { display: flex; flex-direction: column; }
+        .p-name { font-weight: 600; color: #e2e8f0; }
+        .p-pos { font-size: 0.7rem; color: var(--text-sec); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+        
+        .p-level { 
+            background: #0f172a; padding: 4px 10px; border-radius: 6px; 
+            font-size: 0.85rem; min-width: 35px; text-align: center; font-weight: bold; color: var(--accent);
+            border: 1px solid var(--border);
+        }
+
+        .is-coringa { background: rgba(251, 191, 36, 0.05); border-left: 3px solid var(--coringa-color); }
+        .is-coringa .p-name { color: var(--coringa-color); }
+
+        .actions-area { margin-top: 30px; display: none; gap: 10px; }
+        .global-stats { margin-top: 20px; text-align: center; font-size: 0.9rem; color: var(--text-sec); display: none; background: #1e293b; padding: 10px; border-radius: 8px; border: 1px solid var(--border); }
+        
+        .change-indicator {
+            color: var(--success); font-weight: bold; margin-left: 10px;
+        }
+        .loading { opacity: 0.5; pointer-events: none; cursor: wait; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>⚽ Sorteio dos times <span class="badge">Pelada do Faraó</span></h1>
+    </header>
+
+    <div class="input-section">
+        <label>Cole a lista (Nome, Nível 1-8, Posição)</label>
+        <textarea id="inputList" placeholder="Cole sua lista aqui..."></textarea>
+        <div class="status-bar">
+            <span id="playerCount">0 jogadores</span>
+            <span id="teamsPrediction">--</span>
+        </div>
+        <div class="btn-group">
+            <button class="btn-primary" id="btnSortear" onclick="iniciarProcesso()">⚡ Sortear Times</button>
+            <button class="btn-outline" onclick="limpar()">Limpar</button>
+        </div>
+    </div>
+
+    <div id="globalStats" class="global-stats"></div>
+    <div id="teamsGrid" class="teams-grid"></div>
+
+    <div id="actionsArea" class="actions-area">
+        <button class="btn-primary" onclick="copiarWhatsApp()">📱 Copiar Todos</button>
+        <button class="btn-outline" id="btnRefazer" onclick="iniciarProcesso(true)">🎲 Refazer (Novo Sorteio)</button>
+    </div>
+</div>
+
+<script>
+    const PLAYERS_PER_TEAM = 5;
+    const MAX_RETRIES_VARIETY = 100;
+    
+    const POSITIONS_MAP = {
+        'goleiro': 'GOL', 'gol': 'GOL',
+        'zaga': 'ZAGA', 'zagueiro': 'ZAGA', 'defesa': 'ZAGA', 'beck': 'ZAGA',
+        'meio': 'MEIO', 'meia': 'MEIO',
+        'ataque': 'ATA', 'atacante': 'ATA', 'frente': 'ATA', 'pivo': 'ATA'
+    };
+
+    let lastGeneratedIds = null;
+    let currentTeams = [];
+
+    // --- UTILS ---
+    function generateUUID() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+            const r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    // --- INPUT ---
+    document.getElementById('inputList').addEventListener('input', function(e) {
+        const lines = e.target.value.trim().split('\n').filter(l => l.trim());
+        const count = lines.length;
+        document.getElementById('playerCount').innerText = `${count} jogadores`;
+        if(count > 0) {
+            const numTeams = Math.ceil(count / PLAYERS_PER_TEAM);
+            document.getElementById('teamsPrediction').innerText = `Gerará ${numTeams} times`;
+        }
+    });
+
+    function parsePlayers(text) {
+        const lines = text.trim().split('\n');
+        return lines.map(line => {
+            if (!line.trim()) return null;
+            const parts = line.split(/[,|-]+/).map(p => p.trim());
+            if (parts.length >= 3) {
+                const rawPos = parts[parts.length - 1].toLowerCase();
+                const rawLevel = parts[parts.length - 2]; 
+                const name = parts.slice(0, parts.length - 2).join(' ');
+                let level = parseFloat(rawLevel);
+                if (isNaN(level)) level = 1;
+                const position = POSITIONS_MAP[rawPos] || 'MEIO';
+                return { id: generateUUID(), name, level, position, isCoringa: false };
+            }
+            return null;
+        }).filter(p => p !== null);
+    }
+
+    // --- PROCESSAMENTO ---
+    async function iniciarProcesso(isRefazer = false) {
+        const btn = isRefazer ? document.getElementById('btnRefazer') : document.getElementById('btnSortear');
+        const originalText = btn.innerText;
+        btn.innerText = "Processando...";
+        btn.classList.add('loading');
+
+        setTimeout(() => {
+            try {
+                executarLogica(isRefazer);
+            } catch (e) {
+                alert("Erro: " + e.message);
+            } finally {
+                btn.innerText = originalText;
+                btn.classList.remove('loading');
+            }
+        }, 50);
+    }
+
+    function executarLogica(checkVariety) {
+        const rawText = document.getElementById('inputList').value;
+        let players = parsePlayers(rawText);
+
+        if (players.length < PLAYERS_PER_TEAM) {
+            alert("Mínimo de 5 jogadores necessários.");
+            return;
+        }
+
+        const numTeams = Math.ceil(players.length / PLAYERS_PER_TEAM);
+        const needed = (numTeams * PLAYERS_PER_TEAM) - players.length;
+        for(let i=0; i<needed; i++) {
+            players.push({ id: generateUUID(), name: `CORINGA ${i+1}`, level: 0, position: 'CORINGA', isCoringa: true });
+        }
+
+        let bestResult = null;
+        let maxDiversityScore = -1;
+        const attempts = checkVariety ? MAX_RETRIES_VARIETY : 1;
+        
+        for(let i=0; i < attempts; i++) {
+            let pool = JSON.parse(JSON.stringify(players));
+            let candidateTeams = gerarTimesComCotas(pool, numTeams);
+            ajustarCoringas(candidateTeams);
+
+            for(let k=0; k<50; k++) {
+                if(!otimizarTrocas(candidateTeams)) break;
+            }
+
+            if (checkVariety && lastGeneratedIds) {
+                const diversity = calcularDiversidade(candidateTeams);
+                if (diversity >= 0.6) {
+                    bestResult = candidateTeams;
+                    maxDiversityScore = diversity;
+                    break;
+                }
+                if (diversity > maxDiversityScore) {
+                    maxDiversityScore = diversity;
+                    bestResult = candidateTeams;
+                }
+            } else {
+                bestResult = candidateTeams;
+                break;
+            }
+        }
+
+        currentTeams = bestResult;
+        salvarEstado(currentTeams);
+        renderTeams(currentTeams, maxDiversityScore);
+    }
+
+    function gerarTimesComCotas(allPlayers, numTeams) {
+        let teams = [];
+        for(let i=0; i<numTeams; i++) {
+            teams.push({ id: i, name: obterNomeTime(i), players: [] });
+        }
+
+        let groups = { 'GOL': [], 'ZAGA': [], 'MEIO': [], 'ATA': [], 'CORINGA': [] };
+        allPlayers.forEach(p => {
+            if(groups[p.position]) groups[p.position].push(p);
+            else groups['MEIO'].push(p);
+        });
+
+        const priorityOrder = ['GOL', 'ZAGA', 'ATA', 'MEIO', 'CORINGA'];
+        
+        priorityOrder.forEach(pos => {
+            let playersOfPos = groups[pos];
+            shuffleArray(playersOfPos);
+            playersOfPos.sort((a,b) => b.level - a.level);
+
+            let teamOrder = Array.from({length: numTeams}, (_, i) => i);
+            shuffleArray(teamOrder);
+
+            let currentIdx = 0;
+            playersOfPos.forEach(p => {
+                let targetTeamId = teamOrder[currentIdx % numTeams];
+                let team = teams.find(t => t.id === targetTeamId);
+                
+                if (team.players.length < PLAYERS_PER_TEAM) {
+                    team.players.push(p);
+                } else {
+                    let anyTeam = teams.find(t => t.players.length < PLAYERS_PER_TEAM);
+                    if(anyTeam) anyTeam.players.push(p);
+                }
+                currentIdx++;
+            });
+        });
+
+        return teams;
+    }
+
+    function otimizarTrocas(teams) {
+        teams.forEach(t => t.avg = getAvg(t));
+        let sorted = [...teams].sort((a,b) => b.avg - a.avg);
+        let best = sorted[0];
+        let worst = sorted[sorted.length - 1];
+
+        if ((best.avg - worst.avg) < 0.1) return false;
+
+        for(let i=0; i<best.players.length; i++) {
+            for(let j=0; j<worst.players.length; j++) {
+                let p1 = best.players[i];
+                let p2 = worst.players[j];
+
+                let compatible = (p1.position === p2.position) || p1.isCoringa || p2.isCoringa;
+                if(!compatible) continue;
+
+                if (p1.level <= p2.level) continue;
+
+                let newAvgBest = (best.avg * 5 - p1.level + p2.level) / 5;
+                let newAvgWorst = (worst.avg * 5 - p2.level + p1.level) / 5;
+                let currentDiff = best.avg - worst.avg;
+                let newDiff = Math.abs(newAvgBest - newAvgWorst);
+
+                if (newDiff < currentDiff) {
+                    best.players[i] = p2;
+                    worst.players[j] = p1;
+                    return true;
                 }
             }
         }
-    </script>
-    <style>
-        body { -webkit-tap-highlight-color: transparent; user-select: none; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        .fat-finger { min-height: 48px; min-width: 48px; }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        @keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fade-in 0.2s ease-out forwards; }
+        return false;
+    }
+
+    function salvarEstado(teams) {
+        lastGeneratedIds = {};
+        teams.forEach(t => {
+            t.players.forEach(p => lastGeneratedIds[p.id] = t.id);
+        });
+    }
+
+    function calcularDiversidade(newTeams) {
+        if (!lastGeneratedIds) return 0;
+        let totalPlayers = 0;
+        let changes = 0;
+
+        newTeams.forEach(t => {
+            t.players.forEach(p => {
+                totalPlayers++;
+                if (lastGeneratedIds[p.id] !== undefined && lastGeneratedIds[p.id] !== t.id) {
+                    changes++;
+                }
+            });
+        });
+        return totalPlayers === 0 ? 0 : (changes / totalPlayers);
+    }
+
+    function ajustarCoringas(teams) {
+        let sum = 0, count = 0;
+        teams.forEach(t => t.players.forEach(p => { if(!p.isCoringa){ sum+=p.level; count++; } }));
+        let avg = count > 0 ? sum/count : 5;
+        teams.forEach(t => t.players.forEach(p => {
+            if(p.isCoringa) { p.level = parseFloat(avg.toFixed(1)); p.name = `CORINGA (${p.level})`; }
+        }));
+    }
+
+    function getAvg(t) { return t.players.reduce((a,b)=>a+b.level,0) / t.players.length; }
+    
+    // ATUALIZADO: Nomes padronizados para A, B, C...
+    function obterNomeTime(i) { 
+        const n=['A','B','C','D','E','F','G','H']; 
+        return 'TIME ' + (n[i]||(i+1)); 
+    }
+
+    // --- RENDER ---
+    function renderTeams(teams, diversityScore) {
+        const grid = document.getElementById('teamsGrid');
+        grid.innerHTML = '';
+        grid.style.display = 'grid';
+
+        const statsDiv = document.getElementById('globalStats');
+        statsDiv.style.display = 'block';
         
-        .pos-badge { font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; min-width: 35px; text-align: center; }
-        .pos-gol { background-color: #fbbf24; color: black; }
-        .pos-zag { background-color: #3b82f6; color: white; }
-        .pos-meio { background-color: #22c55e; color: white; }
-        .pos-ata { background-color: #ef4444; color: white; }
-        .player-coringa { color: #b45309; font-weight: 800; font-style: italic; }
-    </style>
-</head>
-<body class="bg-gray-100 text-gray-900 h-screen flex flex-col overflow-hidden">
+        let statsHTML = '';
+        const allAvgs = teams.map(t => getAvg(t));
+        const diff = Math.max(...allAvgs) - Math.min(...allAvgs);
+        
+        statsHTML += `Diferença de Força: <strong>${diff.toFixed(2)}</strong>`;
+        
+        if (diversityScore !== -1) {
+            const pct = (diversityScore * 100).toFixed(0);
+            statsHTML += `<span class="change-indicator">♻️ ${pct}% Modificado</span>`;
+        }
+        statsDiv.innerHTML = statsHTML;
 
-    <header class="bg-farao-dark text-farao-gold p-4 flex justify-between items-center shadow-md z-10 border-b-2 border-farao-gold">
-        <div>
-            <h1 class="font-black text-xl tracking-tighter flex items-center gap-2 uppercase italic">
-                <span class="text-2xl not-italic">👑</span> Pelada do Faraó
-            </h1>
-            <div class="text-[10px] text-gray-400 font-mono" id="header-date"></div>
-        </div>
-        <button onclick="app.exportData()" class="bg-farao-gold active:bg-yellow-500 text-black px-3 py-2 rounded font-bold text-xs flex items-center gap-2 transition-colors shadow-lg">
-            <span>BAIXAR</span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-        </button>
-    </header>
+        // Ordenar times por ID para exibição consistente (A, B, C...)
+        teams.sort((a,b) => a.id - b.id);
 
-    <main id="app-content" class="flex-1 overflow-y-auto hide-scrollbar relative pb-24">
-        </main>
-
-    <div id="toast" class="fixed top-24 left-1/2 transform -translate-x-1/2 bg-farao-black text-farao-gold border border-farao-gold px-6 py-3 rounded-full shadow-2xl opacity-0 pointer-events-none transition-opacity duration-300 z-50 text-center font-bold text-sm w-max max-w-xs">
-        Mensagem aqui
-    </div>
-
-    <nav class="bg-white border-t border-gray-200 grid grid-cols-4 h-16 fixed bottom-0 w-full shadow-[0_-4px_15px_-3px_rgba(0,0,0,0.1)] z-20">
-        <button onclick="app.router('checkin')" class="nav-btn flex flex-col items-center justify-center w-full h-full text-gray-400 active:text-black active:bg-yellow-50">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-            <span class="text-[9px] font-black uppercase tracking-widest">Chegada</span>
-        </button>
-        <button onclick="app.router('teams')" class="nav-btn flex flex-col items-center justify-center w-full h-full text-gray-400 active:text-black active:bg-yellow-50">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-            <span class="text-[9px] font-black uppercase tracking-widest">Times</span>
-        </button>
-        <button onclick="app.router('match')" class="nav-btn flex flex-col items-center justify-center w-full h-full text-gray-400 active:text-black active:bg-yellow-50">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <span class="text-[9px] font-black uppercase tracking-widest">Jogar</span>
-        </button>
-        <button onclick="app.router('rank')" class="nav-btn flex flex-col items-center justify-center w-full h-full text-gray-400 active:text-black active:bg-yellow-50">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-            <span class="text-[9px] font-black uppercase tracking-widest">Rank</span>
-        </button>
-    </nav>
-
-    <div id="event-modal" class="fixed inset-0 bg-black/90 hidden z-50 flex items-end sm:items-center justify-center backdrop-blur-sm">
-        <div id="modal-content" class="bg-white w-full sm:w-96 rounded-t-3xl sm:rounded-3xl p-6 animate-fade-in border-t-4 border-farao-gold shadow-2xl max-h-[80vh] overflow-y-auto">
-            </div>
-    </div>
-
-    <script>
-        // --- DATABASE MENSALISTAS (v13 - Ygor, Noé, Claudeco removidos) ---
-        const MENSALISTAS = [
-            { name: "André Neuro", pos: "Zaga", lvl: 4 },
-            { name: "Bráulio", pos: "Ataque", lvl: 4 },
-            { name: "Breno", pos: "Ataque", lvl: 6 },
-            { name: "Caio Vaz", pos: "Ataque", lvl: 5 },
-            // { name: "Claudeco", pos: "Ataque", lvl: 1 }, // REMOVIDO
-            { name: "Goiaba", pos: "Meio", lvl: 6 },
-            { name: "Jackson", pos: "Zaga", lvl: 4 },
-            { name: "Jojo", pos: "Meio", lvl: 4 },
-            { name: "Juninho", pos: "Meio", lvl: 7 },
-            { name: "Klebnaldo", pos: "Meio", lvl: 4 },
-            { name: "Matheusinho", pos: "Meio", lvl: 7 },
-            { name: "Móvel", pos: "Ataque", lvl: 6 },
-            // { name: "Noé", pos: "Meio", lvl: 7 }, // REMOVIDO
-            { name: "Pereira", pos: "Ataque", lvl: 7 },
-            { name: "Peu Presida", pos: "Zaga", lvl: 4 },
-            { name: "Raji", pos: "Ataque", lvl: 5 },
-            { name: "Rodrigo 01", pos: "Meio", lvl: 7 },
-            { name: "Sam", pos: "Zaga", lvl: 5 },
-            { name: "Wilker", pos: "Meio", lvl: 7 },
-            { name: "Yushin", pos: "Zaga", lvl: 5 },
-            { name: "Zaca", pos: "Meio", lvl: 5 },
-            { name: "Danilove", pos: "Zaga", lvl: 4 },
-            // { name: "Ygor", pos: "Meio", lvl: 6 }, // REMOVIDO
-            { name: "Juca", pos: "Goleiro", lvl: 8 },
-            { name: "Renato", pos: "Goleiro", lvl: 8 },
-            { name: "Adalton", pos: "Goleiro", lvl: 8 },
-            { name: "Mara", pos: "Goleiro", lvl: 8 },
-            { name: "Santos", pos: "Goleiro", lvl: 8 },
-            { name: "Iagho", pos: "Goleiro", lvl: 8 }
-        ].sort((a,b) => a.name.localeCompare(b.name));
-
-        const app = {
-            data: {
-                metadata: { date: new Date().toLocaleDateString('pt-BR'), location: 'Arena Faraó' },
-                players: [], 
-                teams: [],   
-                matches: [], 
-                activeMatch: null, 
-                settings: { playersPerTeam: 4 } // *** v14: Agora são 4 DE LINHA ***
-            },
-            coringas: [], 
-            currentTab: 'checkin',
-            scorerId: null,
-            timerInterval: null,
-            matchAssignment: { 
-                teamAId: null,
-                teamBId: null,
-                coringasToAssign: [], 
-                coringaMap: {},
-                gk_A_Id: null,
-                gk_B_Id: null
-            },
-
-            init() {
-                this.loadFromStorage();
-                document.getElementById('header-date').innerText = this.data.metadata.date;
-                this.router(this.currentTab);
-            },
-
-            saveToStorage() {
-                localStorage.setItem('peladaFaraoV16', JSON.stringify(this.data));
-            },
-
-            loadFromStorage() {
-                const stored = localStorage.getItem('peladaFaraoV16');
-                if (stored) {
-                    this.data = JSON.parse(stored);
-                }
-            },
-
-            router(tab) {
-                this.currentTab = tab;
-                clearInterval(this.timerInterval);
-                document.querySelectorAll('.nav-btn').forEach(btn => {
-                    btn.classList.remove('text-black', 'border-t-4', 'border-farao-gold', 'bg-yellow-50/50');
-                    btn.classList.add('text-gray-400');
-                    if(btn.getAttribute('onclick').includes(tab)) {
-                        btn.classList.remove('text-gray-400');
-                        btn.classList.add('text-black', 'border-t-4', 'border-farao-gold', 'bg-yellow-50/50');
-                    }
-                });
-                const content = document.getElementById('app-content');
-                content.innerHTML = ''; 
-                if (tab === 'checkin') this.renderCheckin(content);
-                else if (tab === 'teams') this.renderTeams(content);
-                else if (tab === 'match') this.renderMatch(content);
-                else if (tab === 'rank') this.renderRanking(content);
-            },
-
-            showToast(msg) {
-                const t = document.getElementById('toast');
-                t.innerText = msg;
-                t.classList.remove('opacity-0');
-                setTimeout(() => t.classList.add('opacity-0'), 2500);
-            },
-
-            // --- MODULE 1: CHECK-IN (FIXED) ---
-            renderCheckin(container) {
-                const availableMensalistas = MENSALISTAS.filter(m => !this.data.players.some(p => p.name === m.name));
-                const availableGoleiros = availableMensalistas.filter(m => m.pos === 'Goleiro');
-                const availableLinha = availableMensalistas.filter(m => m.pos !== 'Goleiro');
-                const sortedPlayers = [...this.data.players].sort((a,b) => b.arrival - a.arrival);
-                const presentGoleiros = sortedPlayers.filter(p => p.pos === 'Goleiro');
-                const presentLinha = sortedPlayers.filter(p => p.pos !== 'Goleiro');
-
-                const renderChamadaList = (list) => {
-                    if (list.length === 0) return '<span class="text-gray-400 text-sm italic">Todos presentes.</span>';
-                    return list.map(m => `
-                        <button onclick="app.addMensalista('${m.name}')" class="flex-shrink-0 bg-white border border-gray-300 rounded px-3 py-2 shadow-sm active:bg-farao-gold active:border-black transition-colors flex flex-col items-center min-w-[80px]">
-                            <span class="font-bold text-xs leading-tight truncate max-w-[70px]">${m.name}</span>
-                            <div class="mt-1 scale-75">${this.getPosBadge(m.pos)}</div>
-                        </button>
-                    `).join('');
-                };
-                
-                const renderPresentList = (list) => {
-                    if (list.length === 0) return '<p class="text-gray-400 text-sm italic px-2 py-4 text-center border-2 border-dashed border-gray-200 rounded-lg">Nenhum jogador aqui.</p>';
-                    return list.map((p) => `
-                        <div class="flex items-center justify-between bg-white pl-4 pr-2 py-3 rounded-lg shadow-sm border border-gray-200">
-                            <div class="flex items-center gap-3">
-                                <div>
-                                    <div class="font-bold text-gray-900">${p.name}</div>
-                                    <div class="flex gap-1 mt-0.5">
-                                        ${this.getPosBadge(p.pos)}
-                                        <span class="text-[9px] bg-gray-100 px-1 rounded border border-gray-300 font-mono pt-0.5">Nível ${p.lvl}</span>
-                                        ${p.type === 'diarista' ? '<span class="text-[9px] text-gray-400 uppercase pt-0.5 pl-1">Diarista</span>' : ''}
-                                    </div>
-                                </div>
-                            </div>
-                            <button onclick="app.removePlayer(${p.id})" class="text-gray-300 hover:text-red-500 p-2">✕</button>
-                        </div>
-                    `).join('');
-                };
-
-                // *** CORREÇÃO v16: Adicionado padding 'p-4' aqui ***
-                container.innerHTML = `
-                    <div class="p-4"> 
-                        <div class="bg-slate-200 p-3 shadow-inner border-b border-gray-300 rounded-lg">
-                            <h3 class="text-xs font-black text-gray-500 uppercase tracking-widest mb-2">🧤 Goleiros Prioridade</h3>
-                            <div class="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">${renderChamadaList(availableGoleiros)}</div>
-                            <h3 class="text-xs font-black text-gray-500 uppercase tracking-widest mb-2 mt-3">📋 Lista de mensalistas</h3>
-                            <div class="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">${renderChamadaList(availableLinha)}</div>
-                        </div>
-
-                        <div class="flex-1 overflow-y-auto pt-4">
-                            <div class="bg-white p-4 rounded-xl shadow-sm mb-6 border-l-4 border-farao-gold">
-                                <label class="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Diarista / Novo</label>
-                                <div class="flex flex-col gap-2">
-                                    <div class="flex gap-2">
-                                        <input type="text" id="dia-name" placeholder="Nome..." class="flex-1 bg-gray-50 border border-gray-300 rounded px-3 h-10 font-bold">
-                                        <select id="dia-lvl" class="bg-gray-50 border border-gray-300 rounded px-2 h-10 text-sm font-bold w-20">
-                                            <option value="1">Nv 1</option><option value="2">Nv 2</option><option value="3">Nv 3</option><option value="4" selected>Nv 4</option><option value="5">Nv 5</option><option value="6">Nv 6</option><option value="7">Nv 7</option>
-                                        </select>
-                                    </div>
-                                    <div class="flex gap-2">
-                                        <select id="dia-pos" class="bg-gray-50 border border-gray-300 rounded px-2 h-10 text-sm font-bold flex-1">
-                                            <option value="Zaga">Zaga</option><option value="Meio" selected>Meio</option><option value="Ataque">Ataque</option><option value="Goleiro">Goleiro</option>
-                                        </select>
-                                        <button onclick="app.addDiarista()" class="bg-farao-black text-farao-gold px-4 rounded h-10 font-black uppercase tracking-wide text-xs shadow-lg">Adicionar</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="mb-6">
-                                <h2 class="font-black text-lg text-farao-dark uppercase italic mb-2 px-1 flex justify-between items-center">
-                                    <span>Goleiros Presentes</span><span class="bg-farao-gold text-black px-2 py-0.5 rounded text-xs">${presentGoleiros.length}</span>
-                                </h2>
-                                <div class="space-y-2">${renderPresentList(presentGoleiros)}</div>
-                            </div>
-                            <div class="mb-6">
-                                <h2 class="font-black text-lg text-farao-dark uppercase italic mb-2 px-1 flex justify-between items-center">
-                                    <span>Jogadores de Linha</span><span class="bg-farao-gold text-black px-2 py-0.5 rounded text-xs">${presentLinha.length}</span>
-                                </h2>
-                                <div class="space-y-2">${renderPresentList(presentLinha)}</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            },
-
-            getPosBadge(pos) {
-                let cls = 'bg-gray-500 text-white';
-                if(pos === 'Goleiro') cls = 'pos-gol';
-                if(pos === 'Zaga') cls = 'pos-zag';
-                if(pos === 'Meio') cls = 'pos-meio';
-                if(pos === 'Ataque') cls = 'pos-ata';
-                return `<span class="pos-badge ${cls}">${pos.substring(0,3)}</span>`;
-            },
-
-            addMensalista(name) {
-                const m = MENSALISTAS.find(x => x.name === name);
-                if (!m) return;
-                this.data.players.push({ id: Date.now(), name: m.name, pos: m.pos, lvl: m.lvl, arrival: Date.now(), type: 'mensalista' });
-                this.saveToStorage();
-                this.renderCheckin(document.getElementById('app-content')); 
-            },
-
-            addDiarista() {
-                const name = document.getElementById('dia-name').value.trim();
-                const pos = document.getElementById('dia-pos').value;
-                const lvl = parseInt(document.getElementById('dia-lvl').value);
-                if (!name) return;
-                this.data.players.push({ id: Date.now(), name: name, pos: pos, lvl: lvl, arrival: Date.now(), type: 'diarista' });
-                this.saveToStorage();
-                this.renderCheckin(document.getElementById('app-content'));
-            },
-
-            removePlayer(id) {
-                if(!confirm("Remover da lista?")) return;
-                this.data.players = this.data.players.filter(p => p.id !== id);
-                this.saveToStorage();
-                this.renderCheckin(document.getElementById('app-content'));
-            },
-
-            // --- MODULE 2: TEAMS (SNAKE DRAFT v16) ---
-            renderTeams(container) {
-                // *** CORREÇÃO v16: Adicionado padding 'p-4' aqui ***
-                container.innerHTML = `
-                    <div class="max-w-md mx-auto animate-fade-in p-4 space-y-6">
-                        <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-farao-gold">
-                            <div class="flex items-center gap-4 justify-between mb-2">
-                                <span class="text-sm font-bold text-gray-500 uppercase">Jogadores de LINHA / Time</span>
-                                <div class="flex items-center gap-3 bg-gray-100 rounded-lg p-1">
-                                    <button onclick="app.changeTeamSize(-1)" class="w-8 h-8 bg-white rounded font-bold text-lg shadow-sm">-</button>
-                                    <span class="font-mono text-xl font-bold w-6 text-center">${this.data.settings.playersPerTeam}</span>
-                                    <button onclick="app.changeTeamSize(1)" class="w-8 h-8 bg-white rounded font-bold text-lg shadow-sm">+</button>
-                                </div>
-                            </div>
-                            <p class="text-xs text-gray-400 mb-4 text-center">Total de jogadores na linha</p>
-                            <button onclick="app.generateTeamsBalanced()" class="w-full bg-farao-black text-farao-gold font-black text-lg py-4 rounded-xl shadow-lg shadow-gray-900/20 active:scale-95 transition-transform flex items-center justify-center gap-2 uppercase">
-                                ⚖️ Gerar Times (Aleatório)
-                            </button>
-                            </div>
-                        <div id="teams-list" class="space-y-4 pb-20">
-                            ${this.data.teams.length === 0 ? '<p class="text-center text-gray-400 py-10">Toque no botão para gerar os times.</p>' : ''}
-                            ${this.data.teams.map(team => {
-                                let totalLvl = 0;
-                                team.playerIds.forEach(pid => {
-                                    const p = app.findPlayerById(pid); 
-                                    if(p && p.pos !== 'Goleiro') totalLvl += p.lvl;
-                                });
-                                return `
-                                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                                    <div class="bg-farao-gold px-4 py-3 flex justify-between items-center">
-                                        <h3 class="font-black text-black text-lg uppercase italic tracking-wide">${team.name}</h3>
-                                        <span class="text-xs font-black bg-black text-farao-gold px-2 py-1 rounded border border-white/20">Força: ${totalLvl}</span>
-                                    </div>
-                                    <div class="p-2">
-                                        <ul class="divide-y divide-gray-100">
-                                            ${team.playerIds.map(pid => {
-                                                const p = app.findPlayerById(pid); 
-                                                return p ? `
-                                                    <li class="py-2 px-2 text-gray-800 font-medium text-sm flex justify-between items-center">
-                                                        <span class="${p.type === 'coringa' ? 'player-coringa' : ''}">${p.name}</span>
-                                                        <div class="flex items-center gap-2">
-                                                            <span class="text-[9px] text-gray-300 font-mono">Nv.${p.lvl}</span>
-                                                            ${this.getPosBadge(p.pos)}
-                                                        </div>
-                                                    </li>
-                                                ` : '';
-                                            }).join('')}
-                                        </ul>
-                                    </div>
-                                </div>
-                            `}).join('')}
-                        </div>
-                    </div>
-                `;
-            },
+        teams.forEach(team => {
+            const avg = getAvg(team);
+            const count = team.players.length;
             
-            findPlayerById(id) {
-                if (this.data.activeMatch && this.data.activeMatch.coringaMap && this.data.activeMatch.coringaMap[id]) {
-                    const realPlayerId = this.data.activeMatch.coringaMap[id];
-                    return this.data.players.find(pl => pl.id === realPlayerId);
-                }
-                let player = this.data.players.find(pl => pl.id === id);
-                if (player) return player;
-                player = this.coringas.find(c => c.id === id);
-                if (player) return player;
-                return undefined; 
-            },
+            const order = {'GOL':1, 'ZAGA':2, 'MEIO':3, 'CORINGA':4, 'ATA':5};
+            const sortedPlayers = [...team.players].sort((a,b) => order[a.position] - order[b.position]);
 
-            changeTeamSize(delta) {
-                let newSize = this.data.settings.playersPerTeam + delta;
-                if (newSize < 3) newSize = 3; 
-                this.data.settings.playersPerTeam = newSize;
-                this.saveToStorage();
-                this.router('teams');
-            },
+            let posCounts = { Z:0, M:0, A:0 };
+            team.players.forEach(p => {
+                if(p.position === 'ZAGA') posCounts.Z++;
+                else if(p.position === 'ATA') posCounts.A++;
+                else posCounts.M++;
+            });
 
-            // *** NOVO ALGORITMO v16: Snake Draft ***
-            generateTeamsBalanced() {
-                const players = [...this.data.players];
-                const linhaPlayers = players.filter(p => p.pos !== 'Goleiro');
-                if (linhaPlayers.length === 0) return alert('Adicione jogadores de linha primeiro.');
-                
-                const size = this.data.settings.playersPerTeam; 
-                if (size <= 0) return alert('Tamanho do time inválido.');
-                if (linhaPlayers.length < size) return alert('Jogadores de linha insuficientes.');
-                
-                const numTeams = Math.ceil(linhaPlayers.length / size);
-                const totalSlots = numTeams * size;
-                const coringasNeeded = totalSlots - linhaPlayers.length;
-                
-                const allLinhaPlayers = [...linhaPlayers]; 
-                this.coringas = []; 
-                
-                if (coringasNeeded > 0) {
-                    const totalLvl = linhaPlayers.reduce((sum, p) => sum + p.lvl, 0);
-                    const avgLvl = linhaPlayers.length > 0 ? Math.round(totalLvl / linhaPlayers.length) : 5; 
-                    for (let i = 0; i < coringasNeeded; i++) {
-                        const coringa = { id: 999 + i, name: `CORINGA Nv.${avgLvl}`, pos: 'Meio', lvl: avgLvl, type: 'coringa' };
-                        allLinhaPlayers.push(coringa);
-                        this.coringas.push(coringa); 
-                    }
-                    this.showToast(`${coringasNeeded} Coringa(s) Nv.${avgLvl} adicionado(s) para completar ${numTeams} times.`);
-                } else {
-                    this.showToast(`${numTeams} times completos gerados.`);
-                }
-
-                const teams = Array.from({length: numTeams}, (_, i) => ({ 
-                    id: i + 1, 
-                    name: `Time ${i + 1}`, 
-                    playerIds: [], 
-                    currentStrength: 0
-                }));
-                
-                // --- INÍCIO DO SNAKE DRAFT (COM ALEATORIEDADE) ---
-                
-                // 1. Agrupa por nível
-                const playersByLevel = allLinhaPlayers.reduce((acc, p) => {
-                    if (!acc[p.lvl]) acc[p.lvl] = [];
-                    acc[p.lvl].push(p);
-                    return acc;
-                }, {});
-
-                // 2. Embaralha dentro de cada nível e junta
-                let sortedPlayers = [];
-                Object.keys(playersByLevel)
-                    .sort((a, b) => b - a) // Ordena Níveis (7, 6, 5...)
-                    .forEach(lvl => {
-                        const shuffledGroup = this.shuffleArray(playersByLevel[lvl]);
-                        sortedPlayers.push(...shuffledGroup);
-                    });
-
-                // 3. Distribui em zigue-zague
-                let teamIndex = 0;
-                let direction = 1; // 1 para frente, -1 para trás
-
-                sortedPlayers.forEach(player => {
-                    teams[teamIndex].playerIds.push(player.id);
-                    teams[teamIndex].currentStrength += player.lvl;
-                    teamIndex += direction;
-
-                    if (teamIndex >= numTeams) {
-                        direction = -1;
-                        teamIndex = numTeams - 1;
-                    } else if (teamIndex < 0) {
-                        direction = 1;
-                        teamIndex = 0;
-                    }
-                });
-                // --- FIM DO SNAKE DRAFT ---
-                
-                this.data.teams = teams.sort((a,b) => a.id - b.id);
-                this.saveToStorage(); 
-                this.router('teams');
-            },
-            
-            // Helper para embaralhar array
-            shuffleArray(array) {
-                for (let i = array.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [array[i], array[j]] = [array[j], array[i]];
-                }
-                return array;
-            },
-
-
-            // --- MODULE 3: MATCH (ALOCAÇÃO GOLEIRO + CORINGA) ---
-            renderMatch(container) {
-                if (this.data.activeMatch) { this.renderActiveMatch(container); } 
-                else { this.renderMatchSetup(container); }
-            },
-
-            renderMatchSetup(container) {
-                const validTeams = this.data.teams.filter(t => t.playerIds.length >= 2); 
-                if (validTeams.length < 2) {
-                    container.innerHTML = `<div class="p-4"><div class="text-center pt-20 px-6"><div class="text-4xl mb-4">⚠️</div><h3 class="text-xl font-bold text-gray-800">Times Insuficientes</h3><button onclick="app.router('teams')" class="mt-6 bg-farao-gold text-black px-6 py-3 rounded-lg font-bold shadow-md">Ver Times</button></div></div>`;
-                    return;
-                }
-                const options = validTeams.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
-                // *** CORREÇÃO v16: Adicionado padding 'p-4' aqui ***
-                container.innerHTML = `
-                    <div class="max-w-md mx-auto p-4">
-                        <div class="bg-white p-6 rounded-2xl shadow-lg animate-fade-in border-t-8 border-farao-gold">
-                            <h2 class="text-2xl font-black text-center mb-6 text-gray-900 uppercase italic">Nova Partida</h2>
-                            <div class="flex justify-center gap-4 mb-6 text-xs font-bold text-gray-400 bg-gray-50 py-2 rounded-lg"><span>⏱️ 10 Minutos</span><span>|</span><span>🥅 Ganha com 2 Gols</span></div>
-                            <div class="flex items-center justify-between gap-2 mb-8">
-                                <div class="flex-1"><select id="team-a-select" class="w-full p-4 bg-gray-100 rounded-xl font-black text-center text-xl border-2 border-transparent focus:border-farao-gold outline-none appearance-none">${options}</select></div>
-                                <span class="font-black text-farao-gold text-2xl italic">X</span>
-                                <div class="flex-1"><select id="team-b-select" class="w-full p-4 bg-gray-100 rounded-xl font-black text-center text-xl border-2 border-transparent focus:border-farao-gold outline-none appearance-none">${options}</select></div>
-                            </div>
-                            <button onclick="app.startMatch()" class="w-full bg-green-600 text-white font-black text-xl py-4 rounded-xl shadow-xl shadow-green-600/20 active:scale-95 transition-transform">APITAR INÍCIO</button>
-                        
-                            ${this.renderMatchHistory()}
+            let listHtml = '';
+            sortedPlayers.forEach(p => {
+                listHtml += `
+                    <li class="player-item ${p.isCoringa?'is-coringa':''}">
+                        <div class="player-info">
+                            <span class="p-name">${p.name}</span>
+                            <span class="p-pos">${p.position}</span>
                         </div>
-                    </div>
-                `;
-                setTimeout(() => { const selB = document.getElementById('team-b-select'); if(selB.options.length > 1) selB.selectedIndex = 1; }, 0);
-            },
-            
-            renderMatchHistory() {
-                if (this.data.matches.length === 0) return '';
-                return `
-                <div class="mt-10 pt-6 border-t border-gray-100">
-                    <h4 class="text-xs font-black text-gray-400 uppercase mb-4 tracking-widest">Histórico Recente</h4>
-                    <div class="space-y-2 text-sm">
-                        ${this.data.matches.map((m, i) => { // <-- MUDANÇA 1: (m, i) e remoção de .slice().reverse()
-                            const teamA = this.data.teams.find(t => t.id === m.teamAId)?.name || `Time ${m.teamAId}`;
-                            const teamB = this.data.teams.find(t => t.id === m.teamBId)?.name || `Time ${m.teamBId}`;
-                            return `
-                            <div class="bg-gray-50 p-3 rounded-lg text-gray-600 border border-gray-100">
-                                <div class="text-xs font-black text-gray-400 mb-1.5 uppercase tracking-wider">Partida ${i + 1}</div> 
-                                
-                                <div class="flex justify-between items-center"> 
-                                    <span class="font-bold">${teamA}</span>
-                                    <span class="font-black text-black bg-farao-gold px-2 py-0.5 rounded">${m.scoreA} - ${m.scoreB}</span>
-                                    <span class="font-bold">${teamB}</span>
-                                </div>
-                            </div>
-                            `
-                        }).join('')}
-                    </div>
+                        <span class="p-level">${p.level.toFixed(2).replace(/[.,]00$/,'')}</span>
+                    </li>`;
+            });
+
+            const card = document.createElement('div');
+            card.className = 'team-card';
+            card.innerHTML = `
+                <div class="team-header">
+                    <span class="team-name">${team.name}</span>
+                    <div class="team-stats">Força: ${avg.toFixed(2)} | Z:${posCounts.Z} M:${posCounts.M} A:${posCounts.A}</div>
+                    <div class="player-count-badge ${count===5?'count-ok':'count-error'}">${count} Atletas</div>
                 </div>
+                <ul class="player-list">${listHtml}</ul>
             `;
-            },
-            
-            startMatch() {
-                const teamAId = parseInt(document.getElementById('team-a-select').value);
-                const teamBId = parseInt(document.getElementById('team-b-select').value);
-                if (teamAId === teamBId) return alert('Selecione times diferentes.');
-                
-                const teamA = this.data.teams.find(t => t.id === teamAId);
-                const teamB = this.data.teams.find(t => t.id === teamBId);
-                
-                const coringaIds = this.coringas.map(c => c.id); 
-                const coringasA = teamA.playerIds.filter(id => coringaIds.includes(id));
-                const coringasB = teamB.playerIds.filter(id => coringaIds.includes(id));
-                const allCoringas = [...coringasA, ...coringasB];
+            grid.appendChild(card);
+        });
 
-                this.matchAssignment = { 
-                    teamAId: teamAId, 
-                    teamBId: teamBId, 
-                    coringasToAssign: allCoringas.sort(), 
-                    coringaMap: {},
-                    gk_A_Id: null,
-                    gk_B_Id: null
-                };
+        document.getElementById('actionsArea').style.display = 'flex';
+        grid.scrollIntoView({ behavior: 'smooth' });
+    }
 
-                if (allCoringas.length > 0) {
-                    this.openCoringaModal();
-                } else {
-                    this.openGoleiroModal('A'); // Pula para alocação de Goleiro
-                }
-            },
-            
-            openCoringaModal() {
-                const coringaId = this.matchAssignment.coringasToAssign[0]; 
-                if (!coringaId) {
-                    this.openGoleiroModal('A');
-                    return;
-                }
-                const coringa = this.findPlayerById(coringaId);
-                const coringaLvl = coringa.lvl;
-                const teamA = this.data.teams.find(t => t.id === this.matchAssignment.teamAId);
-                const teamB = this.data.teams.find(t => t.id === this.matchAssignment.teamBId);
-                const teamCoringa = teamA.playerIds.includes(coringaId) ? teamA : teamB;
-                
-                const coringaIds = this.coringas.map(c => c.id);
-                const realPlayerIdsInTeamA = teamA.playerIds.filter(pid => !coringaIds.includes(pid));
-                const realPlayerIdsInTeamB = teamB.playerIds.filter(pid => !coringaIds.includes(pid));
-                const realPlayerIdsInGame = [...realPlayerIdsInTeamA, ...realPlayerIdsInTeamB];
-                
-                const allAvailablePlayers = this.data.players.filter(p => !realPlayerIdsInGame.includes(p.id) && p.pos !== 'Goleiro');
-                
-                let filteredPlayers = allAvailablePlayers.filter(p => p.lvl === coringaLvl || p.lvl === coringaLvl - 1);
-                let fallback = false;
-                
-                if (filteredPlayers.length === 0) {
-                    filteredPlayers = allAvailablePlayers;
-                    fallback = true;
-                }
+    function limpar() {
+        document.getElementById('inputList').value = '';
+        document.getElementById('teamsGrid').style.display = 'none';
+        document.getElementById('actionsArea').style.display = 'none';
+        document.getElementById('globalStats').style.display = 'none';
+        document.getElementById('playerCount').innerText = '0 jogadores';
+        lastGeneratedIds = null;
+    }
 
-                const filterMsg = fallback 
-                    ? `Nenhum Nv.${coringaLvl}/${coringaLvl-1} encontrado. Mostrando todos:` 
-                    : `Selecione um jogador (Nv.${coringaLvl} ou ${coringaLvl-1}):`;
+    // ATUALIZADO: Exportação limpa
+    function copiarWhatsApp() {
+        let text = "*⚽ TIMES SORTEADOS ⚽*\n\n";
+        
+        // Garante ordem A, B, C...
+        const sortedTeams = [...currentTeams].sort((a,b) => a.id - b.id);
 
-                const modalContent = document.getElementById('modal-content');
-                modalContent.innerHTML = `
-                    <h3 class="text-xl font-black text-center mb-1 text-gray-900 uppercase italic">Alocar Coringa</h3>
-                    <p class="text-center mb-4 text-gray-600">${teamCoringa.name} precisa de 1 <span class="player-coringa">${coringa.name}</span></p>
-                    <h4 class="text-sm font-bold text-gray-500 mb-2">${filterMsg}</h4>
-                    <div class="space-y-2 max-h-[50vh] overflow-y-auto">
-                        ${filteredPlayers.length === 0 ? '<p class="text-gray-400">Nenhum jogador de linha disponível.</p>' : ''}
-                        ${filteredPlayers.map(p => `
-                            <button onclick="app.assignCoringa(${coringa.id}, ${p.id})" class="w-full text-left py-3 px-3 rounded-lg bg-gray-50 border border-gray-200 active:bg-blue-100 flex justify-between items-center">
-                                <div>
-                                    <span class="font-bold">${p.name}</span>
-                                    <div class="text-xs">${this.getPosBadge(p.pos)} Nv.${p.lvl}</div>
-                                </div>
-                            </button>
-                        `).join('')}
-                    </div>
-                `;
-                document.getElementById('event-modal').classList.remove('hidden');
-            },
+        sortedTeams.forEach(t => {
+            text += `*${t.name}* (Força: ${getAvg(t).toFixed(2)})\n`;
+            t.players.forEach(p => {
+                // APENAS NOME (Sem posição entre parênteses)
+                text += `- ${p.name}\n`; 
+            });
+            text += "\n";
+        });
+        navigator.clipboard.writeText(text).then(() => alert("Copiado com sucesso!"));
+    }
+</script>
 
-            assignCoringa(coringaId, realPlayerId) {
-                this.matchAssignment.coringaMap[coringaId] = realPlayerId;
-                this.matchAssignment.coringasToAssign.shift(); 
-                this.openCoringaModal();
-            },
-
-            openGoleiroModal(teamRole) {
-                const teamName = (teamRole === 'A') ? this.data.teams.find(t => t.id === this.matchAssignment.teamAId).name : this.data.teams.find(t => t.id === this.matchAssignment.teamBId).name;
-                
-                let availableGoleiros = this.data.players.filter(p => p.pos === 'Goleiro');
-                
-                if (teamRole === 'B' && this.matchAssignment.gk_A_Id) {
-                    availableGoleiros = availableGoleiros.filter(p => p.id !== this.matchAssignment.gk_A_Id);
-                }
-
-                const modalContent = document.getElementById('modal-content');
-                modalContent.innerHTML = `
-                    <h3 class="text-xl font-black text-center mb-4 text-gray-900 uppercase italic">Escolha o Goleiro</h3>
-                    <p class="text-center mb-4 text-gray-600">Quem vai para o gol do <span class="font-bold text-black">${teamName}</span>?</p>
-                    <div class="space-y-2 max-h-[50vh] overflow-y-auto">
-                        ${availableGoleiros.length === 0 ? '<p class="text-gray-400">Nenhum goleiro disponível.</p>' : ''}
-                        ${availableGoleiros.map(p => `
-                            <button onclick="app.assignGoleiro(${p.id}, '${teamRole}')" class="w-full text-left py-3 px-3 rounded-lg bg-gray-50 border border-gray-200 active:bg-blue-100 flex justify-between items-center">
-                                <span class="font-bold">${p.name}</span>
-                                ${this.getPosBadge(p.pos)}
-                            </button>
-                        `).join('')}
-                    </div>
-                `;
-                document.getElementById('event-modal').classList.remove('hidden');
-            },
-
-            assignGoleiro(gkId, teamRole) {
-                if (teamRole === 'A') {
-                    this.matchAssignment.gk_A_Id = gkId;
-                    this.openGoleiroModal('B'); // Próximo passo
-                } else {
-                    this.matchAssignment.gk_B_Id = gkId;
-                    this.startMatchConfirmed(); // Fim, iniciar partida
-                }
-            },
-            
-            startMatchConfirmed() {
-                document.getElementById('event-modal').classList.add('hidden');
-                this.data.activeMatch = {
-                    match_id: this.data.matches.length + 1,
-                    teamAId: this.matchAssignment.teamAId,
-                    teamBId: this.matchAssignment.teamBId,
-                    gk_A_Id: this.matchAssignment.gk_A_Id,
-                    gk_B_Id: this.matchAssignment.gk_B_Id,
-                    coringaMap: this.matchAssignment.coringaMap,
-                    scoreA: 0, scoreB: 0, startTime: Date.now(), events: []
-                };
-                this.saveToStorage();
-                this.router('match');
-            },
-
-            renderActiveMatch(container) {
-                const m = this.data.activeMatch;
-                const tA = this.data.teams.find(t => t.id === m.teamAId);
-                const tB = this.data.teams.find(t => t.id === m.teamBId);
-                const gkA = this.data.players.find(p => p.id === m.gk_A_Id);
-                const gkB = this.data.players.find(p => p.id === m.gk_B_Id);
-
-                // Renderiza Goleiro + Lista de Linha
-                const renderPlayerList = (team, gk) => {
-                    let gkButton = '';
-                    if (gk) {
-                        gkButton = `<button onclick="app.openEventModal(${gk.id})" class="w-full text-left py-3 px-3 mb-2 rounded-lg bg-yellow-50 border-2 border-yellow-300 shadow-sm active:bg-farao-gold active:text-black font-bold text-sm truncate flex justify-between items-center">
-                            <span>🧤 ${gk.name}</span> ${this.getPosBadge(gk.pos)}
-                        </button>`;
-                    }
-                    
-                    const linePlayers = team.playerIds.map(pid => {
-                        const p = this.findPlayerById(pid); 
-                        return `<button onclick="app.openEventModal(${p.id})" class="w-full text-left py-3 px-3 mb-2 rounded-lg bg-white border border-gray-200 shadow-sm active:bg-farao-gold active:text-black font-bold text-sm truncate transition-colors flex justify-between items-center">
-                            <span class="${this.coringas.some(c => c.id === pid) ? 'player-coringa' : ''}">${p.name}</span> ${this.getPosBadge(p.pos)}
-                        </button>`;
-                    }).join('');
-
-                    return gkButton + linePlayers;
-                };
-
-                // *** CORREÇÃO v16: Adicionado padding 'p-2' ***
-                container.innerHTML = `
-                    <div class="flex flex-col p-2">
-                        <div class="bg-farao-dark text-white rounded-b-3xl p-6 shadow-2xl text-center sticky top-0 z-10 border-b-4 border-farao-gold -m-2">
-                            <div class="flex justify-between items-center mb-4 text-farao-gold text-[10px] font-black uppercase tracking-widest">
-                                <span>${tA.name}</span>
-                                <div class="flex items-center gap-2 bg-gray-800 px-2 py-1 rounded"><span class="animate-pulse text-red-500">●</span><span id="match-timer" class="font-mono text-white">10:00</span></div>
-                                <span>${tB.name}</span>
-                            </div>
-                            <div class="flex justify-center items-center gap-8">
-                                <div class="text-6xl font-black font-mono text-farao-gold">${m.scoreA}</div>
-                                <div class="text-gray-600 text-3xl font-light">x</div>
-                                <div class="text-6xl font-black font-mono text-farao-gold">${m.scoreB}</div>
-                            </div>
-                            <div class="mt-4"><button onclick="app.endMatch()" class="text-[10px] bg-gray-800 text-gray-400 border border-gray-700 px-4 py-2 rounded-full hover:bg-red-900 hover:text-white transition-colors uppercase font-bold tracking-widest">Encerrar Partida</button></div>
-                        </div>
-                        <div class="flex-1 overflow-y-auto grid grid-cols-2 gap-2 mt-2">
-                            <div class="border-r border-gray-200 pr-1">${renderPlayerList(tA, gkA)}</div>
-                            <div class="pl-1">${renderPlayerList(tB, gkB)}</div>
-                        </div>
-                    </div>
-                `;
-                this.startTimer();
-            },
-
-            startTimer() {
-                const timerDisplay = document.getElementById('match-timer');
-                if (!timerDisplay) return;
-                const matchDuration = 10 * 60 * 1000; 
-                const update = () => {
-                    const elapsed = Date.now() - this.data.activeMatch.startTime;
-                    let remaining = matchDuration - elapsed;
-                    if (remaining <= 0) { remaining = 0; timerDisplay.classList.add('text-red-500'); }
-                    const mins = Math.floor(remaining / 60000);
-                    const secs = Math.floor((remaining % 60000) / 1000);
-                    timerDisplay.innerText = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
-                };
-                update();
-                this.timerInterval = setInterval(update, 1000);
-            },
-
-            openEventModal(playerId) {
-                this.scorerId = playerId; 
-                const p = this.findPlayerById(playerId);
-                const modalContent = document.getElementById('modal-content');
-                const modal = document.getElementById('event-modal');
-                
-                modalContent.innerHTML = `
-                    <h3 class="text-2xl font-black text-center mb-6 text-gray-900 uppercase italic ${this.coringas.some(c => c.id === playerId) ? 'player-coringa' : ''}">${p.name}</h3>
-                    <button onclick="app.startGoalFlow()" class="w-full fat-finger bg-green-600 text-white rounded-2xl font-black text-xl shadow-xl active:scale-95 transition-transform py-5 uppercase tracking-wide mb-4">
-                        ⚽ FEZ GOL
-                    </button>
-                    <button onclick="document.getElementById('event-modal').classList.add('hidden')" class="w-full py-4 text-gray-500 font-bold active:bg-gray-100 rounded-xl">Cancelar</button>
-                `;
-                modal.classList.remove('hidden');
-            },
-
-            startGoalFlow() {
-                const m = this.data.activeMatch;
-                const scorerId = this.scorerId; 
-                const tA = this.data.teams.find(t => t.id === m.teamAId);
-                
-                let teamOfScorer, gkOfScorer;
-                const teamAPlayerIds = [...tA.playerIds.map(pid => this.findPlayerById(pid).id), m.gk_A_Id];
-                
-                if (teamAPlayerIds.includes(scorerId)) {
-                    teamOfScorer = tA;
-                    gkOfScorer = this.findPlayerById(m.gk_A_Id);
-                } else {
-                    teamOfScorer = this.data.teams.find(t => t.id === m.teamBId);
-                    gkOfScorer = this.findPlayerById(m.gk_B_Id);
-                }
-
-                const teammates = teamOfScorer.playerIds
-                    .map(pid => this.findPlayerById(pid).id) 
-                    .filter(realId => realId !== scorerId)
-                    .map(realId => this.data.players.find(p => p.id === realId))
-                    .filter(p => p); 
-                
-                if (gkOfScorer && gkOfScorer.id !== scorerId) {
-                    teammates.push(gkOfScorer);
-                }
-
-                const modalContent = document.getElementById('modal-content');
-                
-                modalContent.innerHTML = `
-                    <h3 class="text-xl font-black text-center mb-4 text-gray-900 uppercase italic">Quem deu o passe?</h3>
-                    <div class="space-y-3">
-                        <button onclick="app.registerGoal(null)" class="w-full bg-red-100 text-red-600 py-4 rounded-xl font-bold border-2 border-red-200 active:bg-red-200 uppercase tracking-wide">
-                            🚫 Ninguém (Individual)
-                        </button>
-                        <div class="grid grid-cols-2 gap-2 max-h-[40vh] overflow-y-auto">
-                            ${teammates.map(tm => `
-                                <button onclick="app.registerGoal(${tm.id})" class="bg-blue-50 text-blue-800 py-3 px-2 rounded-lg font-bold border border-blue-100 active:bg-blue-600 active:text-white truncate">
-                                    ${tm.name}
-                                </button>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            },
-
-            registerGoal(assistId) {
-                const m = this.data.activeMatch;
-                if (!m) return;
-                const tA = this.data.teams.find(t => t.id === m.teamAId);
-                const scorerRealId = this.scorerId;
-                
-                const teamAPlayerIds = [...tA.playerIds.map(pid => this.findPlayerById(pid).id), m.gk_A_Id];
-                const isTeamA = teamAPlayerIds.includes(scorerRealId);
-                
-                if (isTeamA) m.scoreA++; else m.scoreB++;
-                
-                const scorer = this.findPlayerById(scorerRealId);
-                const timeStr = Math.floor((Date.now() - m.startTime) / 1000 / 60) + "'";
-                m.events.push({ jogador: scorer.name, time_id: isTeamA ? m.teamAId : m.teamBId, tipo: 'gol', tempo: timeStr });
-                
-                if (assistId) {
-                    const assistant = this.findPlayerById(assistId);
-                    m.events.push({ jogador: assistant.name, time_id: isTeamA ? m.teamAId : m.teamBId, tipo: 'assistencia', tempo: timeStr });
-                }
-                
-                document.getElementById('event-modal').classList.add('hidden');
-                this.saveToStorage();
-                
-                if (m.scoreA >= 2 || m.scoreB >= 2) {
-                    setTimeout(() => { alert(`🏁 FIM DE JOGO!\nPlacar: ${m.scoreA} - ${m.scoreB}`); this.endMatch(); }, 300);
-                } else {
-                    this.renderActiveMatch(document.getElementById('app-content'));
-                    this.showToast(assistId ? 'GOL + ASSISTÊNCIA!' : 'GOL REGISTRADO!');
-                }
-            },
-
-            endMatch() {
-                const m = this.data.activeMatch;
-                if (!m) return;
-                if (m.scoreA < 2 && m.scoreB < 2) { if(!confirm("Encerrar a partida atual?")) return; }
-                // Adiciona o endTime ao objeto finalMatch
-                const finalMatch = { ...m, endTime: Date.now(), status: 'finished', result: m.scoreA > m.scoreB ? 'Time A' : (m.scoreB > m.scoreA ? 'Time B' : 'Empate') };
-                delete finalMatch.coringaMap;
-                this.data.matches.push(finalMatch);
-                this.data.activeMatch = null;
-                this.saveToStorage();
-                this.router('match');
-            },
-
-            // --- MODULE 4: RANKING ---
-            renderRanking(container) {
-                // *** CORREÇÃO v16: Adicionado padding 'p-4' aqui ***
-                const content = `
-                    <div class="max-w-md mx-auto animate-fade-in space-y-8 pb-10 p-4">
-                        
-                        <div class="text-center">
-                            <button onclick="app.clearHistory()" class="bg-red-600 active:bg-red-800 text-white px-4 py-2 rounded-lg font-bold text-xs uppercase tracking-wider shadow-lg">
-                                Limpar Histórico de Partidas
-                            </button>
-                        </div>
-                        <div>
-                            <h2 class="font-black text-lg text-farao-dark mb-3 px-2 flex items-center gap-2"><span class="text-farao-gold">🏆</span> Times</h2>
-                            <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
-                                <table class="w-full text-sm text-center"><thead class="bg-farao-black text-farao-gold font-bold"><tr><th class="p-2">#</th><th class="text-left">Time</th><th>P</th><th>V</th><th>SG</th></tr></thead><tbody>
-                                    ${this.getTeamRanking().map((t, i) => `<tr><td class="font-bold text-gray-400 p-2">${i+1}</td><td class="text-left">${t.name}</td><td class="font-bold">${t.p}</td><td>${t.v}</td><td class="${t.sg>=0?'text-green-600':'text-red-500'} font-bold">${t.sg}</td></tr>`).join('')}
-                                </tbody></table>
-                            </div>
-                        </div>
-                        <div>
-                            <h2 class="font-black text-lg text-farao-dark mb-3 px-2 flex items-center gap-2"><span class="text-farao-gold">👟</span> Atletas</h2>
-                            <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
-                                <table class="w-full text-sm text-center"><thead class="bg-farao-black text-farao-gold font-bold"><tr><th class="p-2">#</th><th class="text-left">Atleta</th><th>Gol</th><th>Ass</th></tr></thead><tbody>
-                                    ${this.getPlayerRanking().map((p, i) => `<tr><td class="font-bold text-gray-400 p-2">${i+1}</td><td class="text-left font-bold">${p.name}</td><td class="text-green-600 font-bold text-base">${p.gols}</td><td class="text-blue-600 font-bold">${p.assist}</td></tr>`).join('')}
-                                </tbody></table>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                
-                if (this.data.matches.length === 0) {
-                    container.innerHTML = `<div class="p-4"><div class="text-center pt-20 px-6"><div class="text-4xl mb-4">📊</div><h3 class="text-xl font-bold text-gray-800">Sem dados</h3><div class="mt-8"><button onclick="app.clearHistory()" class="bg-red-600 active:bg-red-800 text-white px-4 py-2 rounded-lg font-bold text-xs uppercase tracking-wider shadow-lg">Limpar Histórico de Partidas</button></div></div></div>`;
-                } else {
-                    container.innerHTML = content;
-                }
-            },
-            
-            getPlayerRanking() {
-                const playerStats = {}; 
-                this.data.matches.forEach(m => {
-                    if(m.status !== 'finished') return;
-                    m.events.forEach(evt => {
-                        if (evt.jogador.startsWith('CORINGA')) return; 
-                        if (!playerStats[evt.jogador]) playerStats[evt.jogador] = { name: evt.jogador, gols: 0, assist: 0 };
-                        if (evt.tipo === 'gol') playerStats[evt.jogador].gols++;
-                        if (evt.tipo === 'assistencia') playerStats[evt.jogador].assist++;
-                    });
-                });
-                return Object.values(playerStats).filter(p => p.gols > 0 || p.assist > 0).sort((a, b) => b.gols - a.gols || b.assist - a.assist);
-            },
-
-            getTeamRanking() {
-                const teamStats = {};
-                this.data.teams.forEach(t => { teamStats[t.id] = { id: t.id, name: t.name, p: 0, j: 0, v: 0, sg: 0 }; });
-                this.data.matches.forEach(m => {
-                    if(m.status !== 'finished') return;
-                    if(!teamStats[m.teamAId]) teamStats[m.teamAId] = {id: m.teamAId, name: `Time ${m.teamAId}`, p:0, j:0, v:0, sg:0};
-                    if(!teamStats[m.teamBId]) teamStats[m.teamBId] = {id: m.teamBId, name: `Time ${m.teamBId}`, p:0, j:0, v:0, sg:0};
-                    const tA = teamStats[m.teamAId]; const tB = teamStats[m.teamBId];
-                    tA.j++; tB.j++;
-                    if(m.scoreA > m.scoreB) { tA.p += 3; tA.v++; tA.sg += (m.scoreA - m.scoreB); tB.sg += (m.scoreB - m.scoreA); }
-                    else if(m.scoreB > m.scoreA) { tB.p += 3; tB.v++; tB.sg += (m.scoreB - m.scoreA); tA.sg += (m.scoreA - m.scoreB); }
-                    else { tA.p += 1; tB.p += 1; }
-                });
-                return Object.values(teamStats).sort((a, b) => b.p - a.p || b.v - a.v || b.sg - a.sg);
-            },
-
-            exportData() {
-                const cleanTeams = this.data.teams.map(t => {
-                    return { id: t.id, name: t.name, playerIds: t.playerIds, currentStrength: t.currentStrength }
-                });
-                const exportObj = { 
-                    app: "Pelada do Faraó", 
-                    version: "16.0", 
-                    metadata: this.data.metadata, 
-                    times: cleanTeams, 
-                    partidas: this.data.matches, 
-                    jogadores_presentes: this.data.players,
-                    stats_jogadores: this.getPlayerRanking(),
-                    stats_times: this.getTeamRanking()
-                };
-                const jsonStr = JSON.stringify(exportObj, null, 2);
-                try {
-                    const blob = new Blob([jsonStr], { type: "application/json" });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = `farao_v16_${new Date().toISOString().slice(0,10)}.json`;
-                    document.body.appendChild(a);
-                    a.click();
-                    setTimeout(() => { document.body.removeChild(a); window.URL.revokeObjectURL(url); }, 0);
-                    this.showToast('Download Iniciado!');
-                } catch (e) { alert('Erro ao gerar arquivo.'); }
-            },
-
-            clearHistory() {
-                if (!confirm("Tem certeza que deseja apagar TODO o histórico de partidas? Isso irá zerar as estatísticas.")) {
-                    return;
-                }
-                this.data.matches = [];
-                this.saveToStorage();
-                this.showToast('Histórico de partidas apagado.');
-                
-                // Atualiza a visualização atual para refletir o estado zerado
-                if (this.currentTab === 'rank') {
-                    this.router('rank');
-                } else if (this.currentTab === 'match') {
-                    this.router('match');
-                }
-            },
-        };
-
-        app.init();
-    </script>
 </body>
 </html>
