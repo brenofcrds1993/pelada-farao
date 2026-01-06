@@ -3,465 +3,422 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutBalance - V7.1 Final</title>
+    <title>Pelada do Faraó - 04/01/2026</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@300;400;600;700&family=Roboto:wght@400;500;900&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
+        /* === CONFIGURAÇÕES VISUAIS FARAÓ === */
         :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --accent: #38bdf8;
-            --accent-hover: #0ea5e9;
-            --text-main: #f1f5f9;
-            --text-sec: #94a3b8;
-            --border: #334155;
-            --coringa-color: #fbbf24;
-            --danger: #ef4444;
-            --success: #22c55e;
+            --pharaoh-black: #050505;
+            --pharaoh-dark-gray: #0f0f0f;
+            --pharaoh-gold: #FFD700;
+            --pharaoh-gold-dim: #b39500;
+            --text-white: #ffffff;
+            --border-glow: 0 0 10px rgba(255, 215, 0, 0.3);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        body {
+            background-color: var(--pharaoh-black);
+            color: var(--text-white);
+            font-family: 'Roboto', sans-serif;
+            background-image: 
+                linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.95)),
+                url('https://www.transparenttextures.com/patterns/cubes.png');
+        }
+
+        /* Títulos Impactantes */
+        h1, h2, .stat-value, .rank-number {
+            font-family: 'Teko', sans-serif;
+            text-transform: uppercase;
+        }
+
+        /* Utilitários de Cor */
+        .text-gold { color: var(--pharaoh-gold); }
+        .bg-gold { background-color: var(--pharaoh-gold); color: black; }
+        .border-gold { border-color: var(--pharaoh-gold); }
+
+        /* CARDS */
+        .card-panel {
+            background: linear-gradient(145deg, #0f0f0f, #0a0a0a);
+            border: 1px solid #222;
+            border-top: 3px solid var(--pharaoh-gold);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.7);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
         
-        body { background-color: var(--bg-color); color: var(--text-main); padding: 20px; line-height: 1.6; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        
-        header { text-align: center; margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
-        h1 { color: var(--accent); text-transform: uppercase; letter-spacing: 2px; font-size: 1.8rem; font-weight: 800; }
-        .badge { background: var(--accent); color: #0f172a; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; vertical-align: middle; }
-
-        .input-section { background: var(--card-bg); padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid var(--border); }
-        label { display: block; margin-bottom: 10px; font-weight: bold; color: var(--text-sec); }
-        
-        textarea {
-            width: 100%; height: 150px; background: #0f172a; border: 1px solid var(--border);
-            color: white; padding: 15px; border-radius: 8px; font-size: 14px; resize: vertical; font-family: monospace;
-        }
-        textarea:focus { outline: 2px solid var(--accent); border-color: transparent; }
-
-        .status-bar { display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.85rem; color: var(--text-sec); }
-        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
-
-        button {
-            flex: 1; padding: 14px; border: none; border-radius: 8px; font-weight: bold;
-            cursor: pointer; transition: all 0.2s; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.5px;
-        }
-        button:active { transform: scale(0.98); }
-        .btn-primary { background: var(--accent); color: #0f172a; }
-        .btn-primary:hover { background: var(--accent-hover); box-shadow: 0 0 15px rgba(56, 189, 248, 0.3); }
-        .btn-outline { background: transparent; border: 1px solid var(--text-sec); color: var(--text-sec); }
-        .btn-outline:hover { border-color: var(--text-main); color: var(--text-main); }
-
-        /* Grid */
-        .teams-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-top: 30px; display: none; }
-
-        .team-card {
-            background: var(--card-bg); border-radius: 12px; overflow: hidden;
-            border: 1px solid var(--border); display: flex; flex-direction: column;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        .card-panel:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--border-glow);
+            border-color: var(--pharaoh-gold);
         }
 
-        .team-header { background: #1e293b; padding: 15px; border-bottom: 1px solid var(--border); text-align: center; position: relative; }
-        .team-name { font-weight: 800; color: var(--accent); display: block; font-size: 1.2rem; }
-        .team-stats { font-size: 0.85rem; color: var(--text-sec); margin-top: 5px; }
-
-        .player-count-badge {
-            background: #334155; color: #fff; font-size: 0.7rem; padding: 3px 8px;
-            border-radius: 12px; margin-top: 8px; display: inline-block; font-weight: 600;
+        /* TABELA */
+        .custom-table thead th {
+            background-color: #1a1a1a;
+            color: var(--pharaoh-gold);
+            font-family: 'Teko', sans-serif;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+            padding: 12px;
         }
-        .count-ok { color: var(--success); background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2); }
-        .count-error { background: var(--danger); color: white; }
-
-        .player-list { list-style: none; padding: 0; flex-grow: 1; }
-        .player-item {
-            display: flex; justify-content: space-between; padding: 12px 15px;
-            border-bottom: 1px solid #334155; align-items: center; font-size: 0.95rem;
+        .custom-table tbody tr {
+            border-bottom: 1px solid #222;
+            transition: background 0.2s;
         }
-        .player-item:last-child { border-bottom: none; }
-        
-        .player-info { display: flex; flex-direction: column; }
-        .p-name { font-weight: 600; color: #e2e8f0; }
-        .p-pos { font-size: 0.7rem; color: var(--text-sec); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
-        
-        .p-level { 
-            background: #0f172a; padding: 4px 10px; border-radius: 6px; 
-            font-size: 0.85rem; min-width: 35px; text-align: center; font-weight: bold; color: var(--accent);
-            border: 1px solid var(--border);
-        }
+        .rank-1 { color: var(--pharaoh-gold); text-shadow: 0 0 5px var(--pharaoh-gold); }
 
-        .is-coringa { background: rgba(251, 191, 36, 0.05); border-left: 3px solid var(--coringa-color); }
-        .is-coringa .p-name { color: var(--coringa-color); }
-
-        .actions-area { margin-top: 30px; display: none; gap: 10px; }
-        .global-stats { margin-top: 20px; text-align: center; font-size: 0.9rem; color: var(--text-sec); display: none; background: #1e293b; padding: 10px; border-radius: 8px; border: 1px solid var(--border); }
-        
-        .change-indicator {
-            color: var(--success); font-weight: bold; margin-left: 10px;
+        /* Animações */
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .loading { opacity: 0.5; pointer-events: none; cursor: wait; }
+        .animate-entry { animation: slideIn 0.6s ease-out forwards; }
+
+        /* Scrollbar Personalizada para a Tabela */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0f0f0f; 
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #333; 
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: var(--pharaoh-gold); 
+        }
     </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col">
 
-<div class="container">
-    <header>
-        <h1>⚽ Sorteio dos times <span class="badge">Pelada do Faraó</span></h1>
+    <header class="border-b border-gray-800 bg-black/80 backdrop-blur-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="h-16 w-16 md:h-20 md:w-20 bg-gray-900 rounded-full border-2 border-gold flex items-center justify-center overflow-hidden shadow-[0_0_15px_rgba(255,215,0,0.4)]">
+                    <img src="logo_farao.png" alt="Logo Faraó" class="w-full h-full object-contain">
+                </div>
+                <div>
+                    <h1 class="text-3xl md:text-5xl font-bold leading-none tracking-wide">
+                        PELADA DO <span class="text-gold">FARAÓ</span>
+                    </h1>
+                    <p class="text-gray-500 text-sm md:text-base font-medium tracking-widest uppercase">
+                        Domingo • Horário: 09h ÀS 11h30 • Local: Park Barro Society
+                    </p>
+                </div>
+            </div>
+            
+            <div class="hidden md:block text-right">
+                <div class="text-gold font-bold text-lg font-mono">04/01/2026</div>
+                <div class="text-xs text-gray-500 uppercase">Última Atualização</div>
+            </div>
+        </div>
     </header>
 
-    <div class="input-section">
-        <label>Cole a lista (Nome, Nível 1-8, Posição)</label>
-        <textarea id="inputList" placeholder="Cole sua lista aqui..."></textarea>
-        <div class="status-bar">
-            <span id="playerCount">0 jogadores</span>
-            <span id="teamsPrediction">--</span>
-        </div>
-        <div class="btn-group">
-            <button class="btn-primary" id="btnSortear" onclick="iniciarProcesso()">⚡ Sortear Times</button>
-            <button class="btn-outline" onclick="limpar()">Limpar</button>
-        </div>
-    </div>
+    <main class="flex-grow container mx-auto p-4 md:p-8 space-y-12">
 
-    <div id="globalStats" class="global-stats"></div>
-    <div id="teamsGrid" class="teams-grid"></div>
-
-    <div id="actionsArea" class="actions-area">
-        <button class="btn-primary" onclick="copiarWhatsApp()">📱 Copiar Todos</button>
-        <button class="btn-outline" id="btnRefazer" onclick="iniciarProcesso(true)">🎲 Refazer (Novo Sorteio)</button>
-    </div>
-</div>
-
-<script>
-    const PLAYERS_PER_TEAM = 5;
-    const MAX_RETRIES_VARIETY = 100;
-    
-    const POSITIONS_MAP = {
-        'goleiro': 'GOL', 'gol': 'GOL',
-        'zaga': 'ZAGA', 'zagueiro': 'ZAGA', 'defesa': 'ZAGA', 'beck': 'ZAGA',
-        'meio': 'MEIO', 'meia': 'MEIO',
-        'ataque': 'ATA', 'atacante': 'ATA', 'frente': 'ATA', 'pivo': 'ATA'
-    };
-
-    let lastGeneratedIds = null;
-    let currentTeams = [];
-
-    // --- UTILS ---
-    function generateUUID() {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-            const r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-        });
-    }
-
-    function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array;
-    }
-
-    // --- INPUT ---
-    document.getElementById('inputList').addEventListener('input', function(e) {
-        const lines = e.target.value.trim().split('\n').filter(l => l.trim());
-        const count = lines.length;
-        document.getElementById('playerCount').innerText = `${count} jogadores`;
-        if(count > 0) {
-            const numTeams = Math.ceil(count / PLAYERS_PER_TEAM);
-            document.getElementById('teamsPrediction').innerText = `Gerará ${numTeams} times`;
-        }
-    });
-
-    function parsePlayers(text) {
-        const lines = text.trim().split('\n');
-        return lines.map(line => {
-            if (!line.trim()) return null;
-            const parts = line.split(/[,|-]+/).map(p => p.trim());
-            if (parts.length >= 3) {
-                const rawPos = parts[parts.length - 1].toLowerCase();
-                const rawLevel = parts[parts.length - 2]; 
-                const name = parts.slice(0, parts.length - 2).join(' ');
-                let level = parseFloat(rawLevel);
-                if (isNaN(level)) level = 1;
-                const position = POSITIONS_MAP[rawPos] || 'MEIO';
-                return { id: generateUUID(), name, level, position, isCoringa: false };
-            }
-            return null;
-        }).filter(p => p !== null);
-    }
-
-    // --- PROCESSAMENTO ---
-    async function iniciarProcesso(isRefazer = false) {
-        const btn = isRefazer ? document.getElementById('btnRefazer') : document.getElementById('btnSortear');
-        const originalText = btn.innerText;
-        btn.innerText = "Processando...";
-        btn.classList.add('loading');
-
-        setTimeout(() => {
-            try {
-                executarLogica(isRefazer);
-            } catch (e) {
-                alert("Erro: " + e.message);
-            } finally {
-                btn.innerText = originalText;
-                btn.classList.remove('loading');
-            }
-        }, 50);
-    }
-
-    function executarLogica(checkVariety) {
-        const rawText = document.getElementById('inputList').value;
-        let players = parsePlayers(rawText);
-
-        if (players.length < PLAYERS_PER_TEAM) {
-            alert("Mínimo de 5 jogadores necessários.");
-            return;
-        }
-
-        const numTeams = Math.ceil(players.length / PLAYERS_PER_TEAM);
-        const needed = (numTeams * PLAYERS_PER_TEAM) - players.length;
-        for(let i=0; i<needed; i++) {
-            players.push({ id: generateUUID(), name: `CORINGA ${i+1}`, level: 0, position: 'CORINGA', isCoringa: true });
-        }
-
-        let bestResult = null;
-        let maxDiversityScore = -1;
-        const attempts = checkVariety ? MAX_RETRIES_VARIETY : 1;
-        
-        for(let i=0; i < attempts; i++) {
-            let pool = JSON.parse(JSON.stringify(players));
-            let candidateTeams = gerarTimesComCotas(pool, numTeams);
-            ajustarCoringas(candidateTeams);
-
-            for(let k=0; k<50; k++) {
-                if(!otimizarTrocas(candidateTeams)) break;
-            }
-
-            if (checkVariety && lastGeneratedIds) {
-                const diversity = calcularDiversidade(candidateTeams);
-                if (diversity >= 0.6) {
-                    bestResult = candidateTeams;
-                    maxDiversityScore = diversity;
-                    break;
-                }
-                if (diversity > maxDiversityScore) {
-                    maxDiversityScore = diversity;
-                    bestResult = candidateTeams;
-                }
-            } else {
-                bestResult = candidateTeams;
-                break;
-            }
-        }
-
-        currentTeams = bestResult;
-        salvarEstado(currentTeams);
-        renderTeams(currentTeams, maxDiversityScore);
-    }
-
-    function gerarTimesComCotas(allPlayers, numTeams) {
-        let teams = [];
-        for(let i=0; i<numTeams; i++) {
-            teams.push({ id: i, name: obterNomeTime(i), players: [] });
-        }
-
-        let groups = { 'GOL': [], 'ZAGA': [], 'MEIO': [], 'ATA': [], 'CORINGA': [] };
-        allPlayers.forEach(p => {
-            if(groups[p.position]) groups[p.position].push(p);
-            else groups['MEIO'].push(p);
-        });
-
-        const priorityOrder = ['GOL', 'ZAGA', 'ATA', 'MEIO', 'CORINGA'];
-        
-        priorityOrder.forEach(pos => {
-            let playersOfPos = groups[pos];
-            shuffleArray(playersOfPos);
-            playersOfPos.sort((a,b) => b.level - a.level);
-
-            let teamOrder = Array.from({length: numTeams}, (_, i) => i);
-            shuffleArray(teamOrder);
-
-            let currentIdx = 0;
-            playersOfPos.forEach(p => {
-                let targetTeamId = teamOrder[currentIdx % numTeams];
-                let team = teams.find(t => t.id === targetTeamId);
-                
-                if (team.players.length < PLAYERS_PER_TEAM) {
-                    team.players.push(p);
-                } else {
-                    let anyTeam = teams.find(t => t.players.length < PLAYERS_PER_TEAM);
-                    if(anyTeam) anyTeam.players.push(p);
-                }
-                currentIdx++;
-            });
-        });
-
-        return teams;
-    }
-
-    function otimizarTrocas(teams) {
-        teams.forEach(t => t.avg = getAvg(t));
-        let sorted = [...teams].sort((a,b) => b.avg - a.avg);
-        let best = sorted[0];
-        let worst = sorted[sorted.length - 1];
-
-        if ((best.avg - worst.avg) < 0.1) return false;
-
-        for(let i=0; i<best.players.length; i++) {
-            for(let j=0; j<worst.players.length; j++) {
-                let p1 = best.players[i];
-                let p2 = worst.players[j];
-
-                let compatible = (p1.position === p2.position) || p1.isCoringa || p2.isCoringa;
-                if(!compatible) continue;
-
-                if (p1.level <= p2.level) continue;
-
-                let newAvgBest = (best.avg * 5 - p1.level + p2.level) / 5;
-                let newAvgWorst = (worst.avg * 5 - p2.level + p1.level) / 5;
-                let currentDiff = best.avg - worst.avg;
-                let newDiff = Math.abs(newAvgBest - newAvgWorst);
-
-                if (newDiff < currentDiff) {
-                    best.players[i] = p2;
-                    worst.players[j] = p1;
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    function salvarEstado(teams) {
-        lastGeneratedIds = {};
-        teams.forEach(t => {
-            t.players.forEach(p => lastGeneratedIds[p.id] = t.id);
-        });
-    }
-
-    function calcularDiversidade(newTeams) {
-        if (!lastGeneratedIds) return 0;
-        let totalPlayers = 0;
-        let changes = 0;
-
-        newTeams.forEach(t => {
-            t.players.forEach(p => {
-                totalPlayers++;
-                if (lastGeneratedIds[p.id] !== undefined && lastGeneratedIds[p.id] !== t.id) {
-                    changes++;
-                }
-            });
-        });
-        return totalPlayers === 0 ? 0 : (changes / totalPlayers);
-    }
-
-    function ajustarCoringas(teams) {
-        let sum = 0, count = 0;
-        teams.forEach(t => t.players.forEach(p => { if(!p.isCoringa){ sum+=p.level; count++; } }));
-        let avg = count > 0 ? sum/count : 5;
-        teams.forEach(t => t.players.forEach(p => {
-            if(p.isCoringa) { p.level = parseFloat(avg.toFixed(1)); p.name = `CORINGA (${p.level})`; }
-        }));
-    }
-
-    function getAvg(t) { return t.players.reduce((a,b)=>a+b.level,0) / t.players.length; }
-    
-    // ATUALIZADO: Nomes padronizados para A, B, C...
-    function obterNomeTime(i) { 
-        const n=['A','B','C','D','E','F','G','H']; 
-        return 'TIME ' + (n[i]||(i+1)); 
-    }
-
-    // --- RENDER ---
-    function renderTeams(teams, diversityScore) {
-        const grid = document.getElementById('teamsGrid');
-        grid.innerHTML = '';
-        grid.style.display = 'grid';
-
-        const statsDiv = document.getElementById('globalStats');
-        statsDiv.style.display = 'block';
-        
-        let statsHTML = '';
-        const allAvgs = teams.map(t => getAvg(t));
-        const diff = Math.max(...allAvgs) - Math.min(...allAvgs);
-        
-        statsHTML += `Diferença de Força: <strong>${diff.toFixed(2)}</strong>`;
-        
-        if (diversityScore !== -1) {
-            const pct = (diversityScore * 100).toFixed(0);
-            statsHTML += `<span class="change-indicator">♻️ ${pct}% Modificado</span>`;
-        }
-        statsDiv.innerHTML = statsHTML;
-
-        // Ordenar times por ID para exibição consistente (A, B, C...)
-        teams.sort((a,b) => a.id - b.id);
-
-        teams.forEach(team => {
-            const avg = getAvg(team);
-            const count = team.players.length;
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-6 animate-entry">
             
-            const order = {'GOL':1, 'ZAGA':2, 'MEIO':3, 'CORINGA':4, 'ATA':5};
-            const sortedPlayers = [...team.players].sort((a,b) => order[a.position] - order[b.position]);
-
-            let posCounts = { Z:0, M:0, A:0 };
-            team.players.forEach(p => {
-                if(p.position === 'ZAGA') posCounts.Z++;
-                else if(p.position === 'ATA') posCounts.A++;
-                else posCounts.M++;
-            });
-
-            let listHtml = '';
-            sortedPlayers.forEach(p => {
-                listHtml += `
-                    <li class="player-item ${p.isCoringa?'is-coringa':''}">
-                        <div class="player-info">
-                            <span class="p-name">${p.name}</span>
-                            <span class="p-pos">${p.position}</span>
-                        </div>
-                        <span class="p-level">${p.level.toFixed(2).replace(/[.,]00$/,'')}</span>
-                    </li>`;
-            });
-
-            const card = document.createElement('div');
-            card.className = 'team-card';
-            card.innerHTML = `
-                <div class="team-header">
-                    <span class="team-name">${team.name}</span>
-                    <div class="team-stats">Força: ${avg.toFixed(2)} | Z:${posCounts.Z} M:${posCounts.M} A:${posCounts.A}</div>
-                    <div class="player-count-badge ${count===5?'count-ok':'count-error'}">${count} Atletas</div>
+            <div class="card-panel p-6 rounded-xl relative overflow-hidden group">
+                <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition">
+                    <i class="fas fa-futbol text-8xl text-white"></i>
                 </div>
-                <ul class="player-list">${listHtml}</ul>
-            `;
-            grid.appendChild(card);
-        });
+                <h2 class="text-2xl text-gray-400 mb-4 flex items-center gap-2">
+                    <i class="fas fa-crosshairs text-gold"></i> Artilharia
+                </h2>
+                <div id="top-scorers" class="space-y-3 relative z-10">
+                    </div>
+            </div>
 
-        document.getElementById('actionsArea').style.display = 'flex';
-        grid.scrollIntoView({ behavior: 'smooth' });
-    }
+            <div class="card-panel p-6 rounded-xl relative overflow-hidden group">
+                <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition">
+                    <i class="fas fa-shoe-prints text-8xl text-white"></i>
+                </div>
+                <h2 class="text-2xl text-gray-400 mb-4 flex items-center gap-2">
+                    <i class="fas fa-handshake text-gold"></i> Assistências
+                </h2>
+                <div id="top-assists" class="space-y-3 relative z-10">
+                    </div>
+            </div>
 
-    function limpar() {
-        document.getElementById('inputList').value = '';
-        document.getElementById('teamsGrid').style.display = 'none';
-        document.getElementById('actionsArea').style.display = 'none';
-        document.getElementById('globalStats').style.display = 'none';
-        document.getElementById('playerCount').innerText = '0 jogadores';
-        lastGeneratedIds = null;
-    }
+            <div class="card-panel p-6 rounded-xl relative overflow-hidden group">
+                <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition">
+                    <i class="fas fa-shield-alt text-8xl text-white"></i>
+                </div>
+                <h2 class="text-2xl text-gray-400 mb-4 flex items-center gap-2">
+                    <i class="fas fa-users text-gold"></i> Time da Rodada
+                </h2>
+                <div id="top-team" class="space-y-3 relative z-10">
+                    </div>
+            </div>
+        </section>
 
-    // ATUALIZADO: Exportação limpa
-    function copiarWhatsApp() {
-        let text = "*⚽ TIMES SORTEADOS ⚽*\n\n";
+        <section class="animate-entry" style="animation-delay: 0.2s;">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-3xl md:text-4xl text-white border-l-4 border-gold pl-4">
+                    SELEÇÃO DO MÊS
+                </h2>
+                <div class="flex gap-2 flex-wrap justify-end">
+                    <span class="text-xs font-mono text-gray-500 border border-gray-800 px-2 py-1 rounded bg-black/50">1 GOL</span>
+                    <span class="text-xs font-mono text-gray-500 border border-gray-800 px-2 py-1 rounded bg-black/50">1 ZAG</span>
+                    <span class="text-xs font-mono text-gray-500 border border-gray-800 px-2 py-1 rounded bg-black/50">2 MEI</span>
+                    <span class="text-xs font-mono text-gray-500 border border-gray-800 px-2 py-1 rounded bg-black/50">2 ATA</span>
+                </div>
+            </div>
+            
+            <div id="selection-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+                </div>
+        </section>
+
+        <section class="animate-entry" style="animation-delay: 0.4s;">
+            <div class="flex flex-col md:flex-row items-center justify-between mb-4 gap-4">
+                <div class="flex items-center">
+                    <h2 class="text-3xl md:text-4xl text-white border-l-4 border-gold pl-4">
+                        CLASSIFICAÇÃO GERAL
+                    </h2>
+                    <span class="ml-4 bg-gray-800 text-gold px-3 py-1 rounded text-sm font-bold border border-gold/30 hidden sm:inline-block">
+                        TEMPORADA 2026
+                    </span>
+                </div>
+
+                <div class="relative w-full md:w-64">
+                    <input type="text" id="search-input" placeholder="Buscar atleta..." 
+                        class="w-full bg-black/50 border border-gray-700 text-white rounded-full py-2 pl-10 pr-4 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition placeholder-gray-600">
+                    <i class="fas fa-search absolute left-3 top-3 text-gray-500"></i>
+                </div>
+            </div>
+            
+            <div class="rounded-lg shadow-2xl border border-gray-800 overflow-hidden bg-[#0a0a0a]">
+                <div class="overflow-y-auto max-h-[500px] custom-scrollbar">
+                    <table class="w-full text-left custom-table">
+                        <thead class="sticky top-0 z-20 shadow-lg">
+                            <tr>
+                                <th class="text-center w-16">#</th>
+                                <th>ATLETA</th>
+                                <th class="text-center text-white bg-gray-900">PTS</th>
+                                <th class="text-center">GOLS</th>
+                                <th class="text-center">ASSIS</th>
+                                <th class="text-center hidden sm:table-cell text-green-500">VIT</th>
+                                <th class="text-center hidden sm:table-cell text-red-500">DER</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ranking-body" class="text-gray-300 font-medium">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-black border-t border-gray-900 py-8 mt-8 text-center">
+        <p class="text-gold font-bold text-xl font-['Teko'] tracking-widest">PELADA DO FARAÓ</p>
+        <p class="text-gray-600 text-sm mt-2">© 2026 Recife.</p>
+    </footer>
+
+    <script>
+        // DADOS REAIS - ATUALIZADOS EM 04/01/2026 (Baseado na Planilha)
+        // =================================================================
+        // =================================================================
         
-        // Garante ordem A, B, C...
-        const sortedTeams = [...currentTeams].sort((a,b) => a.id - b.id);
+        const playersData = [
+            // --- TIME 5 (CAMPEÃO - 15 PTS) ---
+            { nome: "Bruno",    posicao: "ZAG", gols: 1, assis: 2, pts: 15, vit: 5, der: 1, timeRodada: 1 },
+            { nome: "Móvel",    posicao: "ATA", gols: 4, assis: 0, pts: 15, vit: 5, der: 1, timeRodada: 1 },
+            { nome: "Noé",      posicao: "MEI", gols: 0, assis: 1, pts: 15, vit: 5, der: 1, timeRodada: 1 },
+            { nome: "Gustavo",  posicao: "MEI", gols: 1, assis: 1, pts: 15, vit: 5, der: 1, timeRodada: 1 },
+            { nome: "Juca",     posicao: "GOL", gols: 0, assis: 0, pts: 15, vit: 5, der: 1, timeRodada: 1 },
 
-        sortedTeams.forEach(t => {
-            text += `*${t.name}* (Força: ${getAvg(t).toFixed(2)})\n`;
-            t.players.forEach(p => {
-                // APENAS NOME (Sem posição entre parênteses)
-                text += `- ${p.name}\n`; 
-            });
-            text += "\n";
+            // --- TIME 1 (9 PTS) ---
+            { nome: "Aquiles",  posicao: "ZAG", gols: 2, assis: 0, pts: 9,  vit: 3, der: 2, timeRodada: 0 },
+            { nome: "Breno",    posicao: "ATA", gols: 0, assis: 2, pts: 9,  vit: 3, der: 2, timeRodada: 0 },
+            { nome: "Wilker",   posicao: "MEI", gols: 3, assis: 0, pts: 9,  vit: 3, der: 2, timeRodada: 0 },
+            { nome: "Túlio",    posicao: "ZAG", gols: 0, assis: 0, pts: 9,  vit: 3, der: 2, timeRodada: 0 },
+            { nome: "Goiaba",   posicao: "MEI", gols: 2, assis: 0, pts: 9,  vit: 3, der: 2, timeRodada: 0 },
+
+            // --- TIME 3 (6 PTS) ---
+            { nome: "Braulio",  posicao: "ATA", gols: 0, assis: 0, pts: 6,  vit: 2, der: 2, timeRodada: 0 },
+            { nome: "Juninho",  posicao: "MEI", gols: 1, assis: 2, pts: 6,  vit: 2, der: 2, timeRodada: 0 },
+            { nome: "Tarcísio", posicao: "ATA", gols: 1, assis: 0, pts: 6,  vit: 2, der: 2, timeRodada: 0 },
+            { nome: "Jojo",     posicao: "MEI", gols: 0, assis: 0, pts: 6,  vit: 2, der: 2, timeRodada: 0 },
+
+            // --- TIME 2 (3 PTS) ---
+            { nome: "Yushin",   posicao: "ZAG", gols: 2, assis: 0, pts: 3,  vit: 1, der: 2, timeRodada: 0 },
+            { nome: "Pereira",  posicao: "ATA", gols: 1, assis: 2, pts: 3,  vit: 1, der: 2, timeRodada: 0 },
+            { nome: "Ryan",     posicao: "MEI", gols: 3, assis: 0, pts: 3,  vit: 1, der: 2, timeRodada: 0 },
+            { nome: "Rodrigo",  posicao: "MEI", gols: 0, assis: 0, pts: 3,  vit: 1, der: 2, timeRodada: 0 },
+            { nome: "Zaca",     posicao: "MEI", gols: 1, assis: 0, pts: 3,  vit: 1, der: 2, timeRodada: 0 },
+
+            // --- TIME 4 (0 PTS) ---
+            { nome: "Luan",     posicao: "MEI", gols: 0, assis: 0, pts: 0,  vit: 0, der: 2, timeRodada: 0 },
+            { nome: "Nedson",   posicao: "ATA", gols: 0, assis: 0, pts: 0,  vit: 0, der: 2, timeRodada: 0 },
+            { nome: "Rodrigo01",posicao: "MEI", gols: 0, assis: 2, pts: 0,  vit: 0, der: 2, timeRodada: 0 },
+            { nome: "Xande",    posicao: "ATA", gols: 1, assis: 0, pts: 0,  vit: 0, der: 2, timeRodada: 0 }
+        ];
+
+        // =================================================================
+        // LÓGICA DE RENDERIZAÇÃO
+        // =================================================================
+
+        function renderDashboard() {
+            renderTopLists();
+            renderTable(); // Carrega tabela sem filtro inicial
+            renderSelection();
+        }
+
+        function renderTopLists() {
+            const createRow = (p, value, label, index) => {
+                const colorClass = index === 0 ? "text-gold font-bold text-lg" : "text-gray-300";
+                const borderClass = index === 0 ? "border-l-2 border-gold pl-2 bg-white/5" : "";
+                return `
+                    <div class="flex justify-between items-center py-1 ${borderClass}">
+                        <div class="flex items-center gap-2">
+                            <span class="font-mono text-gray-600 w-4">${index + 1}.</span>
+                            <span class="${colorClass}">${p.nome}</span>
+                        </div>
+                        <div class="font-mono font-bold text-white bg-gray-800 px-2 rounded">
+                            ${value} <span class="text-xs text-gray-500 font-normal">${label}</span>
+                        </div>
+                    </div>
+                `;
+            };
+
+            // Top Gols
+            const topGols = [...playersData].sort((a,b) => b.gols - a.gols).slice(0, 5);
+            document.getElementById('top-scorers').innerHTML = topGols.map((p, i) => createRow(p, p.gols, 'GOLS', i)).join('');
+
+            // Top Assist
+            const topAssis = [...playersData].sort((a,b) => b.assis - a.assis).slice(0, 5);
+            document.getElementById('top-assists').innerHTML = topAssis.map((p, i) => createRow(p, p.assis, 'ASS', i)).join('');
+
+            // Top Time da Rodada
+            // Prioridade: Flag Time da Rodada > Pontos > Vitórias
+            const topTeam = [...playersData].sort((a,b) => b.timeRodada - a.timeRodada || b.pts - a.pts).slice(0, 5);
+            document.getElementById('top-team').innerHTML = topTeam.map((p, i) => createRow(p, p.timeRodada, 'VEZES', i)).join('');
+        }
+
+        // Função de Renderização da Tabela (Com Filtro)
+        function renderTable(searchTerm = "") {
+            let filteredPlayers = playersData;
+            
+            // Filtro
+            if (searchTerm) {
+                const term = searchTerm.toLowerCase();
+                filteredPlayers = playersData.filter(p => 
+                    p.nome.toLowerCase().includes(term) || 
+                    p.posicao.toLowerCase().includes(term)
+                );
+            }
+
+            // Ordenação (Pontos > Vitórias > Gols)
+            const sorted = [...filteredPlayers].sort((a,b) => b.pts - a.pts || b.vit - a.vit || b.gols - a.gols);
+            
+            const html = sorted.map((p, i) => {
+                // Rank só ganha destaque se não houver busca (pois a busca altera a ordem visual)
+                const rankStyle = i < 3 && !searchTerm ? `rank-${i+1} font-bold` : 'text-gray-500';
+                const rowBg = i % 2 === 0 ? 'bg-white/[0.02]' : '';
+                
+                return `
+                <tr class="${rowBg} hover:bg-gray-800 transition-colors">
+                    <td class="text-center py-3 font-mono ${rankStyle}">${i+1}º</td>
+                    <td class="py-3 font-bold text-gray-200 uppercase tracking-wide flex items-center gap-2">
+                        ${p.nome} 
+                        <span class="text-[10px] text-gray-500 border border-gray-700 px-1.5 py-0.5 rounded bg-black/30 font-mono">${p.posicao}</span>
+                    </td>
+                    <td class="text-center py-3 font-black text-xl text-gold bg-gray-800/50 border-x border-gray-800">${p.pts}</td>
+                    <td class="text-center py-3 text-gray-400 font-bold">${p.gols}</td>
+                    <td class="text-center py-3 text-gray-400 font-bold">${p.assis}</td>
+                    <td class="text-center py-3 text-green-500/80 font-mono hidden sm:table-cell">${p.vit}</td>
+                    <td class="text-center py-3 text-red-500/80 font-mono hidden sm:table-cell">${p.der}</td>
+                </tr>
+                `;
+            }).join('');
+            
+            // Estado Vazio (Busca sem resultados)
+            if (sorted.length === 0) {
+                document.getElementById('ranking-body').innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center py-8 text-gray-500">
+                            Nenhum faraó encontrado com esse nome.
+                        </td>
+                    </tr>
+                `;
+            } else {
+                document.getElementById('ranking-body').innerHTML = html;
+            }
+        }
+
+        function renderSelection() {
+            const getBest = (pos, count, sortFn) => {
+                return [...playersData]
+                    .filter(p => p.posicao === pos)
+                    .sort(sortFn)
+                    .slice(0, count);
+            };
+
+            // Lógica definida:
+            // 1. Goleiro: Time da Rodada (Pontos ou Flag)
+            const goleiro = getBest('GOL', 1, (a,b) => b.pts - a.pts);
+            
+            // 2. Zagueiro: Pontos > Gols
+            const zagueiro = getBest('ZAG', 1, (a,b) => b.pts - a.pts || b.gols - a.gols);
+            
+            // 3. Meias: Gols + Assis
+            const meias = getBest('MEI', 2, (a,b) => (b.gols + b.assis) - (a.gols + a.assis) || b.pts - a.pts);
+            
+            // 4. Atacantes: Gols + Assis
+            const atacantes = getBest('ATA', 2, (a,b) => (b.gols + b.assis) - (a.gols + a.assis) || b.pts - a.pts);
+
+            // Grid: GOL -> ZAG -> MEI -> ATA
+            const selecao = [...goleiro, ...zagueiro, ...meias, ...atacantes];
+
+            const html = selecao.map(p => `
+                <div class="card-panel rounded-lg p-4 flex flex-col items-center justify-center group relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gold/5 opacity-0 group-hover:opacity-100 transition duration-500"></div>
+                    
+                    <div class="text-xs font-mono text-gold mb-1 tracking-widest border border-gold/30 px-2 rounded-full bg-black">
+                        ${p.posicao}
+                    </div>
+                    
+                    <div class="text-2xl font-bold text-white uppercase font-['Teko'] mb-2 relative z-10">
+                        ${p.nome}
+                    </div>
+                    
+                    <div class="flex gap-3 text-sm text-gray-400">
+                        <div class="flex flex-col items-center">
+                            <span class="text-white font-bold">${p.gols}</span>
+                            <span class="text-[10px]">GOLS</span>
+                        </div>
+                        <div class="w-px bg-gray-700 h-full"></div>
+                        <div class="flex flex-col items-center">
+                            <span class="text-white font-bold">${p.assis}</span>
+                            <span class="text-[10px]">ASSIS</span>
+                        </div>
+                        <div class="w-px bg-gray-700 h-full"></div>
+                         <div class="flex flex-col items-center">
+                            <span class="text-gold font-bold">${p.pts}</span>
+                            <span class="text-[10px]">PTS</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('selection-grid').innerHTML = html;
+        }
+
+        // Listener da Busca
+        document.getElementById('search-input').addEventListener('keyup', (e) => {
+            renderTable(e.target.value);
         });
-        navigator.clipboard.writeText(text).then(() => alert("Copiado com sucesso!"));
-    }
-</script>
 
+        // Inicializa
+        renderDashboard();
+    </script>
 </body>
 </html>
