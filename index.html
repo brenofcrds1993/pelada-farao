@@ -3,104 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pelada do Faraó - 04/01/2026</title>
+    <title>Pelada do Faraó - Ranking Cartola Ao Vivo</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Teko:wght@300;400;600;700&family=Roboto:wght@400;500;900&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* === CONFIGURAÇÕES VISUAIS FARAÓ === */
-        :root {
-            --pharaoh-black: #050505;
-            --pharaoh-dark-gray: #0f0f0f;
-            --pharaoh-gold: #FFD700;
-            --pharaoh-gold-dim: #b39500;
-            --text-white: #ffffff;
-            --border-glow: 0 0 10px rgba(255, 215, 0, 0.3);
-        }
-
-        body {
-            background-color: var(--pharaoh-black);
-            color: var(--text-white);
-            font-family: 'Roboto', sans-serif;
-            background-image: 
-                linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.95)),
-                url('https://www.transparenttextures.com/patterns/cubes.png');
-        }
-
-        /* Títulos Impactantes */
-        h1, h2, .stat-value, .rank-number {
-            font-family: 'Teko', sans-serif;
-            text-transform: uppercase;
-        }
-
-        /* Utilitários de Cor */
+        /* CONFIGURAÇÕES VISUAIS */
+        :root { --pharaoh-black: #050505; --pharaoh-gold: #FFD700; --text-white: #ffffff; }
+        body { background-color: var(--pharaoh-black); color: var(--text-white); font-family: 'Roboto', sans-serif; 
+               background-image: linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.95)), url('https://www.transparenttextures.com/patterns/cubes.png'); }
+        h1, h2, th, .font-teko { font-family: 'Teko', sans-serif; text-transform: uppercase; }
         .text-gold { color: var(--pharaoh-gold); }
         .bg-gold { background-color: var(--pharaoh-gold); color: black; }
-        .border-gold { border-color: var(--pharaoh-gold); }
-
-        /* CARDS */
-        .card-panel {
-            background: linear-gradient(145deg, #0f0f0f, #0a0a0a);
-            border: 1px solid #222;
-            border-top: 3px solid var(--pharaoh-gold);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.7);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
         
-        .card-panel:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--border-glow);
-            border-color: var(--pharaoh-gold);
-        }
-
-        /* TABELA */
-        .custom-table thead th {
-            background-color: #1a1a1a;
-            color: var(--pharaoh-gold);
-            font-family: 'Teko', sans-serif;
-            font-size: 1.2rem;
-            letter-spacing: 1px;
-            padding: 12px;
-        }
-        .custom-table tbody tr {
-            border-bottom: 1px solid #222;
-            transition: background 0.2s;
-        }
-        .custom-table tbody tr:hover {
-            background-color: rgba(255, 215, 0, 0.05);
-        }
-        .rank-1 { color: var(--pharaoh-gold); text-shadow: 0 0 5px var(--pharaoh-gold); }
-
-        /* Animações */
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-entry { animation: slideIn 0.6s ease-out forwards; }
-
-        /* Scrollbar Personalizada para a Tabela */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #0f0f0f; 
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #333; 
-            border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: var(--pharaoh-gold); 
-        }
+        .card-panel { background: linear-gradient(145deg, #0f0f0f, #0a0a0a); border: 1px solid #222; border-top: 3px solid var(--pharaoh-gold); transition: transform 0.3s ease; }
+        .card-panel:hover { transform: translateY(-5px); border-color: var(--pharaoh-gold); }
         
-        /* Loader Simples */
+        .custom-scrollbar::-webkit-scrollbar { height: 8px; width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #0f0f0f; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        
         .loader { border: 3px solid #333; border-top: 3px solid var(--pharaoh-gold); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; display: inline-block; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-entry { animation: slideIn 0.6s ease-out forwards; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -112,17 +40,12 @@
                     <img src="logo_farao.png" alt="Logo Faraó" class="w-full h-full object-contain">
                 </div>
                 <div>
-                    <h1 class="text-3xl md:text-5xl font-bold leading-none tracking-wide">
-                        PELADA DO <span class="text-gold">FARAÓ</span>
-                    </h1>
-                    <p class="text-gray-500 text-sm md:text-base font-medium tracking-widest uppercase">
-                        Domingo • Horário: 09h ÀS 11h30 • Local: Park Barro Society
-                    </p>
+                    <h1 class="text-3xl md:text-5xl font-bold leading-none tracking-wide">PELADA DO <span class="text-gold">FARAÓ</span></h1>
+                    <p class="text-gray-500 text-sm md:text-base font-medium tracking-widest uppercase">Domingo • Horário: 09h ÀS 11h30 • Local: Park Barro Society</p>
                 </div>
             </div>
-            
             <div class="hidden md:block text-right">
-                <div class="text-gold font-bold text-lg font-mono">04/01/2026</div>
+                <div class="text-gold font-bold text-lg font-mono">TEMPORADA 2026</div>
                 <div class="text-xs text-gray-500 uppercase flex items-center justify-end gap-2">
                     <span id="status-text">Conectando...</span>
                     <div id="status-indicator" class="w-2 h-2 rounded-full bg-red-500"></div>
@@ -132,54 +55,37 @@
     </header>
 
     <main class="flex-grow container mx-auto p-4 md:p-8 space-y-12">
-
-        <div id="loading-screen" class="text-center py-10">
+        <div id="loading-screen" class="text-center py-20">
             <div class="loader"></div>
-            <p class="text-gray-500 mt-2 font-mono text-sm">Carregando dados da planilha...</p>
+            <p class="text-gray-400 font-mono animate-pulse">Buscando dados na planilha...</p>
         </div>
 
-        <div id="dashboard-content" class="hidden">
+        <div id="dashboard-content" class="hidden space-y-12">
+            
             <section class="grid grid-cols-1 md:grid-cols-3 gap-6 animate-entry">
-                
                 <div class="card-panel p-6 rounded-xl relative overflow-hidden group">
-                    <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition">
-                        <i class="fas fa-futbol text-8xl text-white"></i>
-                    </div>
-                    <h2 class="text-2xl text-gray-400 mb-4 flex items-center gap-2">
-                        <i class="fas fa-crosshairs text-gold"></i> Artilharia
-                    </h2>
-                    <div id="top-scorers" class="space-y-3 relative z-10">
-                    </div>
+                    <div class="absolute right-0 top-0 p-4 opacity-10"><i class="fas fa-futbol text-8xl text-white"></i></div>
+                    <h2 class="text-2xl text-gray-400 mb-4 flex items-center gap-2"><i class="fas fa-crosshairs text-gold"></i> Artilharia</h2>
+                    <div id="top-scorers" class="space-y-2 relative z-10"></div>
                 </div>
-
                 <div class="card-panel p-6 rounded-xl relative overflow-hidden group">
-                    <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition">
-                        <i class="fas fa-shoe-prints text-8xl text-white"></i>
-                    </div>
-                    <h2 class="text-2xl text-gray-400 mb-4 flex items-center gap-2">
-                        <i class="fas fa-handshake text-gold"></i> Assistências
-                    </h2>
-                    <div id="top-assists" class="space-y-3 relative z-10">
-                    </div>
+                    <div class="absolute right-0 top-0 p-4 opacity-10"><i class="fas fa-shoe-prints text-8xl text-white"></i></div>
+                    <h2 class="text-2xl text-gray-400 mb-4 flex items-center gap-2"><i class="fas fa-handshake text-gold"></i> Assistências</h2>
+                    <div id="top-assists" class="space-y-2 relative z-10"></div>
                 </div>
-
                 <div class="card-panel p-6 rounded-xl relative overflow-hidden group">
-                    <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition">
-                        <i class="fas fa-shield-alt text-8xl text-white"></i>
-                    </div>
-                    <h2 class="text-2xl text-gray-400 mb-4 flex items-center gap-2">
-                        <i class="fas fa-users text-gold"></i> Time da Rodada
-                    </h2>
-                    <div id="top-team" class="space-y-3 relative z-10">
-                    </div>
+                    <div class="absolute right-0 top-0 p-4 opacity-10"><i class="fas fa-shield-alt text-8xl text-white"></i></div>
+                    <h2 class="text-2xl text-gray-400 mb-4 flex items-center gap-2"><i class="fas fa-users text-gold"></i> Time da Rodada</h2>
+                    <div id="top-team" class="space-y-2 relative z-10"></div>
                 </div>
             </section>
 
-            <section class="animate-entry mt-12" style="animation-delay: 0.2s;">
+            <section class="animate-entry" style="animation-delay: 0.2s;">
                 <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-3xl md:text-4xl text-white border-l-4 border-gold pl-4">
-                        SELEÇÃO DO MÊS
-                    </h2>
+                    <div>
+                        <h2 class="text-3xl md:text-4xl text-white border-l-4 border-gold pl-4">SELEÇÃO DO MÊS</h2>
+                        <span id="month-label" class="ml-4 text-xs text-gold font-mono uppercase border border-gold/30 px-2 py-1 rounded bg-black/50">CARREGANDO...</span>
+                    </div>
                     <div class="flex gap-2 flex-wrap justify-end">
                         <span class="text-xs font-mono text-gray-500 border border-gray-800 px-2 py-1 rounded bg-black/50">1 GOL</span>
                         <span class="text-xs font-mono text-gray-500 border border-gray-800 px-2 py-1 rounded bg-black/50">1 ZAG</span>
@@ -187,100 +93,85 @@
                         <span class="text-xs font-mono text-gray-500 border border-gray-800 px-2 py-1 rounded bg-black/50">2 ATA</span>
                     </div>
                 </div>
-                
-                <div id="selection-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
-                </div>
+                <div id="selection-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4"></div>
             </section>
 
-            <section class="animate-entry mt-12" style="animation-delay: 0.4s;">
+            <section class="animate-entry" style="animation-delay: 0.4s;">
                 <div class="flex flex-col md:flex-row items-center justify-between mb-4 gap-4">
-                    <div class="flex items-center">
-                        <h2 class="text-3xl md:text-4xl text-white border-l-4 border-gold pl-4">
-                            CLASSIFICAÇÃO GERAL
-                        </h2>
-                        <span class="ml-4 bg-gray-800 text-gold px-3 py-1 rounded text-sm font-bold border border-gold/30 hidden sm:inline-block">
-                            TEMPORADA 2026
-                        </span>
-                    </div>
-
+                    <h2 class="text-3xl md:text-4xl text-white border-l-4 border-gold pl-4">RANKING GERAL</h2>
                     <div class="relative w-full md:w-64">
-                        <input type="text" id="search-input" placeholder="Buscar atleta..." 
-                            class="w-full bg-black/50 border border-gray-700 text-white rounded-full py-2 pl-10 pr-4 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition placeholder-gray-600">
+                        <input type="text" id="search-input" placeholder="Buscar atleta..." class="w-full bg-black/50 border border-gray-700 text-white rounded-full py-2 pl-10 pr-4 focus:outline-none focus:border-gold">
                         <i class="fas fa-search absolute left-3 top-3 text-gray-500"></i>
                     </div>
                 </div>
-                
-                <div class="rounded-lg shadow-2xl border border-gray-800 overflow-hidden bg-[#0a0a0a]">
-                    <div class="overflow-y-auto max-h-[500px] custom-scrollbar">
-                        <table class="w-full text-left custom-table">
-                            <thead class="sticky top-0 z-20 shadow-lg">
-                                <tr>
-                                    <th class="text-center w-16">#</th>
-                                    <th>ATLETA</th>
-                                    <th class="text-center text-white bg-gray-900 border-x border-gray-800">PTS</th>
-                                    <th class="text-center text-xs text-gray-400" title="Gols (+3)">GOLS</th>
-                                    <th class="text-center text-xs text-gray-400" title="Assistências (+3)">ASSIS</th>
-                                    <th class="text-center text-xs text-gray-400" title="Vitórias (+5)">VIT</th>
-                                    <th class="text-center text-xs text-gray-400" title="Clean Sheet (+5)">SG</th>
-                                    <th class="text-center text-xs text-gray-400" title="Presença (+10)">PRES</th>
-                                    <th class="text-center text-xs text-gray-400" title="Pontualidade (+2)">PONT</th>
-                                    <th class="text-center text-xs text-gray-400" title="Atraso (-2)">ATR</th>
-                                    <th class="text-center text-xs text-gray-400" title="Cartão (-2)">CARD</th>
-                                    <th class="text-center text-xs text-gray-400" title="Furo (-10)">FURO</th>
-                                </tr>
-                            </thead>
-                            <tbody id="ranking-body" class="text-gray-300 font-medium">
-                            </tbody>
-                        </table>
+                <div class="rounded-lg shadow-2xl border border-gray-800 bg-[#0a0a0a] flex flex-col">
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <div class="inline-block min-w-full align-middle">
+                            <table class="min-w-full text-left custom-table divide-y divide-gray-800">
+                                <thead class="bg-gray-900 sticky top-0 z-20">
+                                    <tr>
+                                        <th class="py-4 px-3 sticky left-0 bg-gray-900 z-30 shadow-lg min-w-[180px] text-gold border-r border-gray-800">ATLETA</th>
+                                        <th class="py-4 px-3 text-center text-white bg-gold/10 border-x border-gray-800 min-w-[80px] text-xl">TOTAL</th>
+                                        <th class="px-3 text-center text-xs text-gray-400 min-w-[80px]" title="Presença (+10)"><i class="fas fa-check-circle text-green-500 mb-1 block text-lg"></i> PRES</th>
+                                        <th class="px-3 text-center text-xs text-gray-400 min-w-[80px]" title="Pontualidade (+2)"><i class="fas fa-clock text-blue-400 mb-1 block text-lg"></i> PONT</th>
+                                        <th class="px-3 text-center text-xs text-gray-400 min-w-[80px]" title="Atraso (-2)"><i class="fas fa-running text-yellow-500 mb-1 block text-lg"></i> ATRASO</th>
+                                        <th class="px-3 text-center text-xs text-gray-400 min-w-[100px]" title="Gols e Assistências (+3)"><i class="fas fa-futbol text-white mb-1 block text-lg"></i> G/A</th>
+                                        <th class="px-3 text-center text-xs text-gray-400 min-w-[80px]" title="Clean Sheet (+5)"><i class="fas fa-shield-alt text-gray-300 mb-1 block text-lg"></i> SG</th>
+                                        <th class="px-3 text-center text-xs text-gray-400 min-w-[80px]" title="Vitória (+5)"><i class="fas fa-trophy text-gold mb-1 block text-lg"></i> VIT</th>
+                                        <th class="px-3 text-center text-xs text-gray-400 min-w-[80px]" title="Cartão (-2)"><i class="fas fa-square text-red-500 mb-1 block text-lg"></i> CART</th>
+                                        <th class="px-3 text-center text-xs text-gray-400 min-w-[80px]" title="Furo (-10)"><i class="fas fa-user-times text-red-700 mb-1 block text-lg"></i> FURO</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ranking-body" class="divide-y divide-gray-800 bg-[#0a0a0a]"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </section>
         </div>
-
     </main>
 
     <footer class="bg-black border-t border-gray-900 py-8 mt-8 text-center">
         <p class="text-gold font-bold text-xl font-['Teko'] tracking-widest">PELADA DO FARAÓ</p>
-        <p class="text-gray-600 text-sm mt-2">© 2026 Recife. O sol nasce para todos, a sombra é para quem ganha.</p>
+        <p class="text-gray-600 text-sm mt-2">© 2026 Recife.</p>
     </footer>
 
     <script>
         // =================================================================
-        // CONFIGURAÇÕES & CONEXÃO
+        // CONFIGURAÇÕES
         // =================================================================
         
-        // 👇👇 COLE O LINK CSV AQUI DENTRO DAS ASPAS 👇👇
-        const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTQfAWxpKRn7PA9URd6u2tpPwEGOt_J-U4YrtbJOobjEjLISJOr7U0hQNCjJYbGO-9jAaeAbn8hW_dw/pub?gid=0&single=true&output=csv";
+        // 👇👇 COLE O LINK CSV AQUI 👇👇
+        const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTQfAWxpKRn7PA9URd6u2tpPwEGOt_J-U4YrtbJOobjEjLISJOr7U0hQNCjJYbGO-9jAaeAbn8hW_dw/pubhtml?gid=0&single=true"; 
         // --------------------------------------------------
 
-        const CAMINHO_FOTOS = "./fotos/"; 
-        const FORMATO_FOTO = ".jpg";      
-        const FOTO_GENERICA = "https://cdn-icons-png.flaticon.com/512/847/847969.png"; 
+        const CAMINHO_FOTOS = "./fotos/";
+        const FORMATO_FOTO = ".jpg";
+        const FOTO_GENERICA = "https://cdn-icons-png.flaticon.com/512/847/847969.png";
 
-        // PESOS CARTOLA
         const REGRAS = {
             presenca: 10, pontualidade: 2, atraso: -2, clean_sheet: 5,
             vitoria: 5, gol: 3, assistencia: 3, cartao: -2, furo: -10
         };
 
-        let globalData = [];
+        // Variáveis Globais
+        let allMatches = []; // Armazena cada linha da planilha individualmente
+        let globalAggregated = []; // Armazena totais da temporada
 
         // =================================================================
-        // LÓGICA DE DADOS (FETCH + PARSE)
+        // CONEXÃO COM PLANILHA
         // =================================================================
-        
         async function init() {
             if(SHEET_URL.includes("COLE_SEU")) {
                 document.getElementById('loading-screen').innerHTML = "<p class='text-red-500'>Erro: Configure o link da planilha no código!</p>";
                 return;
             }
-            
             try {
-                const response = await fetch(SHEET_URL);
-                const csvText = await response.text();
-                globalData = parseCSV(csvText);
+                const res = await fetch(SHEET_URL);
+                const txt = await res.text();
+                processData(txt);
                 
-                // Sucesso
+                // UI Update
                 document.getElementById('loading-screen').classList.add('hidden');
                 document.getElementById('dashboard-content').classList.remove('hidden');
                 document.getElementById('status-indicator').classList.remove('bg-red-500');
@@ -289,28 +180,25 @@
                 document.getElementById('status-text').classList.add('text-green-500');
 
                 renderDashboard();
-            } catch (error) {
-                console.error(error);
+            } catch (err) {
+                console.error(err);
                 document.getElementById('loading-screen').innerHTML = "<p class='text-red-500'>Erro ao conectar com a planilha.</p>";
             }
         }
 
-        function parseCSV(text) {
-            const rows = text.split('\n').map(r => r.split(','));
+        // Processa CSV e cria estruturas de dados
+        function processData(csvText) {
+            const rows = csvText.split('\n').map(r => r.split(','));
             const headers = rows[0].map(h => h.trim().replace(/"/g, ''));
-            const playersMap = {};
-
-            // Pula cabeçalho (i=1)
+            
+            allMatches = [];
+            
+            // Pula cabeçalho
             for(let i=1; i<rows.length; i++) {
                 const row = rows[i];
                 if(row.length < headers.length) continue;
 
-                // Helpers de leitura
-                const getStr = (k) => {
-                    const idx = headers.indexOf(k);
-                    return row[idx] ? row[idx].replace(/"/g, '').trim() : "";
-                };
-                const getNum = (k) => {
+                const getVal = (k) => {
                     const idx = headers.indexOf(k);
                     if(idx === -1) return 0;
                     let val = row[idx] ? row[idx].replace(/"/g, '').trim() : "0";
@@ -318,37 +206,61 @@
                     if(val.toUpperCase() === 'N') return 0;
                     return Number(val) || 0;
                 };
+                const getStr = (k) => {
+                    const idx = headers.indexOf(k);
+                    return row[idx] ? row[idx].replace(/"/g, '').trim() : "";
+                };
 
                 const nome = getStr('nomeAtleta');
                 if(!nome) continue;
 
-                if(!playersMap[nome]) {
-                    playersMap[nome] = {
-                        nome: nome,
-                        posicao: normalizePos(getStr('posicao')),
-                        gols: 0, assis: 0, vitoria: 0, der: 0,
-                        presenca: 0, pontual: 0, atraso: 0, clean: 0, cartao: 0, furo: 0,
-                        timeRodada: 0
-                    };
-                }
-
-                const p = playersMap[nome];
-                // Acumula
-                p.gols += getNum('qtdGols');
-                p.assis += getNum('qtdAssistencias');
-                p.vitoria += getNum('qtdVitorias');
-                p.der += getNum('qtdDerrotas');
-                p.presenca += getNum('presenca');
-                p.pontual += getNum('chegou_nahora');
-                p.atraso += getNum('chegou_atrasado');
-                p.clean += getNum('clean_sheet');
-                p.cartao += getNum('cartao');
-                p.furo += getNum('confirmou_e_naofoi');
+                // Cria objeto da partida
+                const match = {
+                    data: getStr('data'), // Importante: ler a data
+                    nome: nome,
+                    posicao: normalizePos(getStr('posicao')),
+                    gols: getVal('qtdGols'),
+                    assis: getVal('qtdAssistencias'),
+                    vitoria: getVal('qtdVitorias'),
+                    presenca: getVal('presenca'),
+                    pontual: getVal('chegou_nahora'),
+                    atraso: getVal('chegou_atrasado'),
+                    clean: getVal('clean_sheet'),
+                    cartao: getVal('cartao'),
+                    furo: getVal('confirmou_e_naofoi'),
+                    timeRodada: (getStr('timeRodada').toUpperCase() === 'S' ? 1 : 0)
+                };
                 
-                // Time da rodada (flag S/N na planilha, somamos quantas vezes foi 'S')
-                if(getStr('timeRodada').toUpperCase() === 'S') p.timeRodada++;
+                // Calcula pontos dessa partida específica
+                match.totalPoints = calcPoints(match);
+                
+                allMatches.push(match);
             }
-            return Object.values(playersMap);
+
+            // Agrega para temporada (Global)
+            globalAggregated = aggregateData(allMatches);
+        }
+
+        // Função para somar dados de uma lista de partidas
+        function aggregateData(matchesList) {
+            const map = {};
+            matchesList.forEach(m => {
+                if(!map[m.nome]) {
+                    map[m.nome] = { ...m }; // Clona o primeiro registro
+                    // Zera contadores para somar corretamente
+                    map[m.nome].gols = 0; map[m.nome].assis = 0; map[m.nome].vitoria = 0;
+                    map[m.nome].presenca = 0; map[m.nome].pontual = 0; map[m.nome].atraso = 0;
+                    map[m.nome].clean = 0; map[m.nome].cartao = 0; map[m.nome].furo = 0;
+                    map[m.nome].timeRodada = 0; map[m.nome].totalPoints = 0;
+                }
+                const p = map[m.nome];
+                p.gols += m.gols; p.assis += m.assis; p.vitoria += m.vitoria;
+                p.presenca += m.presenca; p.pontual += m.pontual; p.atraso += m.atraso;
+                p.clean += m.clean; p.cartao += m.cartao; p.furo += m.furo;
+                p.timeRodada += m.timeRodada;
+                p.totalPoints += m.totalPoints;
+            });
+            return Object.values(map);
         }
 
         function normalizePos(pos) {
@@ -360,36 +272,71 @@
             return 'MEI';
         }
 
+        function calcPoints(p) {
+            return (p.presenca * REGRAS.presenca) + (p.pontual * REGRAS.pontualidade) +
+                   (p.atraso * REGRAS.atraso) + (p.clean * REGRAS.clean_sheet) +
+                   (p.vitoria * REGRAS.vitoria) + (p.gols * REGRAS.gol) +
+                   (p.assis * REGRAS.assistencia) + (p.cartao * REGRAS.cartao) +
+                   (p.furo * REGRAS.furo);
+        }
+
+        // =================================================================
+        // LÓGICA DE DATA E SELEÇÃO MENSAL
+        // =================================================================
+        
+        // Retorna "MM/YYYY" de uma data "DD/MM/YYYY"
+        function getMonthKey(dateStr) {
+            if(!dateStr) return "";
+            const parts = dateStr.split('/');
+            if(parts.length < 3) return "";
+            return `${parts[1]}/${parts[2]}`; // Retorna "01/2026"
+        }
+
+        function getLatestMonth() {
+            // Pega todos os meses disponíveis
+            const months = [...new Set(allMatches.map(m => getMonthKey(m.data)))].filter(m => m !== "");
+            // Ordena (simples, assume ano/mês formatados ok)
+            // Para robustez, podemos converter para data objeto e ordenar, mas string YYYYMM funciona se invertermos
+            if(months.length === 0) return "";
+            
+            // Lógica para pegar o último: converte para valor comparável
+            const sorted = months.sort((a,b) => {
+                const [ma, ya] = a.split('/');
+                const [mb, yb] = b.split('/');
+                return (yb + mb) - (ya + ma); // Decrescente
+            });
+            return sorted[0]; // Retorna o mais recente (ex: "01/2026")
+        }
+
+        function getMonthName(monthKey) {
+            const [m, y] = monthKey.split('/');
+            const date = new Date(y, m - 1);
+            return date.toLocaleString('pt-BR', { month: 'long', year: 'numeric' }).toUpperCase();
+        }
+
         // =================================================================
         // RENDERIZAÇÃO
         // =================================================================
 
-        function getFoto(nome) {
-            return `${CAMINHO_FOTOS}${nome.toLowerCase().trim()}${FORMATO_FOTO}`;
-        }
+        function getFoto(nome) { return `${CAMINHO_FOTOS}${nome.toLowerCase().trim()}${FORMATO_FOTO}`; }
         const imgError = `this.onerror=null; this.src='${FOTO_GENERICA}';`;
-
-        function calcPoints(p) {
-            return (p.presenca * REGRAS.presenca) + 
-                   (p.pontual * REGRAS.pontualidade) + 
-                   (p.atraso * REGRAS.atraso) + 
-                   (p.clean * REGRAS.clean_sheet) + 
-                   (p.vitoria * REGRAS.vitoria) + 
-                   (p.gols * REGRAS.gol) + 
-                   (p.assis * REGRAS.assistencia) + 
-                   (p.cartao * REGRAS.cartao) + 
-                   (p.furo * REGRAS.furo);
-        }
 
         function renderDashboard() {
             renderTopLists();
-            renderSelection();
             renderTable();
             renderLegend();
+            
+            // Renderiza Seleção do Mês mais recente
+            const latestMonth = getLatestMonth();
+            if(latestMonth) {
+                document.getElementById('month-label').innerText = getMonthName(latestMonth);
+                renderSelection(latestMonth);
+            } else {
+                document.getElementById('month-label').innerText = "SEM DADOS";
+            }
         }
 
         function renderLegend() {
-            // Insere legenda se não existir
             if(!document.getElementById('score-legend')) {
                 const legendHTML = `
                     <div id="score-legend" class="grid grid-cols-2 md:grid-cols-5 gap-2 text-[10px] md:text-xs text-gray-500 mb-4 font-mono border-b border-gray-800 pb-4">
@@ -401,52 +348,57 @@
                         <span class="text-green-500">✌️ Vitória +5</span>
                         <span class="text-red-500">🟨 Cartão -2</span>
                         <span class="text-red-700 font-bold">❌ Furão -10</span>
-                    </div>
-                `;
+                    </div>`;
                 const tableSection = document.getElementById('search-input').closest('section').querySelector('.rounded-lg');
                 tableSection.insertAdjacentHTML('beforebegin', legendHTML);
             }
         }
 
         function renderTopLists() {
-            const createRow = (p, value, label, index) => {
-                const colorClass = index === 0 ? "text-gold font-bold text-lg" : "text-gray-300";
-                return `
-                    <div class="flex justify-between items-center py-2 border-b border-gray-800 last:border-0">
-                        <div class="flex items-center gap-3">
-                            <span class="font-mono text-gray-600 w-4">${index + 1}.</span>
-                            <div class="h-8 w-8 rounded-full overflow-hidden border border-gray-700 bg-gray-900">
-                                <img src="${getFoto(p.nome)}" alt="${p.nome}" class="w-full h-full object-cover" onerror="${imgError}">
-                            </div>
-                            <span class="${colorClass}">${p.nome}</span>
+            const createRow = (p, value, label, index) => `
+                <div class="flex justify-between items-center py-2 border-b border-gray-800 last:border-0">
+                    <div class="flex items-center gap-3">
+                        <span class="font-mono text-gray-600 w-4">${index + 1}.</span>
+                        <div class="h-8 w-8 rounded-full overflow-hidden border border-gray-700 bg-gray-900">
+                            <img src="${getFoto(p.nome)}" class="w-full h-full object-cover" onerror="${imgError}">
                         </div>
-                        <div class="font-mono font-bold text-white bg-gray-800 px-2 rounded">
-                            ${value} <span class="text-xs text-gray-500 font-normal">${label}</span>
-                        </div>
+                        <span class="${index === 0 ? 'text-gold font-bold text-lg' : 'text-gray-300'}">${p.nome}</span>
                     </div>
-                `;
-            };
+                    <div class="font-mono font-bold text-white bg-gray-800 px-2 rounded">
+                        ${value} <span class="text-xs text-gray-500 font-normal">${label}</span>
+                    </div>
+                </div>`;
 
-            const topGols = [...globalData].sort((a,b) => b.gols - a.gols).slice(0, 5);
+            // Usa globalAggregated para os tops gerais
+            const topGols = [...globalAggregated].sort((a,b) => b.gols - a.gols).slice(0, 5);
             document.getElementById('top-scorers').innerHTML = topGols.map((p, i) => createRow(p, p.gols, 'GOLS', i)).join('');
 
-            const topAssis = [...globalData].sort((a,b) => b.assis - a.assis).slice(0, 5);
+            const topAssis = [...globalAggregated].sort((a,b) => b.assis - a.assis).slice(0, 5);
             document.getElementById('top-assists').innerHTML = topAssis.map((p, i) => createRow(p, p.assis, 'ASS', i)).join('');
 
-            const topTeam = [...globalData].sort((a,b) => b.timeRodada - a.timeRodada || calcPoints(b) - calcPoints(a)).slice(0, 5);
+            const topTeam = [...globalAggregated].sort((a,b) => b.timeRodada - a.timeRodada || b.totalPoints - a.totalPoints).slice(0, 5);
             document.getElementById('top-team').innerHTML = topTeam.map((p, i) => createRow(p, p.timeRodada, 'VEZES', i)).join('');
         }
 
-        function renderSelection() {
-            const getBest = (pos, count, sortFn) => {
-                const withPoints = globalData.map(p => ({...p, total: calcPoints(p)}));
-                return withPoints.filter(p => p.posicao === pos).sort(sortFn).slice(0, count);
+        // Renderiza Seleção baseada no mês específico
+        function renderSelection(targetMonth) {
+            // 1. Filtra partidas só daquele mês
+            const monthlyMatches = allMatches.filter(m => getMonthKey(m.data) === targetMonth);
+            
+            // 2. Agrega os dados desse mês (soma pontos do mês)
+            const monthlyStats = aggregateData(monthlyMatches);
+
+            const getBest = (pos, count) => {
+                return monthlyStats
+                    .filter(p => p.posicao === pos)
+                    .sort((a,b) => b.totalPoints - a.totalPoints) // Critério: Soma de Pontos no Mês
+                    .slice(0, count);
             };
 
-            const goleiro = getBest('GOL', 1, (a,b) => b.total - a.total);
-            const zagueiro = getBest('ZAG', 1, (a,b) => b.total - a.total);
-            const meias = getBest('MEI', 2, (a,b) => (b.gols+b.assis) - (a.gols+a.assis) || b.total - a.total);
-            const atacantes = getBest('ATA', 2, (a,b) => (b.gols+b.assis) - (a.gols+a.assis) || b.total - a.total);
+            const goleiro = getBest('GOL', 1);
+            const zagueiro = getBest('ZAG', 1);
+            const meias = getBest('MEI', 2);
+            const atacantes = getBest('ATA', 2);
 
             const selecao = [...goleiro, ...zagueiro, ...meias, ...atacantes];
 
@@ -459,7 +411,7 @@
                     </div>
                     <div class="text-xl font-bold text-white uppercase font-['Teko'] mb-1 relative z-10">${p.nome}</div>
                     <div class="text-2xl font-black text-gold z-10 drop-shadow-md">
-                        ${p.total} <span class="text-[10px] text-gray-500 font-normal align-middle">PTS</span>
+                        ${p.totalPoints} <span class="text-[10px] text-gray-500 font-normal align-middle">PTS</span>
                     </div>
                 </div>
             `).join('');
@@ -467,50 +419,45 @@
         }
 
         function renderTable(searchTerm = "") {
-            let processed = globalData.map(p => ({...p, total: calcPoints(p)}));
+            let processed = [...globalAggregated]; // Usa dados da temporada
             
             if (searchTerm) {
                 const term = searchTerm.toLowerCase();
                 processed = processed.filter(p => p.nome.toLowerCase().includes(term) || p.posicao.toLowerCase().includes(term));
             }
 
-            const sorted = processed.sort((a,b) => b.total - a.total);
+            const sorted = processed.sort((a,b) => b.totalPoints - a.totalPoints);
+            const getCls = (v) => v < 0 ? 'text-red-500 font-bold' : (v > 0 ? 'text-green-400' : 'text-gray-600');
             
-            const html = sorted.map((p, i) => {
-                const rowBg = i % 2 === 0 ? 'bg-white/[0.02]' : '';
-                const getCls = (v) => v < 0 ? 'text-red-500 font-bold' : (v > 0 ? 'text-gray-300' : 'text-gray-600');
-                
-                return `
-                <tr class="${rowBg} hover:bg-gray-800 transition-colors">
-                    <td class="text-center py-3 font-mono ${i<3 ? 'text-gold font-bold' : 'text-gray-500'} align-middle">${i+1}º</td>
-                    <td class="py-2 font-bold text-gray-200 uppercase tracking-wide flex items-center gap-2 align-middle">
-                        <div class="h-8 w-8 rounded-full overflow-hidden border border-gray-600 bg-gray-900 shrink-0">
-                            <img src="${getFoto(p.nome)}" class="w-full h-full object-cover" onerror="${imgError}">
-                        </div>
-                        <div>
-                            <div class="leading-tight text-sm">${p.nome}</div>
-                            <span class="text-[9px] text-gray-500 border border-gray-700 px-1 rounded bg-black/30 font-mono">${p.posicao}</span>
+            const html = sorted.map((p, i) => `
+                <tr class="${i % 2 === 0 ? 'bg-white/[0.02]' : ''} hover:bg-gray-800 transition-colors">
+                    <td class="py-3 px-3 sticky left-0 bg-[#0a0a0a] group-hover:bg-gray-800 transition-colors z-10 border-r border-gray-800">
+                        <div class="flex items-center gap-3">
+                            <span class="font-mono text-gray-500 w-4 text-xs">${i+1}º</span>
+                            <div class="h-10 w-10 rounded-full overflow-hidden border border-gray-600 bg-gray-900 shrink-0">
+                                <img src="${getFoto(p.nome)}" class="w-full h-full object-cover" onerror="${imgError}">
+                            </div>
+                            <div>
+                                <div class="font-bold text-gray-200 uppercase text-sm">${p.nome}</div>
+                                <span class="text-[10px] text-gold border border-gold/30 px-1 rounded bg-black/30 font-mono">${p.posicao}</span>
+                            </div>
                         </div>
                     </td>
-                    <td class="text-center py-3 font-black text-lg text-gold bg-gray-800/50 border-x border-gray-800 align-middle">${p.total}</td>
-                    <td class="text-center text-xs py-3 font-bold text-gray-400">${p.gols}</td>
-                    <td class="text-center text-xs py-3 font-bold text-gray-400">${p.assis}</td>
-                    <td class="text-center text-xs py-3 font-mono ${getCls(p.vitoria)}">${p.vitoria}</td>
-                    <td class="text-center text-xs py-3 font-mono ${getCls(p.clean)}">${p.clean}</td>
-                    <td class="text-center text-xs py-3 font-mono ${getCls(p.presenca)}">${p.presenca}</td>
-                    <td class="text-center text-xs py-3 font-mono ${getCls(p.pontual)}">${p.pontual}</td>
-                    <td class="text-center text-xs py-3 font-mono ${getCls(p.atraso)}">${p.atraso}</td>
-                    <td class="text-center text-xs py-3 font-mono ${getCls(p.cartao)}">${p.cartao}</td>
-                    <td class="text-center text-xs py-3 font-mono ${getCls(p.furo)}">${p.furo}</td>
-                </tr>`;
-            }).join('');
+                    <td class="text-center py-3 px-3 font-black text-2xl text-gold bg-gold/5 border-x border-gray-800 align-middle">${p.totalPoints}</td>
+                    <td class="text-center px-3 font-mono text-sm border-r border-gray-800/50 align-middle ${getCls(p.presenca)}">${p.presenca * REGRAS.presenca}</td>
+                    <td class="text-center px-3 font-mono text-sm border-r border-gray-800/50 align-middle ${getCls(p.pontual)}">${p.pontual * REGRAS.pontualidade}</td>
+                    <td class="text-center px-3 font-mono text-sm border-r border-gray-800/50 align-middle ${getCls(p.atraso)}">${p.atraso * REGRAS.atraso}</td>
+                    <td class="text-center px-3 font-bold text-sm border-r border-gray-800/50 align-middle text-gray-300">${(p.gols * REGRAS.gol) + (p.assis * REGRAS.assistencia)}</td>
+                    <td class="text-center px-3 font-mono text-sm border-r border-gray-800/50 align-middle ${getCls(p.clean)}">${p.clean * REGRAS.clean_sheet}</td>
+                    <td class="text-center px-3 font-mono text-sm border-r border-gray-800/50 align-middle ${getCls(p.vitoria)}">${p.vitoria * REGRAS.vitoria}</td>
+                    <td class="text-center px-3 font-mono text-sm border-r border-gray-800/50 align-middle ${getCls(p.cartao)}">${p.cartao * REGRAS.cartao}</td>
+                    <td class="text-center px-3 font-mono text-sm align-middle ${getCls(p.furo)}">${p.furo * REGRAS.furo}</td>
+                </tr>`).join('');
             
             document.getElementById('ranking-body').innerHTML = sorted.length ? html : `<tr><td colspan="12" class="text-center py-8 text-gray-500">Nenhum atleta encontrado.</td></tr>`;
         }
 
         document.getElementById('search-input').addEventListener('keyup', (e) => renderTable(e.target.value));
-        
-        // Iniciar
         init();
     </script>
 </body>
