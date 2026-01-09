@@ -24,15 +24,16 @@
         /* Loader */
         .loader { border: 3px solid #333; border-top: 3px solid var(--pharaoh-gold); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; display: inline-block; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-entry { animation: slideIn 0.6s ease-out forwards; }
         
-        /* Estilos Específicos para a Lista Expansível */
+        /* Estilos Específicos para a Lista Expansível (Mobile) */
         .player-row { border-bottom: 1px solid #222; transition: background 0.2s; }
         .player-details { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out, padding 0.3s ease; background: #0a0a0a; }
         .player-row.active .player-details { max-height: 500px; padding-bottom: 1rem; border-bottom: 1px solid var(--pharaoh-gold); }
         .player-row.active { background-color: rgba(255, 215, 0, 0.05); }
         .rotate-icon { transition: transform 0.3s; }
         .player-row.active .rotate-icon { transform: rotate(180deg); }
-
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -67,6 +68,24 @@
 
         <div id="dashboard-content" class="hidden space-y-12">
             
+            <section class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 animate-entry">
+                <div class="card-panel p-4 md:p-6 rounded-xl relative overflow-hidden group">
+                    <div class="absolute right-0 top-0 p-4 opacity-10"><i class="fas fa-futbol text-7xl md:text-8xl text-white"></i></div>
+                    <h2 class="text-xl md:text-2xl text-gray-400 mb-4 flex items-center gap-2"><i class="fas fa-crosshairs text-gold"></i> Artilharia</h2>
+                    <div id="top-scorers" class="space-y-2 relative z-10"></div>
+                </div>
+                <div class="card-panel p-4 md:p-6 rounded-xl relative overflow-hidden group">
+                    <div class="absolute right-0 top-0 p-4 opacity-10"><i class="fas fa-shoe-prints text-7xl md:text-8xl text-white"></i></div>
+                    <h2 class="text-xl md:text-2xl text-gray-400 mb-4 flex items-center gap-2"><i class="fas fa-handshake text-gold"></i> Assistências</h2>
+                    <div id="top-assists" class="space-y-2 relative z-10"></div>
+                </div>
+                <div class="card-panel p-4 md:p-6 rounded-xl relative overflow-hidden group">
+                    <div class="absolute right-0 top-0 p-4 opacity-10"><i class="fas fa-shield-alt text-7xl md:text-8xl text-white"></i></div>
+                    <h2 class="text-xl md:text-2xl text-gray-400 mb-4 flex items-center gap-2"><i class="fas fa-users text-gold"></i> Time da Rodada</h2>
+                    <div id="top-team" class="space-y-2 relative z-10"></div>
+                </div>
+            </section>
+
             <section class="animate-entry" style="animation-delay: 0.2s;">
                 <div class="flex items-center justify-between mb-4">
                     <div>
@@ -278,7 +297,8 @@
         const imgError = `this.onerror=null; this.src='${FOTO_GENERICA}';`;
 
         function renderDashboard() {
-            renderList(); // Renderiza a nova lista
+            renderTopLists(); // RENDERIZA OS TOP 5
+            renderList();     // RENDERIZA A LISTA EXPANSÍVEL
             
             const latestMonth = getLatestMonth();
             if(latestMonth) {
@@ -289,7 +309,43 @@
             }
         }
 
-        // Renderiza Seleção (Mesma lógica)
+        // FUNÇÃO RESTAURADA: RENDERIZA OS TOP 5
+        function renderTopLists() {
+            // Calcula pontos para critério de desempate
+            const dataWithPoints = globalAggregated.map(p => ({...p, total: calcPoints(p)}));
+
+            const createRow = (p, value, label, index) => {
+                const colorClass = index === 0 ? "text-gold font-bold text-base md:text-lg" : "text-gray-300 text-sm md:text-base";
+                return `
+                    <div class="flex justify-between items-center py-2 border-b border-gray-800 last:border-0">
+                        <div class="flex items-center gap-2 md:gap-3">
+                            <span class="font-mono text-gray-600 w-4 text-xs md:text-sm">${index + 1}.</span>
+                            <div class="h-6 w-6 md:h-8 md:w-8 rounded-full overflow-hidden border border-gray-700 bg-gray-900">
+                                <img src="${getFoto(p.nome)}" class="w-full h-full object-cover" onerror="${imgError}">
+                            </div>
+                            <span class="${colorClass} truncate">${p.nome}</span>
+                        </div>
+                        <div class="font-mono font-bold text-white bg-gray-800 px-2 rounded text-xs md:text-sm">
+                            ${value} <span class="text-[10px] md:text-xs text-gray-500 font-normal">${label}</span>
+                        </div>
+                    </div>
+                `;
+            };
+
+            // Artilheiros (Desempate por total de pontos)
+            const topGols = [...dataWithPoints].sort((a,b) => b.gols - a.gols || b.total - a.total).slice(0, 5);
+            document.getElementById('top-scorers').innerHTML = topGols.map((p, i) => createRow(p, p.gols, 'GOLS', i)).join('');
+
+            // Assistentes (Desempate por total de pontos)
+            const topAssis = [...dataWithPoints].sort((a,b) => b.assis - a.assis || b.total - a.total).slice(0, 5);
+            document.getElementById('top-assists').innerHTML = topAssis.map((p, i) => createRow(p, p.assis, 'ASS', i)).join('');
+
+            // Time da Rodada (Desempate por total de pontos)
+            const topTeam = [...dataWithPoints].sort((a,b) => b.timeRodada - a.timeRodada || b.total - a.total).slice(0, 5);
+            document.getElementById('top-team').innerHTML = topTeam.map((p, i) => createRow(p, p.timeRodada, 'VEZES', i)).join('');
+        }
+
+        // RENDERIZAÇÃO DA SELEÇÃO (Mantida)
         function renderSelection(targetMonth) {
             const monthlyMatches = allMatches.filter(m => getMonthKey(m.data) === targetMonth);
             const monthlyStats = aggregateData(monthlyMatches);
@@ -315,7 +371,7 @@
             document.getElementById('selection-grid').innerHTML = html;
         }
 
-        // *** A NOVA RENDERIZAÇÃO DA LISTA (ACCORDION) ***
+        // RENDERIZAÇÃO DA LISTA EXPANSÍVEL (Mantida)
         function renderList(searchTerm = "") {
             let processed = globalAggregated.map(p => ({...p, total: calcPoints(p)}));
             if (searchTerm) {
