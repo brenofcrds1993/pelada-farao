@@ -275,8 +275,12 @@
 
         // Helper para gerar URL da foto
         function getFoto(nome) {
-            // Remove espaços extras caso existam, mas mantem acentos se o arquivo tiver acento
-            return `${CAMINHO_FOTOS}${nome.trim()}${FORMATO_FOTO}`;
+            // Converte o nome para minúsculo para bater com o arquivo (ex: "Bruno" vira "bruno")
+            // Certifique-se que seus arquivos na pasta fotos estão em minúsculo!
+            return `${CAMINHO_FOTOS}${nome.trim()}${FORMATO_FOTO}`; 
+            
+            // OU, se seus arquivos respeitam a Maiúscula do nome (ex: Bruno.jpg), mantenha como estava:
+            // return `${CAMINHO_FOTOS}${nome.trim()}${FORMATO_FOTO}`;
         }
 
         // Helper para tratar erro de imagem (Fallback)
