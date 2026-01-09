@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pelada do Faraó - Ranking Cartola Ao Vivo</title>
+    <title>Pelada do Faraó - Ranking Ao Vivo</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Teko:wght@300;400;600;700&family=Roboto:wght@400;500;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* CONFIGURAÇÕES VISUAIS */
+        /* === CONFIGURAÇÕES VISUAIS === */
         :root { --pharaoh-black: #050505; --pharaoh-gold: #FFD700; --text-white: #ffffff; }
         body { background-color: var(--pharaoh-black); color: var(--text-white); font-family: 'Roboto', sans-serif; 
                background-image: linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.95)), url('https://www.transparenttextures.com/patterns/cubes.png'); }
@@ -25,7 +25,7 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: #0f0f0f; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
         
-        .loader { border: 3px solid #333; border-top: 3px solid var(--pharaoh-gold); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; display: inline-block; }
+        .loader { border: 4px solid #333; border-top: 4px solid var(--pharaoh-gold); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-entry { animation: slideIn 0.6s ease-out forwards; }
@@ -46,9 +46,9 @@
             </div>
             <div class="hidden md:block text-right">
                 <div class="text-gold font-bold text-lg font-mono">TEMPORADA 2026</div>
-                <div class="text-xs text-gray-500 uppercase flex items-center justify-end gap-2">
+                <div class="text-xs text-gray-500 uppercase flex items-center justify-end gap-1">
+                    <div id="status-indicator" class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div> 
                     <span id="status-text">Conectando...</span>
-                    <div id="status-indicator" class="w-2 h-2 rounded-full bg-red-500"></div>
                 </div>
             </div>
         </div>
@@ -57,11 +57,11 @@
     <main class="flex-grow container mx-auto p-4 md:p-8 space-y-12">
         <div id="loading-screen" class="text-center py-20">
             <div class="loader"></div>
-            <p class="text-gray-400 font-mono animate-pulse">Buscando dados na planilha...</p>
+            <p class="text-gray-400 font-mono animate-pulse">Baixando dados do Google Sheets...</p>
+            <p id="error-message" class="text-red-500 mt-4 hidden"></p>
         </div>
 
         <div id="dashboard-content" class="hidden space-y-12">
-            
             <section class="grid grid-cols-1 md:grid-cols-3 gap-6 animate-entry">
                 <div class="card-panel p-6 rounded-xl relative overflow-hidden group">
                     <div class="absolute right-0 top-0 p-4 opacity-10"><i class="fas fa-futbol text-8xl text-white"></i></div>
@@ -138,10 +138,10 @@
 
     <script>
         // =================================================================
-        // CONFIGURAÇÕES
+        // CONFIGURAÇÕES GERAIS
         // =================================================================
         
-        // 👇👇 COLE O LINK CSV AQUI 👇👇
+        // 👇👇 COLE O LINK CSV (TERMINADO EM .csv) AQUI 👇👇
         const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTQfAWxpKRn7PA9URd6u2tpPwEGOt_J-U4YrtbJOobjEjLISJOr7U0hQNCjJYbGO-9jAaeAbn8hW_dw/pubhtml?gid=0&single=true"; 
         // --------------------------------------------------
 
@@ -154,97 +154,111 @@
             vitoria: 5, gol: 3, assistencia: 3, cartao: -2, furo: -10
         };
 
-        // Variáveis Globais
-        let allMatches = []; // Armazena cada linha da planilha individualmente
-        let globalAggregated = []; // Armazena totais da temporada
+        let allMatches = [];
+        let globalAggregated = [];
 
         // =================================================================
-        // CONEXÃO COM PLANILHA
+        // CONEXÃO SEGURA COM GOOGLE SHEETS
         // =================================================================
         async function init() {
+            const errorMsg = document.getElementById('error-message');
+            
             if(SHEET_URL.includes("COLE_SEU")) {
-                document.getElementById('loading-screen').innerHTML = "<p class='text-red-500'>Erro: Configure o link da planilha no código!</p>";
+                errorMsg.innerText = "Link não configurado. Abra o index.html e cole o link CSV.";
+                errorMsg.classList.remove('hidden');
                 return;
             }
+            
             try {
-                const res = await fetch(SHEET_URL);
-                const txt = await res.text();
+                const response = await fetch(SHEET_URL);
+                const txt = await response.text();
+
+                // VERIFICA SE O LINK ESTÁ ERRADO (Se baixou HTML em vez de CSV)
+                if(txt.trim().startsWith("<!DOCTYPE") || txt.trim().startsWith("<html")) {
+                    throw new Error("Link incorreto! Você usou o link da página, não o link CSV (Publicar na Web).");
+                }
+
                 processData(txt);
                 
-                // UI Update
+                // Sucesso
                 document.getElementById('loading-screen').classList.add('hidden');
                 document.getElementById('dashboard-content').classList.remove('hidden');
-                document.getElementById('status-indicator').classList.remove('bg-red-500');
-                document.getElementById('status-indicator').classList.add('bg-green-500');
+                
+                const status = document.getElementById('status-indicator');
+                status.classList.remove('bg-red-500');
+                status.classList.add('bg-green-500');
                 document.getElementById('status-text').innerText = "Online";
                 document.getElementById('status-text').classList.add('text-green-500');
 
                 renderDashboard();
+
             } catch (err) {
                 console.error(err);
-                document.getElementById('loading-screen').innerHTML = "<p class='text-red-500'>Erro ao conectar com a planilha.</p>";
+                errorMsg.innerHTML = `Erro: ${err.message}<br>Verifique se publicou como CSV.`;
+                errorMsg.classList.remove('hidden');
+                document.getElementById('status-text').innerText = "Erro";
             }
         }
 
-        // Processa CSV
         function processData(csvText) {
             const rows = csvText.split('\n').map(r => r.split(','));
-            const headers = rows[0].map(h => h.trim().replace(/"/g, ''));
+            // Normaliza cabeçalhos (remove espaços e aspas, tudo minúsculo para evitar erros)
+            const headers = rows[0].map(h => h.trim().replace(/^"|"$/g, '').toLowerCase());
             
             allMatches = [];
             
-            // Pula cabeçalho
             for(let i=1; i<rows.length; i++) {
                 const row = rows[i];
                 if(row.length < headers.length) continue;
 
-                const getVal = (k) => {
-                    const idx = headers.indexOf(k);
+                // Função auxiliar segura para pegar dados
+                const getVal = (keyPart) => {
+                    // Procura coluna que contenha o nome (ex: procura 'gols' acha 'qtdgols')
+                    const idx = headers.findIndex(h => h.includes(keyPart.toLowerCase()));
                     if(idx === -1) return 0;
-                    let val = row[idx] ? row[idx].replace(/"/g, '').trim() : "0";
+                    
+                    let val = row[idx] ? row[idx].replace(/^"|"$/g, '').trim() : "0";
                     if(val.toUpperCase() === 'S') return 1;
                     if(val.toUpperCase() === 'N') return 0;
                     return Number(val) || 0;
                 };
-                const getStr = (k) => {
-                    const idx = headers.indexOf(k);
-                    return row[idx] ? row[idx].replace(/"/g, '').trim() : "";
+
+                const getStr = (keyPart) => {
+                    const idx = headers.findIndex(h => h.includes(keyPart.toLowerCase()));
+                    return (idx !== -1 && row[idx]) ? row[idx].replace(/^"|"$/g, '').trim() : "";
                 };
 
-                const nome = getStr('nomeAtleta');
+                const nome = getStr('nomeatleta'); // Procura 'nomeatleta'
                 if(!nome) continue;
 
-                // Cria objeto da partida com DADOS BRUTOS (sem calcular totalPoints ainda)
                 const match = {
                     data: getStr('data'),
                     nome: nome,
                     posicao: normalizePos(getStr('posicao')),
-                    gols: getVal('qtdGols'),
-                    assis: getVal('qtdAssistencias'),
-                    vitoria: getVal('qtdVitorias'),
+                    gols: getVal('qtdgols'),
+                    assis: getVal('qtdassistencias'),
+                    vitoria: getVal('qtdvitorias'),
                     presenca: getVal('presenca'),
                     pontual: getVal('chegou_nahora'),
                     atraso: getVal('chegou_atrasado'),
                     clean: getVal('clean_sheet'),
                     cartao: getVal('cartao'),
                     furo: getVal('confirmou_e_naofoi'),
-                    timeRodada: (getStr('timeRodada').toUpperCase() === 'S' ? 1 : 0)
+                    timeRodada: (getStr('timerodada').toUpperCase() === 'S' ? 1 : 0)
                 };
                 
                 allMatches.push(match);
             }
 
-            // Agrega para temporada (Global)
             globalAggregated = aggregateData(allMatches);
         }
 
-        // Soma APENAS as estatísticas, não os pontos
         function aggregateData(matchesList) {
             const map = {};
             matchesList.forEach(m => {
                 if(!map[m.nome]) {
-                    map[m.nome] = { ...m }; 
-                    // Zera contadores
+                    map[m.nome] = { ...m };
+                    // Zera acumuladores
                     map[m.nome].gols = 0; map[m.nome].assis = 0; map[m.nome].vitoria = 0;
                     map[m.nome].presenca = 0; map[m.nome].pontual = 0; map[m.nome].atraso = 0;
                     map[m.nome].clean = 0; map[m.nome].cartao = 0; map[m.nome].furo = 0;
@@ -277,14 +291,14 @@
         }
 
         // =================================================================
-        // LÓGICA DE DATA
+        // LÓGICA DE DATAS (SELEÇÃO)
         // =================================================================
-        
         function getMonthKey(dateStr) {
             if(!dateStr) return "";
+            // Tenta lidar com DD/MM/YYYY
             const parts = dateStr.split('/');
-            if(parts.length < 3) return "";
-            return `${parts[1]}/${parts[2]}`;
+            if(parts.length >= 3) return `${parts[1]}/${parts[2]}`;
+            return ""; 
         }
 
         function getLatestMonth() {
@@ -307,7 +321,6 @@
         // =================================================================
         // RENDERIZAÇÃO
         // =================================================================
-
         function getFoto(nome) { return `${CAMINHO_FOTOS}${nome.toLowerCase().trim()}${FORMATO_FOTO}`; }
         const imgError = `this.onerror=null; this.src='${FOTO_GENERICA}';`;
 
@@ -344,9 +357,7 @@
         }
 
         function renderTopLists() {
-            // Recalcula total aqui também para garantir
             const dataWithPoints = globalAggregated.map(p => ({...p, total: calcPoints(p)}));
-
             const createRow = (p, value, label, index) => `
                 <div class="flex justify-between items-center py-2 border-b border-gray-800 last:border-0">
                     <div class="flex items-center gap-3">
@@ -372,17 +383,9 @@
         }
 
         function renderSelection(targetMonth) {
-            // 1. Filtra partidas só daquele mês
             const monthlyMatches = allMatches.filter(m => getMonthKey(m.data) === targetMonth);
-            
-            // 2. Agrega estatísticas
             const monthlyStats = aggregateData(monthlyMatches);
-
-            // 3. CALCULA PONTOS USANDO A MESMA FUNÇÃO DA TABELA GERAL
-            const statsWithPoints = monthlyStats.map(p => ({
-                ...p,
-                total: calcPoints(p)
-            }));
+            const statsWithPoints = monthlyStats.map(p => ({ ...p, total: calcPoints(p) }));
 
             const getBest = (pos, count) => {
                 return statsWithPoints
@@ -391,12 +394,7 @@
                     .slice(0, count);
             };
 
-            const goleiro = getBest('GOL', 1);
-            const zagueiro = getBest('ZAG', 1);
-            const meias = getBest('MEI', 2);
-            const atacantes = getBest('ATA', 2);
-
-            const selecao = [...goleiro, ...zagueiro, ...meias, ...atacantes];
+            const selecao = [...getBest('GOL', 1), ...getBest('ZAG', 1), ...getBest('MEI', 2), ...getBest('ATA', 2)];
 
             const html = selecao.map(p => `
                 <div class="card-panel rounded-lg p-4 flex flex-col items-center justify-center group relative overflow-hidden min-h-[200px]">
@@ -415,14 +413,11 @@
         }
 
         function renderTable(searchTerm = "") {
-            // Calcula pontos
             let processed = globalAggregated.map(p => ({...p, total: calcPoints(p)}));
-            
             if (searchTerm) {
                 const term = searchTerm.toLowerCase();
                 processed = processed.filter(p => p.nome.toLowerCase().includes(term) || p.posicao.toLowerCase().includes(term));
             }
-
             const sorted = processed.sort((a,b) => b.total - a.total);
             const getCls = (v) => v < 0 ? 'text-red-500 font-bold' : (v > 0 ? 'text-green-400' : 'text-gray-600');
             
