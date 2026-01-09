@@ -186,7 +186,7 @@
             }
         }
 
-        // Processa CSV e cria estruturas de dados
+        // Processa CSV
         function processData(csvText) {
             const rows = csvText.split('\n').map(r => r.split(','));
             const headers = rows[0].map(h => h.trim().replace(/"/g, ''));
@@ -214,9 +214,9 @@
                 const nome = getStr('nomeAtleta');
                 if(!nome) continue;
 
-                // Cria objeto da partida
+                // Cria objeto da partida com DADOS BRUTOS (sem calcular totalPoints ainda)
                 const match = {
-                    data: getStr('data'), // Importante: ler a data
+                    data: getStr('data'),
                     nome: nome,
                     posicao: normalizePos(getStr('posicao')),
                     gols: getVal('qtdGols'),
@@ -231,9 +231,6 @@
                     timeRodada: (getStr('timeRodada').toUpperCase() === 'S' ? 1 : 0)
                 };
                 
-                // Calcula pontos dessa partida específica
-                match.totalPoints = calcPoints(match);
-                
                 allMatches.push(match);
             }
 
@@ -241,24 +238,23 @@
             globalAggregated = aggregateData(allMatches);
         }
 
-        // Função para somar dados de uma lista de partidas
+        // Soma APENAS as estatísticas, não os pontos
         function aggregateData(matchesList) {
             const map = {};
             matchesList.forEach(m => {
                 if(!map[m.nome]) {
-                    map[m.nome] = { ...m }; // Clona o primeiro registro
-                    // Zera contadores para somar corretamente
+                    map[m.nome] = { ...m }; 
+                    // Zera contadores
                     map[m.nome].gols = 0; map[m.nome].assis = 0; map[m.nome].vitoria = 0;
                     map[m.nome].presenca = 0; map[m.nome].pontual = 0; map[m.nome].atraso = 0;
                     map[m.nome].clean = 0; map[m.nome].cartao = 0; map[m.nome].furo = 0;
-                    map[m.nome].timeRodada = 0; map[m.nome].totalPoints = 0;
+                    map[m.nome].timeRodada = 0;
                 }
                 const p = map[m.nome];
                 p.gols += m.gols; p.assis += m.assis; p.vitoria += m.vitoria;
                 p.presenca += m.presenca; p.pontual += m.pontual; p.atraso += m.atraso;
                 p.clean += m.clean; p.cartao += m.cartao; p.furo += m.furo;
                 p.timeRodada += m.timeRodada;
-                p.totalPoints += m.totalPoints;
             });
             return Object.values(map);
         }
@@ -281,31 +277,25 @@
         }
 
         // =================================================================
-        // LÓGICA DE DATA E SELEÇÃO MENSAL
+        // LÓGICA DE DATA
         // =================================================================
         
-        // Retorna "MM/YYYY" de uma data "DD/MM/YYYY"
         function getMonthKey(dateStr) {
             if(!dateStr) return "";
             const parts = dateStr.split('/');
             if(parts.length < 3) return "";
-            return `${parts[1]}/${parts[2]}`; // Retorna "01/2026"
+            return `${parts[1]}/${parts[2]}`;
         }
 
         function getLatestMonth() {
-            // Pega todos os meses disponíveis
             const months = [...new Set(allMatches.map(m => getMonthKey(m.data)))].filter(m => m !== "");
-            // Ordena (simples, assume ano/mês formatados ok)
-            // Para robustez, podemos converter para data objeto e ordenar, mas string YYYYMM funciona se invertermos
             if(months.length === 0) return "";
-            
-            // Lógica para pegar o último: converte para valor comparável
             const sorted = months.sort((a,b) => {
                 const [ma, ya] = a.split('/');
                 const [mb, yb] = b.split('/');
-                return (yb + mb) - (ya + ma); // Decrescente
+                return (yb + mb) - (ya + ma);
             });
-            return sorted[0]; // Retorna o mais recente (ex: "01/2026")
+            return sorted[0];
         }
 
         function getMonthName(monthKey) {
@@ -326,7 +316,6 @@
             renderTable();
             renderLegend();
             
-            // Renderiza Seleção do Mês mais recente
             const latestMonth = getLatestMonth();
             if(latestMonth) {
                 document.getElementById('month-label').innerText = getMonthName(latestMonth);
@@ -355,6 +344,9 @@
         }
 
         function renderTopLists() {
+            // Recalcula total aqui também para garantir
+            const dataWithPoints = globalAggregated.map(p => ({...p, total: calcPoints(p)}));
+
             const createRow = (p, value, label, index) => `
                 <div class="flex justify-between items-center py-2 border-b border-gray-800 last:border-0">
                     <div class="flex items-center gap-3">
@@ -369,29 +361,33 @@
                     </div>
                 </div>`;
 
-            // Usa globalAggregated para os tops gerais
-            const topGols = [...globalAggregated].sort((a,b) => b.gols - a.gols).slice(0, 5);
+            const topGols = [...dataWithPoints].sort((a,b) => b.gols - a.gols).slice(0, 5);
             document.getElementById('top-scorers').innerHTML = topGols.map((p, i) => createRow(p, p.gols, 'GOLS', i)).join('');
 
-            const topAssis = [...globalAggregated].sort((a,b) => b.assis - a.assis).slice(0, 5);
+            const topAssis = [...dataWithPoints].sort((a,b) => b.assis - a.assis).slice(0, 5);
             document.getElementById('top-assists').innerHTML = topAssis.map((p, i) => createRow(p, p.assis, 'ASS', i)).join('');
 
-            const topTeam = [...globalAggregated].sort((a,b) => b.timeRodada - a.timeRodada || b.totalPoints - a.totalPoints).slice(0, 5);
+            const topTeam = [...dataWithPoints].sort((a,b) => b.timeRodada - a.timeRodada || b.total - a.total).slice(0, 5);
             document.getElementById('top-team').innerHTML = topTeam.map((p, i) => createRow(p, p.timeRodada, 'VEZES', i)).join('');
         }
 
-        // Renderiza Seleção baseada no mês específico
         function renderSelection(targetMonth) {
             // 1. Filtra partidas só daquele mês
             const monthlyMatches = allMatches.filter(m => getMonthKey(m.data) === targetMonth);
             
-            // 2. Agrega os dados desse mês (soma pontos do mês)
+            // 2. Agrega estatísticas
             const monthlyStats = aggregateData(monthlyMatches);
 
+            // 3. CALCULA PONTOS USANDO A MESMA FUNÇÃO DA TABELA GERAL
+            const statsWithPoints = monthlyStats.map(p => ({
+                ...p,
+                total: calcPoints(p)
+            }));
+
             const getBest = (pos, count) => {
-                return monthlyStats
+                return statsWithPoints
                     .filter(p => p.posicao === pos)
-                    .sort((a,b) => b.totalPoints - a.totalPoints) // Critério: Soma de Pontos no Mês
+                    .sort((a,b) => b.total - a.total)
                     .slice(0, count);
             };
 
@@ -411,7 +407,7 @@
                     </div>
                     <div class="text-xl font-bold text-white uppercase font-['Teko'] mb-1 relative z-10">${p.nome}</div>
                     <div class="text-2xl font-black text-gold z-10 drop-shadow-md">
-                        ${p.totalPoints} <span class="text-[10px] text-gray-500 font-normal align-middle">PTS</span>
+                        ${p.total} <span class="text-[10px] text-gray-500 font-normal align-middle">PTS</span>
                     </div>
                 </div>
             `).join('');
@@ -419,14 +415,15 @@
         }
 
         function renderTable(searchTerm = "") {
-            let processed = [...globalAggregated]; // Usa dados da temporada
+            // Calcula pontos
+            let processed = globalAggregated.map(p => ({...p, total: calcPoints(p)}));
             
             if (searchTerm) {
                 const term = searchTerm.toLowerCase();
                 processed = processed.filter(p => p.nome.toLowerCase().includes(term) || p.posicao.toLowerCase().includes(term));
             }
 
-            const sorted = processed.sort((a,b) => b.totalPoints - a.totalPoints);
+            const sorted = processed.sort((a,b) => b.total - a.total);
             const getCls = (v) => v < 0 ? 'text-red-500 font-bold' : (v > 0 ? 'text-green-400' : 'text-gray-600');
             
             const html = sorted.map((p, i) => `
@@ -443,7 +440,7 @@
                             </div>
                         </div>
                     </td>
-                    <td class="text-center py-3 px-3 font-black text-2xl text-gold bg-gold/5 border-x border-gray-800 align-middle">${p.totalPoints}</td>
+                    <td class="text-center py-3 px-3 font-black text-2xl text-gold bg-gold/5 border-x border-gray-800 align-middle">${p.total}</td>
                     <td class="text-center px-3 font-mono text-sm border-r border-gray-800/50 align-middle ${getCls(p.presenca)}">${p.presenca * REGRAS.presenca}</td>
                     <td class="text-center px-3 font-mono text-sm border-r border-gray-800/50 align-middle ${getCls(p.pontual)}">${p.pontual * REGRAS.pontualidade}</td>
                     <td class="text-center px-3 font-mono text-sm border-r border-gray-800/50 align-middle ${getCls(p.atraso)}">${p.atraso * REGRAS.atraso}</td>
