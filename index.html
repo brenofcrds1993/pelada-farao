@@ -112,12 +112,12 @@
                                     <tr>
                                         <th class="py-4 px-3 sticky left-0 bg-gray-900 z-30 shadow-lg min-w-[180px] text-gold border-r border-gray-800">ATLETA</th>
                                         <th class="py-4 px-3 text-center text-white bg-gold/10 border-x border-gray-800 min-w-[80px] text-xl">TOTAL</th>
-                                        <th class="px-3 text-center text-xs text-gray-400 min-w-[80px]" title="Presença (+10)"><i class="fas fa-check-circle text-green-500 mb-1 block text-lg"></i> PRES</th>
+                                        <th class="px-3 text-center text-xs text-gray-400 min-w-[80px]" title="Presença (+5)"><i class="fas fa-check-circle text-green-500 mb-1 block text-lg"></i> PRES</th>
                                         <th class="px-3 text-center text-xs text-gray-400 min-w-[80px]" title="Pontualidade (+2)"><i class="fas fa-clock text-blue-400 mb-1 block text-lg"></i> PONT</th>
-                                        <th class="px-3 text-center text-xs text-gray-400 min-w-[80px]" title="Atraso (-2)"><i class="fas fa-running text-yellow-500 mb-1 block text-lg"></i> ATRASO</th>
+                                        <th class="px-3 text-center text-xs text-gray-400 min-w-[80px]" title="Atraso (-1)"><i class="fas fa-running text-yellow-500 mb-1 block text-lg"></i> ATRASO</th>
                                         <th class="px-3 text-center text-xs text-gray-400 min-w-[100px]" title="Gols e Assistências (+3)"><i class="fas fa-futbol text-white mb-1 block text-lg"></i> G/A</th>
                                         <th class="px-3 text-center text-xs text-gray-400 min-w-[80px]" title="Clean Sheet (+5)"><i class="fas fa-shield-alt text-gray-300 mb-1 block text-lg"></i> SG</th>
-                                        <th class="px-3 text-center text-xs text-gray-400 min-w-[80px]" title="Vitória (+5)"><i class="fas fa-trophy text-gold mb-1 block text-lg"></i> VIT</th>
+                                        <th class="px-3 text-center text-xs text-gray-400 min-w-[80px]" title="Vitória (+2)"><i class="fas fa-trophy text-gold mb-1 block text-lg"></i> VIT</th>
                                         <th class="px-3 text-center text-xs text-gray-400 min-w-[80px]" title="Cartão (-2)"><i class="fas fa-square text-red-500 mb-1 block text-lg"></i> CART</th>
                                         <th class="px-3 text-center text-xs text-gray-400 min-w-[80px]" title="Furo (-10)"><i class="fas fa-user-times text-red-700 mb-1 block text-lg"></i> FURO</th>
                                     </tr>
@@ -149,17 +149,17 @@
         const FORMATO_FOTO = ".jpg";
         const FOTO_GENERICA = "https://cdn-icons-png.flaticon.com/512/847/847969.png";
 
-        // NOVAS REGRAS - PONTUAÇÃO REALISTA (MÁX ~30 PTS)
+        // NOVOS PESOS - AJUSTE FINO (REALISTA)
         const REGRAS = {
-            presenca: 2,        // Valor baixo, apenas participação
-            pontualidade: 1,    // Bônus pequeno
-            atraso: -1,         // Punição leve
-            clean_sheet: 3,     // Defesa sólida vale +3 (apenas ZAG/GOL)
-            vitoria: 2,         // Como jogam muitas partidas, vitória vale 2
-            gol: 3,             // O gol continua valioso
-            assistencia: 2,     // Assistência vale um pouco menos
-            cartao: -2,         // Cartão tira quase um gol
-            furo: -5            // Punição por não ir
+            presenca: 5,        // Aumentou para valorizar a ida (+5)
+            pontualidade: 2,    // Chegar na hora vale (+2)
+            atraso: -1,         // Atraso desconta pouco (-1)
+            clean_sheet: 3,     // Defesa não vazada (+3)
+            vitoria: 2,         // Vitória (+2 cada)
+            gol: 3,             // Gol mantém o prestígio (+3)
+            assistencia: 2,     // Assistência vale um pouco menos (+2)
+            cartao: -2,         // Punição média (-2)
+            furo: -10           // Punição severa mantida (-10)
         };
 
         let allMatches = [];
