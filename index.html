@@ -70,6 +70,9 @@
             border-bottom: 1px solid #222;
             transition: background 0.2s;
         }
+        .custom-table tbody tr:hover {
+            background-color: rgba(255, 215, 0, 0.05);
+        }
         .rank-1 { color: var(--pharaoh-gold); text-shadow: 0 0 5px var(--pharaoh-gold); }
 
         /* Animações */
@@ -94,6 +97,10 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: var(--pharaoh-gold); 
         }
+        
+        /* Loader Simples */
+        .loader { border: 3px solid #333; border-top: 3px solid var(--pharaoh-gold); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; display: inline-block; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -116,187 +123,296 @@
             
             <div class="hidden md:block text-right">
                 <div class="text-gold font-bold text-lg font-mono">04/01/2026</div>
-                <div class="text-xs text-gray-500 uppercase">Última Atualização</div>
+                <div class="text-xs text-gray-500 uppercase flex items-center justify-end gap-2">
+                    <span id="status-text">Conectando...</span>
+                    <div id="status-indicator" class="w-2 h-2 rounded-full bg-red-500"></div>
+                </div>
             </div>
         </div>
     </header>
 
     <main class="flex-grow container mx-auto p-4 md:p-8 space-y-12">
 
-        <section class="grid grid-cols-1 md:grid-cols-3 gap-6 animate-entry">
-            
-            <div class="card-panel p-6 rounded-xl relative overflow-hidden group">
-                <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition">
-                    <i class="fas fa-futbol text-8xl text-white"></i>
-                </div>
-                <h2 class="text-2xl text-gray-400 mb-4 flex items-center gap-2">
-                    <i class="fas fa-crosshairs text-gold"></i> Artilharia
-                </h2>
-                <div id="top-scorers" class="space-y-3 relative z-10">
+        <div id="loading-screen" class="text-center py-10">
+            <div class="loader"></div>
+            <p class="text-gray-500 mt-2 font-mono text-sm">Carregando dados da planilha...</p>
+        </div>
+
+        <div id="dashboard-content" class="hidden">
+            <section class="grid grid-cols-1 md:grid-cols-3 gap-6 animate-entry">
+                
+                <div class="card-panel p-6 rounded-xl relative overflow-hidden group">
+                    <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition">
+                        <i class="fas fa-futbol text-8xl text-white"></i>
                     </div>
-            </div>
-
-            <div class="card-panel p-6 rounded-xl relative overflow-hidden group">
-                <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition">
-                    <i class="fas fa-shoe-prints text-8xl text-white"></i>
-                </div>
-                <h2 class="text-2xl text-gray-400 mb-4 flex items-center gap-2">
-                    <i class="fas fa-handshake text-gold"></i> Assistências
-                </h2>
-                <div id="top-assists" class="space-y-3 relative z-10">
-                    </div>
-            </div>
-
-            <div class="card-panel p-6 rounded-xl relative overflow-hidden group">
-                <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition">
-                    <i class="fas fa-shield-alt text-8xl text-white"></i>
-                </div>
-                <h2 class="text-2xl text-gray-400 mb-4 flex items-center gap-2">
-                    <i class="fas fa-users text-gold"></i> Time da Rodada
-                </h2>
-                <div id="top-team" class="space-y-3 relative z-10">
-                    </div>
-            </div>
-        </section>
-
-        <section class="animate-entry" style="animation-delay: 0.2s;">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-3xl md:text-4xl text-white border-l-4 border-gold pl-4">
-                    SELEÇÃO DO MÊS
-                </h2>
-                <div class="flex gap-2 flex-wrap justify-end">
-                    <span class="text-xs font-mono text-gray-500 border border-gray-800 px-2 py-1 rounded bg-black/50">1 GOL</span>
-                    <span class="text-xs font-mono text-gray-500 border border-gray-800 px-2 py-1 rounded bg-black/50">1 ZAG</span>
-                    <span class="text-xs font-mono text-gray-500 border border-gray-800 px-2 py-1 rounded bg-black/50">2 MEI</span>
-                    <span class="text-xs font-mono text-gray-500 border border-gray-800 px-2 py-1 rounded bg-black/50">2 ATA</span>
-                </div>
-            </div>
-            
-            <div id="selection-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
-                </div>
-        </section>
-
-        <section class="animate-entry" style="animation-delay: 0.4s;">
-            <div class="flex flex-col md:flex-row items-center justify-between mb-4 gap-4">
-                <div class="flex items-center">
-                    <h2 class="text-3xl md:text-4xl text-white border-l-4 border-gold pl-4">
-                        CLASSIFICAÇÃO GERAL
+                    <h2 class="text-2xl text-gray-400 mb-4 flex items-center gap-2">
+                        <i class="fas fa-crosshairs text-gold"></i> Artilharia
                     </h2>
-                    <span class="ml-4 bg-gray-800 text-gold px-3 py-1 rounded text-sm font-bold border border-gold/30 hidden sm:inline-block">
-                        TEMPORADA 2026
-                    </span>
+                    <div id="top-scorers" class="space-y-3 relative z-10">
+                    </div>
                 </div>
 
-                <div class="relative w-full md:w-64">
-                    <input type="text" id="search-input" placeholder="Buscar atleta..." 
-                        class="w-full bg-black/50 border border-gray-700 text-white rounded-full py-2 pl-10 pr-4 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition placeholder-gray-600">
-                    <i class="fas fa-search absolute left-3 top-3 text-gray-500"></i>
+                <div class="card-panel p-6 rounded-xl relative overflow-hidden group">
+                    <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition">
+                        <i class="fas fa-shoe-prints text-8xl text-white"></i>
+                    </div>
+                    <h2 class="text-2xl text-gray-400 mb-4 flex items-center gap-2">
+                        <i class="fas fa-handshake text-gold"></i> Assistências
+                    </h2>
+                    <div id="top-assists" class="space-y-3 relative z-10">
+                    </div>
                 </div>
-            </div>
-            
-            <div class="rounded-lg shadow-2xl border border-gray-800 overflow-hidden bg-[#0a0a0a]">
-                <div class="overflow-y-auto max-h-[500px] custom-scrollbar">
-                    <table class="w-full text-left custom-table">
-                        <thead class="sticky top-0 z-20 shadow-lg">
-                            <tr>
-                                <th class="text-center w-16">#</th>
-                                <th>ATLETA</th>
-                                <th class="text-center text-white bg-gray-900">PTS</th>
-                                <th class="text-center">GOLS</th>
-                                <th class="text-center">ASSIS</th>
-                                <th class="text-center hidden sm:table-cell text-green-500">VIT</th>
-                                <th class="text-center hidden sm:table-cell text-red-500">DER</th>
-                            </tr>
-                        </thead>
-                        <tbody id="ranking-body" class="text-gray-300 font-medium">
+
+                <div class="card-panel p-6 rounded-xl relative overflow-hidden group">
+                    <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition">
+                        <i class="fas fa-shield-alt text-8xl text-white"></i>
+                    </div>
+                    <h2 class="text-2xl text-gray-400 mb-4 flex items-center gap-2">
+                        <i class="fas fa-users text-gold"></i> Time da Rodada
+                    </h2>
+                    <div id="top-team" class="space-y-3 relative z-10">
+                    </div>
+                </div>
+            </section>
+
+            <section class="animate-entry mt-12" style="animation-delay: 0.2s;">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-3xl md:text-4xl text-white border-l-4 border-gold pl-4">
+                        SELEÇÃO DO MÊS
+                    </h2>
+                    <div class="flex gap-2 flex-wrap justify-end">
+                        <span class="text-xs font-mono text-gray-500 border border-gray-800 px-2 py-1 rounded bg-black/50">1 GOL</span>
+                        <span class="text-xs font-mono text-gray-500 border border-gray-800 px-2 py-1 rounded bg-black/50">1 ZAG</span>
+                        <span class="text-xs font-mono text-gray-500 border border-gray-800 px-2 py-1 rounded bg-black/50">2 MEI</span>
+                        <span class="text-xs font-mono text-gray-500 border border-gray-800 px-2 py-1 rounded bg-black/50">2 ATA</span>
+                    </div>
+                </div>
+                
+                <div id="selection-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+                </div>
+            </section>
+
+            <section class="animate-entry mt-12" style="animation-delay: 0.4s;">
+                <div class="flex flex-col md:flex-row items-center justify-between mb-4 gap-4">
+                    <div class="flex items-center">
+                        <h2 class="text-3xl md:text-4xl text-white border-l-4 border-gold pl-4">
+                            CLASSIFICAÇÃO GERAL
+                        </h2>
+                        <span class="ml-4 bg-gray-800 text-gold px-3 py-1 rounded text-sm font-bold border border-gold/30 hidden sm:inline-block">
+                            TEMPORADA 2026
+                        </span>
+                    </div>
+
+                    <div class="relative w-full md:w-64">
+                        <input type="text" id="search-input" placeholder="Buscar atleta..." 
+                            class="w-full bg-black/50 border border-gray-700 text-white rounded-full py-2 pl-10 pr-4 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition placeholder-gray-600">
+                        <i class="fas fa-search absolute left-3 top-3 text-gray-500"></i>
+                    </div>
+                </div>
+                
+                <div class="rounded-lg shadow-2xl border border-gray-800 overflow-hidden bg-[#0a0a0a]">
+                    <div class="overflow-y-auto max-h-[500px] custom-scrollbar">
+                        <table class="w-full text-left custom-table">
+                            <thead class="sticky top-0 z-20 shadow-lg">
+                                <tr>
+                                    <th class="text-center w-16">#</th>
+                                    <th>ATLETA</th>
+                                    <th class="text-center text-white bg-gray-900 border-x border-gray-800">PTS</th>
+                                    <th class="text-center text-xs text-gray-400" title="Gols (+3)">GOLS</th>
+                                    <th class="text-center text-xs text-gray-400" title="Assistências (+3)">ASSIS</th>
+                                    <th class="text-center text-xs text-gray-400" title="Vitórias (+5)">VIT</th>
+                                    <th class="text-center text-xs text-gray-400" title="Clean Sheet (+5)">SG</th>
+                                    <th class="text-center text-xs text-gray-400" title="Presença (+10)">PRES</th>
+                                    <th class="text-center text-xs text-gray-400" title="Pontualidade (+2)">PONT</th>
+                                    <th class="text-center text-xs text-gray-400" title="Atraso (-2)">ATR</th>
+                                    <th class="text-center text-xs text-gray-400" title="Cartão (-2)">CARD</th>
+                                    <th class="text-center text-xs text-gray-400" title="Furo (-10)">FURO</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ranking-body" class="text-gray-300 font-medium">
                             </tbody>
-                    </table>
+                        </table>
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
+        </div>
 
     </main>
 
     <footer class="bg-black border-t border-gray-900 py-8 mt-8 text-center">
         <p class="text-gold font-bold text-xl font-['Teko'] tracking-widest">PELADA DO FARAÓ</p>
-        <p class="text-gray-600 text-sm mt-2">© 2026 Recife.</p>
+        <p class="text-gray-600 text-sm mt-2">© 2026 Recife. O sol nasce para todos, a sombra é para quem ganha.</p>
     </footer>
 
     <script>
         // =================================================================
-        // CONFIGURAÇÕES
-        // =================================================================
-        const CAMINHO_FOTOS = "./fotos/"; // Pasta onde estão as imagens
-        const FORMATO_FOTO = ".jpg";      // Extensão (.png, .jpg, .jpeg)
-        const FOTO_GENERICA = "https://cdn-icons-png.flaticon.com/512/847/847969.png"; // Avatar padrão (silhueta)
-
-        // =================================================================
-        // DADOS REAIS - ATUALIZADOS EM 04/01/2026
+        // CONFIGURAÇÕES & CONEXÃO
         // =================================================================
         
-        const playersData = [
-            // --- TIME 5 (CAMPEÃO - 15 PTS) ---
-            { nome: "Bruno",    posicao: "ZAG", gols: 1, assis: 2, pts: 15, vit: 5, der: 1, timeRodada: 1 },
-            { nome: "Móvel",    posicao: "ATA", gols: 4, assis: 0, pts: 15, vit: 5, der: 1, timeRodada: 1 },
-            { nome: "Noé",      posicao: "MEI", gols: 0, assis: 1, pts: 15, vit: 5, der: 1, timeRodada: 1 },
-            { nome: "Gustavo",  posicao: "MEI", gols: 1, assis: 1, pts: 15, vit: 5, der: 1, timeRodada: 1 },
-            { nome: "Juca",     posicao: "GOL", gols: 0, assis: 0, pts: 15, vit: 5, der: 1, timeRodada: 1 },
+        // 👇👇 COLE O LINK CSV AQUI DENTRO DAS ASPAS 👇👇
+        const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTQfAWxpKRn7PA9URd6u2tpPwEGOt_J-U4YrtbJOobjEjLISJOr7U0hQNCjJYbGO-9jAaeAbn8hW_dw/pub?gid=0&single=true&output=csv";
+        // --------------------------------------------------
 
-            // --- TIME 1 (9 PTS) ---
-            { nome: "Aquiles",  posicao: "ZAG", gols: 2, assis: 0, pts: 9,  vit: 3, der: 2, timeRodada: 0 },
-            { nome: "Breno",    posicao: "ATA", gols: 0, assis: 2, pts: 9,  vit: 3, der: 2, timeRodada: 0 },
-            { nome: "Wilker",   posicao: "MEI", gols: 3, assis: 0, pts: 9,  vit: 3, der: 2, timeRodada: 0 },
-            { nome: "Túlio",    posicao: "ZAG", gols: 0, assis: 0, pts: 9,  vit: 3, der: 2, timeRodada: 0 },
-            { nome: "Goiaba",   posicao: "MEI", gols: 2, assis: 0, pts: 9,  vit: 3, der: 2, timeRodada: 0 },
+        const CAMINHO_FOTOS = "./fotos/"; 
+        const FORMATO_FOTO = ".jpg";      
+        const FOTO_GENERICA = "https://cdn-icons-png.flaticon.com/512/847/847969.png"; 
 
-            // --- TIME 3 (6 PTS) ---
-            { nome: "Braulio",  posicao: "ATA", gols: 0, assis: 0, pts: 6,  vit: 2, der: 2, timeRodada: 0 },
-            { nome: "Juninho",  posicao: "MEI", gols: 1, assis: 2, pts: 6,  vit: 2, der: 2, timeRodada: 0 },
-            { nome: "Tarcísio", posicao: "ATA", gols: 1, assis: 0, pts: 6,  vit: 2, der: 2, timeRodada: 0 },
-            { nome: "Jojo",     posicao: "MEI", gols: 0, assis: 0, pts: 6,  vit: 2, der: 2, timeRodada: 0 },
+        // PESOS CARTOLA
+        const REGRAS = {
+            presenca: 10, pontualidade: 2, atraso: -2, clean_sheet: 5,
+            vitoria: 5, gol: 3, assistencia: 3, cartao: -2, furo: -10
+        };
 
-            // --- TIME 2 (3 PTS) ---
-            { nome: "Yushin",   posicao: "ZAG", gols: 2, assis: 0, pts: 3,  vit: 1, der: 2, timeRodada: 0 },
-            { nome: "Pereira",  posicao: "ATA", gols: 1, assis: 2, pts: 3,  vit: 1, der: 2, timeRodada: 0 },
-            { nome: "Ryan",     posicao: "MEI", gols: 3, assis: 0, pts: 3,  vit: 1, der: 2, timeRodada: 0 },
-            { nome: "Rodrigo",  posicao: "MEI", gols: 0, assis: 0, pts: 3,  vit: 1, der: 2, timeRodada: 0 },
-            { nome: "Zaca",     posicao: "MEI", gols: 1, assis: 0, pts: 3,  vit: 1, der: 2, timeRodada: 0 },
-
-            // --- TIME 4 (0 PTS) ---
-            { nome: "Luan",     posicao: "MEI", gols: 0, assis: 0, pts: 0,  vit: 0, der: 2, timeRodada: 0 },
-            { nome: "Nedson",   posicao: "ZAG", gols: 0, assis: 0, pts: 0,  vit: 0, der: 2, timeRodada: 0 },
-            { nome: "Rodrigo01",posicao: "MEI", gols: 0, assis: 2, pts: 0,  vit: 0, der: 2, timeRodada: 0 },
-            { nome: "Xande",    posicao: "ATA", gols: 1, assis: 0, pts: 0,  vit: 0, der: 2, timeRodada: 0 }
-        ];
+        let globalData = [];
 
         // =================================================================
-        // LÓGICA DE RENDERIZAÇÃO
+        // LÓGICA DE DADOS (FETCH + PARSE)
         // =================================================================
+        
+        async function init() {
+            if(SHEET_URL.includes("COLE_SEU")) {
+                document.getElementById('loading-screen').innerHTML = "<p class='text-red-500'>Erro: Configure o link da planilha no código!</p>";
+                return;
+            }
+            
+            try {
+                const response = await fetch(SHEET_URL);
+                const csvText = await response.text();
+                globalData = parseCSV(csvText);
+                
+                // Sucesso
+                document.getElementById('loading-screen').classList.add('hidden');
+                document.getElementById('dashboard-content').classList.remove('hidden');
+                document.getElementById('status-indicator').classList.remove('bg-red-500');
+                document.getElementById('status-indicator').classList.add('bg-green-500');
+                document.getElementById('status-text').innerText = "Online";
+                document.getElementById('status-text').classList.add('text-green-500');
 
-        // Helper para gerar URL da foto
-        function getFoto(nome) {
-            // Converte para minúsculo, mas MANTÉM os acentos
-            // Exemplo: O código envia "Móvel" -> a função transforma em "móvel" para bater com o arquivo
-            return `${CAMINHO_FOTOS}${nome.toLowerCase().trim()}${FORMATO_FOTO}`;
+                renderDashboard();
+            } catch (error) {
+                console.error(error);
+                document.getElementById('loading-screen').innerHTML = "<p class='text-red-500'>Erro ao conectar com a planilha.</p>";
+            }
         }
 
-        // Helper para tratar erro de imagem (Fallback)
-        // Nota: O tratamento 'onerror' é inserido diretamente na string HTML abaixo
+        function parseCSV(text) {
+            const rows = text.split('\n').map(r => r.split(','));
+            const headers = rows[0].map(h => h.trim().replace(/"/g, ''));
+            const playersMap = {};
+
+            // Pula cabeçalho (i=1)
+            for(let i=1; i<rows.length; i++) {
+                const row = rows[i];
+                if(row.length < headers.length) continue;
+
+                // Helpers de leitura
+                const getStr = (k) => {
+                    const idx = headers.indexOf(k);
+                    return row[idx] ? row[idx].replace(/"/g, '').trim() : "";
+                };
+                const getNum = (k) => {
+                    const idx = headers.indexOf(k);
+                    if(idx === -1) return 0;
+                    let val = row[idx] ? row[idx].replace(/"/g, '').trim() : "0";
+                    if(val.toUpperCase() === 'S') return 1;
+                    if(val.toUpperCase() === 'N') return 0;
+                    return Number(val) || 0;
+                };
+
+                const nome = getStr('nomeAtleta');
+                if(!nome) continue;
+
+                if(!playersMap[nome]) {
+                    playersMap[nome] = {
+                        nome: nome,
+                        posicao: normalizePos(getStr('posicao')),
+                        gols: 0, assis: 0, vitoria: 0, der: 0,
+                        presenca: 0, pontual: 0, atraso: 0, clean: 0, cartao: 0, furo: 0,
+                        timeRodada: 0
+                    };
+                }
+
+                const p = playersMap[nome];
+                // Acumula
+                p.gols += getNum('qtdGols');
+                p.assis += getNum('qtdAssistencias');
+                p.vitoria += getNum('qtdVitorias');
+                p.der += getNum('qtdDerrotas');
+                p.presenca += getNum('presenca');
+                p.pontual += getNum('chegou_nahora');
+                p.atraso += getNum('chegou_atrasado');
+                p.clean += getNum('clean_sheet');
+                p.cartao += getNum('cartao');
+                p.furo += getNum('confirmou_e_naofoi');
+                
+                // Time da rodada (flag S/N na planilha, somamos quantas vezes foi 'S')
+                if(getStr('timeRodada').toUpperCase() === 'S') p.timeRodada++;
+            }
+            return Object.values(playersMap);
+        }
+
+        function normalizePos(pos) {
+            pos = pos.toLowerCase();
+            if(pos.includes('gol')) return 'GOL';
+            if(pos.includes('zag')) return 'ZAG';
+            if(pos.includes('mei')) return 'MEI';
+            if(pos.includes('ata')) return 'ATA';
+            return 'MEI';
+        }
+
+        // =================================================================
+        // RENDERIZAÇÃO
+        // =================================================================
+
+        function getFoto(nome) {
+            return `${CAMINHO_FOTOS}${nome.toLowerCase().trim()}${FORMATO_FOTO}`;
+        }
         const imgError = `this.onerror=null; this.src='${FOTO_GENERICA}';`;
+
+        function calcPoints(p) {
+            return (p.presenca * REGRAS.presenca) + 
+                   (p.pontual * REGRAS.pontualidade) + 
+                   (p.atraso * REGRAS.atraso) + 
+                   (p.clean * REGRAS.clean_sheet) + 
+                   (p.vitoria * REGRAS.vitoria) + 
+                   (p.gols * REGRAS.gol) + 
+                   (p.assis * REGRAS.assistencia) + 
+                   (p.cartao * REGRAS.cartao) + 
+                   (p.furo * REGRAS.furo);
+        }
 
         function renderDashboard() {
             renderTopLists();
-            renderTable();
             renderSelection();
+            renderTable();
+            renderLegend();
+        }
+
+        function renderLegend() {
+            // Insere legenda se não existir
+            if(!document.getElementById('score-legend')) {
+                const legendHTML = `
+                    <div id="score-legend" class="grid grid-cols-2 md:grid-cols-5 gap-2 text-[10px] md:text-xs text-gray-500 mb-4 font-mono border-b border-gray-800 pb-4">
+                        <span class="text-green-500">✅ Presença +10</span>
+                        <span class="text-green-500">⏰ Pontual +2</span>
+                        <span class="text-red-500">🐢 Atraso -2</span>
+                        <span class="text-gold">⚽ Gol/Assis +3</span>
+                        <span class="text-blue-400">🛡️ SG +5</span>
+                        <span class="text-green-500">✌️ Vitória +5</span>
+                        <span class="text-red-500">🟨 Cartão -2</span>
+                        <span class="text-red-700 font-bold">❌ Furão -10</span>
+                    </div>
+                `;
+                const tableSection = document.getElementById('search-input').closest('section').querySelector('.rounded-lg');
+                tableSection.insertAdjacentHTML('beforebegin', legendHTML);
+            }
         }
 
         function renderTopLists() {
             const createRow = (p, value, label, index) => {
                 const colorClass = index === 0 ? "text-gold font-bold text-lg" : "text-gray-300";
-                const borderClass = index === 0 ? "border-l-2 border-gold pl-2 bg-white/5" : "";
-                
                 return `
-                    <div class="flex justify-between items-center py-2 ${borderClass}">
+                    <div class="flex justify-between items-center py-2 border-b border-gray-800 last:border-0">
                         <div class="flex items-center gap-3">
                             <span class="font-mono text-gray-600 w-4">${index + 1}.</span>
                             <div class="h-8 w-8 rounded-full overflow-hidden border border-gray-700 bg-gray-900">
@@ -311,118 +427,91 @@
                 `;
             };
 
-            const topGols = [...playersData].sort((a,b) => b.gols - a.gols).slice(0, 5);
+            const topGols = [...globalData].sort((a,b) => b.gols - a.gols).slice(0, 5);
             document.getElementById('top-scorers').innerHTML = topGols.map((p, i) => createRow(p, p.gols, 'GOLS', i)).join('');
 
-            const topAssis = [...playersData].sort((a,b) => b.assis - a.assis).slice(0, 5);
+            const topAssis = [...globalData].sort((a,b) => b.assis - a.assis).slice(0, 5);
             document.getElementById('top-assists').innerHTML = topAssis.map((p, i) => createRow(p, p.assis, 'ASS', i)).join('');
 
-            const topTeam = [...playersData].sort((a,b) => b.timeRodada - a.timeRodada || b.pts - a.pts).slice(0, 5);
+            const topTeam = [...globalData].sort((a,b) => b.timeRodada - a.timeRodada || calcPoints(b) - calcPoints(a)).slice(0, 5);
             document.getElementById('top-team').innerHTML = topTeam.map((p, i) => createRow(p, p.timeRodada, 'VEZES', i)).join('');
-        }
-
-        function renderTable(searchTerm = "") {
-            let filteredPlayers = playersData;
-            
-            if (searchTerm) {
-                const term = searchTerm.toLowerCase();
-                filteredPlayers = playersData.filter(p => 
-                    p.nome.toLowerCase().includes(term) || 
-                    p.posicao.toLowerCase().includes(term)
-                );
-            }
-
-            const sorted = [...filteredPlayers].sort((a,b) => b.pts - a.pts || b.vit - a.vit || b.gols - a.gols);
-            
-            const html = sorted.map((p, i) => {
-                const rankStyle = i < 3 && !searchTerm ? `rank-${i+1} font-bold` : 'text-gray-500';
-                const rowBg = i % 2 === 0 ? 'bg-white/[0.02]' : '';
-                
-                return `
-                <tr class="${rowBg} hover:bg-gray-800 transition-colors">
-                    <td class="text-center py-3 font-mono ${rankStyle} align-middle">${i+1}º</td>
-                    <td class="py-2 font-bold text-gray-200 uppercase tracking-wide flex items-center gap-3 align-middle">
-                        <div class="h-10 w-10 rounded-full overflow-hidden border border-gray-600 bg-gray-900 shrink-0">
-                            <img src="${getFoto(p.nome)}" alt="${p.nome}" class="w-full h-full object-cover" onerror="${imgError}">
-                        </div>
-                        <div>
-                            <div class="leading-tight">${p.nome}</div>
-                            <span class="text-[10px] text-gray-500 border border-gray-700 px-1.5 rounded bg-black/30 font-mono">${p.posicao}</span>
-                        </div>
-                    </td>
-                    <td class="text-center py-3 font-black text-xl text-gold bg-gray-800/50 border-x border-gray-800 align-middle">${p.pts}</td>
-                    <td class="text-center py-3 text-gray-400 font-bold align-middle">${p.gols}</td>
-                    <td class="text-center py-3 text-gray-400 font-bold align-middle">${p.assis}</td>
-                    <td class="text-center py-3 text-green-500/80 font-mono hidden sm:table-cell align-middle">${p.vit}</td>
-                    <td class="text-center py-3 text-red-500/80 font-mono hidden sm:table-cell align-middle">${p.der}</td>
-                </tr>
-                `;
-            }).join('');
-            
-            if (sorted.length === 0) {
-                document.getElementById('ranking-body').innerHTML = `
-                    <tr><td colspan="7" class="text-center py-8 text-gray-500">Nenhum faraó encontrado.</td></tr>
-                `;
-            } else {
-                document.getElementById('ranking-body').innerHTML = html;
-            }
         }
 
         function renderSelection() {
             const getBest = (pos, count, sortFn) => {
-                return [...playersData].filter(p => p.posicao === pos).sort(sortFn).slice(0, count);
+                const withPoints = globalData.map(p => ({...p, total: calcPoints(p)}));
+                return withPoints.filter(p => p.posicao === pos).sort(sortFn).slice(0, count);
             };
 
-            const goleiro = getBest('GOL', 1, (a,b) => b.pts - a.pts);
-            const zagueiro = getBest('ZAG', 1, (a,b) => b.pts - a.pts || b.gols - a.gols);
-            const meias = getBest('MEI', 2, (a,b) => (b.gols + b.assis) - (a.gols + a.assis) || b.pts - a.pts);
-            const atacantes = getBest('ATA', 2, (a,b) => (b.gols + b.assis) - (a.gols + a.assis) || b.pts - a.pts);
+            const goleiro = getBest('GOL', 1, (a,b) => b.total - a.total);
+            const zagueiro = getBest('ZAG', 1, (a,b) => b.total - a.total);
+            const meias = getBest('MEI', 2, (a,b) => (b.gols+b.assis) - (a.gols+a.assis) || b.total - a.total);
+            const atacantes = getBest('ATA', 2, (a,b) => (b.gols+b.assis) - (a.gols+a.assis) || b.total - a.total);
 
             const selecao = [...goleiro, ...zagueiro, ...meias, ...atacantes];
 
             const html = selecao.map(p => `
-                <div class="card-panel rounded-lg p-4 flex flex-col items-center justify-center group relative overflow-hidden min-h-[220px]">
+                <div class="card-panel rounded-lg p-4 flex flex-col items-center justify-center group relative overflow-hidden min-h-[200px]">
                     <div class="absolute inset-0 bg-gold/5 opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                    
-                    <div class="text-xs font-mono text-gold mb-2 tracking-widest border border-gold/30 px-2 rounded-full bg-black z-10">
-                        ${p.posicao}
-                    </div>
-                    
-                    <div class="w-20 h-20 rounded-full border-2 border-gold shadow-[0_0_15px_rgba(255,215,0,0.3)] overflow-hidden mb-2 z-10 bg-gray-900">
+                    <div class="text-xs font-mono text-gold mb-2 tracking-widest border border-gold/30 px-2 rounded-full bg-black z-10">${p.posicao}</div>
+                    <div class="w-16 h-16 rounded-full border-2 border-gold shadow-[0_0_15px_rgba(255,215,0,0.3)] overflow-hidden mb-2 z-10 bg-gray-900">
                          <img src="${getFoto(p.nome)}" alt="${p.nome}" class="w-full h-full object-cover transition transform group-hover:scale-110 duration-500" onerror="${imgError}">
                     </div>
-
-                    <div class="text-2xl font-bold text-white uppercase font-['Teko'] mb-2 relative z-10">
-                        ${p.nome}
-                    </div>
-                    
-                    <div class="flex gap-3 text-sm text-gray-400 z-10 bg-black/40 px-3 py-1 rounded-full border border-gray-800">
-                        <div class="flex flex-col items-center">
-                            <span class="text-white font-bold leading-none">${p.gols}</span>
-                            <span class="text-[8px] leading-none mt-1">GOL</span>
-                        </div>
-                        <div class="w-px bg-gray-600 h-full"></div>
-                        <div class="flex flex-col items-center">
-                            <span class="text-white font-bold leading-none">${p.assis}</span>
-                            <span class="text-[8px] leading-none mt-1">ASS</span>
-                        </div>
-                        <div class="w-px bg-gray-600 h-full"></div>
-                         <div class="flex flex-col items-center">
-                            <span class="text-gold font-bold leading-none">${p.pts}</span>
-                            <span class="text-[8px] leading-none mt-1">PTS</span>
-                        </div>
+                    <div class="text-xl font-bold text-white uppercase font-['Teko'] mb-1 relative z-10">${p.nome}</div>
+                    <div class="text-2xl font-black text-gold z-10 drop-shadow-md">
+                        ${p.total} <span class="text-[10px] text-gray-500 font-normal align-middle">PTS</span>
                     </div>
                 </div>
             `).join('');
-
             document.getElementById('selection-grid').innerHTML = html;
         }
 
-        document.getElementById('search-input').addEventListener('keyup', (e) => {
-            renderTable(e.target.value);
-        });
+        function renderTable(searchTerm = "") {
+            let processed = globalData.map(p => ({...p, total: calcPoints(p)}));
+            
+            if (searchTerm) {
+                const term = searchTerm.toLowerCase();
+                processed = processed.filter(p => p.nome.toLowerCase().includes(term) || p.posicao.toLowerCase().includes(term));
+            }
 
-        renderDashboard();
+            const sorted = processed.sort((a,b) => b.total - a.total);
+            
+            const html = sorted.map((p, i) => {
+                const rowBg = i % 2 === 0 ? 'bg-white/[0.02]' : '';
+                const getCls = (v) => v < 0 ? 'text-red-500 font-bold' : (v > 0 ? 'text-gray-300' : 'text-gray-600');
+                
+                return `
+                <tr class="${rowBg} hover:bg-gray-800 transition-colors">
+                    <td class="text-center py-3 font-mono ${i<3 ? 'text-gold font-bold' : 'text-gray-500'} align-middle">${i+1}º</td>
+                    <td class="py-2 font-bold text-gray-200 uppercase tracking-wide flex items-center gap-2 align-middle">
+                        <div class="h-8 w-8 rounded-full overflow-hidden border border-gray-600 bg-gray-900 shrink-0">
+                            <img src="${getFoto(p.nome)}" class="w-full h-full object-cover" onerror="${imgError}">
+                        </div>
+                        <div>
+                            <div class="leading-tight text-sm">${p.nome}</div>
+                            <span class="text-[9px] text-gray-500 border border-gray-700 px-1 rounded bg-black/30 font-mono">${p.posicao}</span>
+                        </div>
+                    </td>
+                    <td class="text-center py-3 font-black text-lg text-gold bg-gray-800/50 border-x border-gray-800 align-middle">${p.total}</td>
+                    <td class="text-center text-xs py-3 font-bold text-gray-400">${p.gols}</td>
+                    <td class="text-center text-xs py-3 font-bold text-gray-400">${p.assis}</td>
+                    <td class="text-center text-xs py-3 font-mono ${getCls(p.vitoria)}">${p.vitoria}</td>
+                    <td class="text-center text-xs py-3 font-mono ${getCls(p.clean)}">${p.clean}</td>
+                    <td class="text-center text-xs py-3 font-mono ${getCls(p.presenca)}">${p.presenca}</td>
+                    <td class="text-center text-xs py-3 font-mono ${getCls(p.pontual)}">${p.pontual}</td>
+                    <td class="text-center text-xs py-3 font-mono ${getCls(p.atraso)}">${p.atraso}</td>
+                    <td class="text-center text-xs py-3 font-mono ${getCls(p.cartao)}">${p.cartao}</td>
+                    <td class="text-center text-xs py-3 font-mono ${getCls(p.furo)}">${p.furo}</td>
+                </tr>`;
+            }).join('');
+            
+            document.getElementById('ranking-body').innerHTML = sorted.length ? html : `<tr><td colspan="12" class="text-center py-8 text-gray-500">Nenhum atleta encontrado.</td></tr>`;
+        }
+
+        document.getElementById('search-input').addEventListener('keyup', (e) => renderTable(e.target.value));
+        
+        // Iniciar
+        init();
     </script>
 </body>
 </html>
