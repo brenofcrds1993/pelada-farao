@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* === CONFIGURAÇÕES VISUAIS === */
+        /* CONFIGURAÇÕES VISUAIS */
         :root { --pharaoh-black: #050505; --pharaoh-gold: #FFD700; --text-white: #ffffff; }
         body { background-color: var(--pharaoh-black); color: var(--text-white); font-family: 'Roboto', sans-serif; 
                background-image: linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.95)), url('https://www.transparenttextures.com/patterns/cubes.png'); }
@@ -21,14 +21,18 @@
         .card-panel { background: linear-gradient(145deg, #0f0f0f, #0a0a0a); border: 1px solid #222; border-top: 3px solid var(--pharaoh-gold); transition: transform 0.3s ease; }
         .card-panel:hover { transform: translateY(-5px); border-color: var(--pharaoh-gold); }
         
-        .custom-scrollbar::-webkit-scrollbar { height: 8px; width: 8px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #0f0f0f; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
-        
-        .loader { border: 4px solid #333; border-top: 4px solid var(--pharaoh-gold); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
+        /* Loader */
+        .loader { border: 3px solid #333; border-top: 3px solid var(--pharaoh-gold); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; display: inline-block; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-entry { animation: slideIn 0.6s ease-out forwards; }
+        
+        /* Estilos Específicos para a Lista Expansível */
+        .player-row { border-bottom: 1px solid #222; transition: background 0.2s; }
+        .player-details { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out, padding 0.3s ease; background: #0a0a0a; }
+        .player-row.active .player-details { max-height: 500px; padding-bottom: 1rem; border-bottom: 1px solid var(--pharaoh-gold); }
+        .player-row.active { background-color: rgba(255, 215, 0, 0.05); }
+        .rotate-icon { transition: transform 0.3s; }
+        .player-row.active .rotate-icon { transform: rotate(180deg); }
+
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -36,12 +40,12 @@
     <header class="border-b border-gray-800 bg-black/80 backdrop-blur-md sticky top-0 z-50">
         <div class="container mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center gap-4">
-                <div class="h-16 w-16 md:h-20 md:w-20 bg-gray-900 rounded-full border-2 border-gold flex items-center justify-center overflow-hidden shadow-[0_0_15px_rgba(255,215,0,0.4)]">
-                    <img src="logo_farao.png" alt="Logo Faraó" class="w-full h-full object-contain">
+                <div class="h-14 w-14 md:h-16 md:w-16 bg-gray-900 rounded-full border-2 border-gold flex items-center justify-center overflow-hidden shadow-[0_0_15px_rgba(255,215,0,0.4)]">
+                    <img src="logo_farao.png" alt="Logo" class="w-full h-full object-contain">
                 </div>
                 <div>
-                    <h1 class="text-3xl md:text-5xl font-bold leading-none tracking-wide">PELADA DO <span class="text-gold">FARAÓ</span></h1>
-                    <p class="text-gray-500 text-sm md:text-base font-medium tracking-widest uppercase">Domingo • Horário: 09h ÀS 11h30 • Local: Park Barro Society</p>
+                    <h1 class="text-2xl md:text-4xl font-bold leading-none tracking-wide">PELADA DO <span class="text-gold">FARAÓ</span></h1>
+                    <p class="text-gray-500 text-[10px] md:text-sm font-medium tracking-widest uppercase">Domingo • 09h - 11h30 • Park Barro</p>
                 </div>
             </div>
             <div class="hidden md:block text-right">
@@ -54,125 +58,84 @@
         </div>
     </header>
 
-    <main class="flex-grow container mx-auto p-4 md:p-8 space-y-12">
+    <main class="flex-grow container mx-auto p-4 md:p-8 space-y-8">
         <div id="loading-screen" class="text-center py-20">
             <div class="loader"></div>
-            <p class="text-gray-400 font-mono animate-pulse">Baixando dados do Google Sheets...</p>
-            <p id="error-message" class="text-red-500 mt-4 hidden"></p>
+            <p class="text-gray-400 font-mono animate-pulse mt-2">Sincronizando dados...</p>
+            <p id="error-message" class="text-red-500 mt-4 hidden font-bold"></p>
         </div>
 
         <div id="dashboard-content" class="hidden space-y-12">
-            <section class="grid grid-cols-1 md:grid-cols-3 gap-6 animate-entry">
-                <div class="card-panel p-6 rounded-xl relative overflow-hidden group">
-                    <div class="absolute right-0 top-0 p-4 opacity-10"><i class="fas fa-futbol text-8xl text-white"></i></div>
-                    <h2 class="text-2xl text-gray-400 mb-4 flex items-center gap-2"><i class="fas fa-crosshairs text-gold"></i> Artilharia</h2>
-                    <div id="top-scorers" class="space-y-2 relative z-10"></div>
-                </div>
-                <div class="card-panel p-6 rounded-xl relative overflow-hidden group">
-                    <div class="absolute right-0 top-0 p-4 opacity-10"><i class="fas fa-shoe-prints text-8xl text-white"></i></div>
-                    <h2 class="text-2xl text-gray-400 mb-4 flex items-center gap-2"><i class="fas fa-handshake text-gold"></i> Assistências</h2>
-                    <div id="top-assists" class="space-y-2 relative z-10"></div>
-                </div>
-                <div class="card-panel p-6 rounded-xl relative overflow-hidden group">
-                    <div class="absolute right-0 top-0 p-4 opacity-10"><i class="fas fa-shield-alt text-8xl text-white"></i></div>
-                    <h2 class="text-2xl text-gray-400 mb-4 flex items-center gap-2"><i class="fas fa-users text-gold"></i> Time da Rodada</h2>
-                    <div id="top-team" class="space-y-2 relative z-10"></div>
-                </div>
-            </section>
-
+            
             <section class="animate-entry" style="animation-delay: 0.2s;">
-                <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center justify-between mb-4">
                     <div>
-                        <h2 class="text-3xl md:text-4xl text-white border-l-4 border-gold pl-4">SELEÇÃO DO MÊS</h2>
-                        <span id="month-label" class="ml-4 text-xs text-gold font-mono uppercase border border-gold/30 px-2 py-1 rounded bg-black/50">CARREGANDO...</span>
-                    </div>
-                    <div class="flex gap-2 flex-wrap justify-end">
-                        <span class="text-xs font-mono text-gray-500 border border-gray-800 px-2 py-1 rounded bg-black/50">1 GOL</span>
-                        <span class="text-xs font-mono text-gray-500 border border-gray-800 px-2 py-1 rounded bg-black/50">1 ZAG</span>
-                        <span class="text-xs font-mono text-gray-500 border border-gray-800 px-2 py-1 rounded bg-black/50">2 MEI</span>
-                        <span class="text-xs font-mono text-gray-500 border border-gray-800 px-2 py-1 rounded bg-black/50">2 ATA</span>
+                        <h2 class="text-2xl md:text-4xl text-white border-l-4 border-gold pl-3">SELEÇÃO DO MÊS</h2>
+                        <span id="month-label" class="ml-3 text-[10px] md:text-xs text-gold font-mono uppercase border border-gold/30 px-2 py-1 rounded bg-black/50">CARREGANDO...</span>
                     </div>
                 </div>
-                <div id="selection-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4"></div>
+                <div class="overflow-x-auto pb-4 -mx-4 px-4 md:mx-0 md:px-0">
+                    <div id="selection-grid" class="flex md:grid md:grid-cols-6 gap-4 min-w-[600px] md:min-w-0"></div>
+                </div>
             </section>
 
             <section class="animate-entry" style="animation-delay: 0.4s;">
                 <div class="flex flex-col md:flex-row items-center justify-between mb-4 gap-4">
-                    <h2 class="text-3xl md:text-4xl text-white border-l-4 border-gold pl-4">RANKING GERAL</h2>
+                    <h2 class="text-2xl md:text-4xl text-white border-l-4 border-gold pl-3 w-full md:w-auto">RANKING GERAL</h2>
                     <div class="relative w-full md:w-64">
-                        <input type="text" id="search-input" placeholder="Buscar atleta..." class="w-full bg-black/50 border border-gray-700 text-white rounded-full py-2 pl-10 pr-4 focus:outline-none focus:border-gold">
-                        <i class="fas fa-search absolute left-3 top-3 text-gray-500"></i>
+                        <input type="text" id="search-input" placeholder="Buscar atleta..." class="w-full bg-black/50 border border-gray-700 text-white rounded-full py-3 pl-10 pr-4 focus:outline-none focus:border-gold">
+                        <i class="fas fa-search absolute left-3 top-3.5 text-gray-500"></i>
                     </div>
                 </div>
-                <div class="rounded-lg shadow-2xl border border-gray-800 bg-[#0a0a0a] flex flex-col">
-                    <div class="overflow-x-auto custom-scrollbar">
-                        <div class="inline-block min-w-full align-middle">
-                            <table class="min-w-full text-left custom-table divide-y divide-gray-800">
-                                <thead class="bg-gray-900 sticky top-0 z-20">
-                                    <tr>
-                                        <th class="py-4 px-3 sticky left-0 bg-gray-900 z-30 shadow-lg min-w-[180px] text-gold border-r border-gray-800">ATLETA</th>
-                                        <th class="py-4 px-3 text-center text-white bg-gold/10 border-x border-gray-800 min-w-[80px] text-xl">TOTAL</th>
-                                        <th class="px-3 text-center text-xs text-gray-400 min-w-[80px]" title="Presença (+5)"><i class="fas fa-check-circle text-green-500 mb-1 block text-lg"></i> PRES</th>
-                                        <th class="px-3 text-center text-xs text-gray-400 min-w-[80px]" title="Pontualidade (+2)"><i class="fas fa-clock text-blue-400 mb-1 block text-lg"></i> PONT</th>
-                                        <th class="px-3 text-center text-xs text-gray-400 min-w-[80px]" title="Atraso (-1)"><i class="fas fa-running text-yellow-500 mb-1 block text-lg"></i> ATRASO</th>
-                                        <th class="px-3 text-center text-xs text-gray-400 min-w-[100px]" title="Gols e Assistências (+3)"><i class="fas fa-futbol text-white mb-1 block text-lg"></i> G/A</th>
-                                        <th class="px-3 text-center text-xs text-gray-400 min-w-[80px]" title="Clean Sheet (+5)"><i class="fas fa-shield-alt text-gray-300 mb-1 block text-lg"></i> SG</th>
-                                        <th class="px-3 text-center text-xs text-gray-400 min-w-[80px]" title="Vitória (+2)"><i class="fas fa-trophy text-gold mb-1 block text-lg"></i> VIT</th>
-                                        <th class="px-3 text-center text-xs text-gray-400 min-w-[80px]" title="Cartão (-2)"><i class="fas fa-square text-red-500 mb-1 block text-lg"></i> CART</th>
-                                        <th class="px-3 text-center text-xs text-gray-400 min-w-[80px]" title="Furo (-10)"><i class="fas fa-user-times text-red-700 mb-1 block text-lg"></i> FURO</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="ranking-body" class="divide-y divide-gray-800 bg-[#0a0a0a]"></tbody>
-                            </table>
+
+                <div class="rounded-lg shadow-2xl border border-gray-800 bg-[#0f0f0f] overflow-hidden">
+                    <div class="p-3 bg-gray-900 border-b border-gray-800 flex justify-between text-xs text-gray-500 font-bold uppercase tracking-wider">
+                        <span class="w-12 text-center">#</span>
+                        <span class="flex-grow pl-2">Atleta</span>
+                        <span class="w-16 text-center text-gold">PTS</span>
+                        <span class="w-8 text-center"></span> </div>
+                    
+                    <div id="ranking-list" class="divide-y divide-gray-800">
                         </div>
-                    </div>
                 </div>
             </section>
         </div>
     </main>
 
-    <footer class="bg-black border-t border-gray-900 py-8 mt-8 text-center">
-        <p class="text-gold font-bold text-xl font-['Teko'] tracking-widest">PELADA DO FARAÓ</p>
-        <p class="text-gray-600 text-sm mt-2">© 2026 Recife.</p>
+    <footer class="bg-black border-t border-gray-900 py-8 mt-8 text-center text-gray-600 text-sm">
+        <p class="text-gold font-bold text-xl font-['Teko'] tracking-widest mb-2">PELADA DO FARAÓ</p>
+        <p>© 2026 Recife.</p>
     </footer>
 
     <script>
         // =================================================================
-        // CONFIGURAÇÕES GERAIS
+        // CONFIGURAÇÕES
         // =================================================================
         
-        // 👇👇 COLE O LINK CSV (TERMINADO EM .csv) AQUI 👇👇
-        const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTQfAWxpKRn7PA9URd6u2tpPwEGOt_J-U4YrtbJOobjEjLISJOr7U0hQNCjJYbGO-9jAaeAbn8hW_dw/pub?gid=0&single=true&output=csv";
+        // 👇👇 COLE O LINK CSV AQUI 👇👇
+        const SHEET_URL = "COLE_SEU_LINK_CSV_AQUI"; 
         // --------------------------------------------------
 
         const CAMINHO_FOTOS = "./fotos/";
         const FORMATO_FOTO = ".jpg";
         const FOTO_GENERICA = "https://cdn-icons-png.flaticon.com/512/847/847969.png";
 
-        // NOVOS PESOS - AJUSTE FINO (REALISTA)
         const REGRAS = {
-            presenca: 5,        // Aumentou para valorizar a ida (+5)
-            pontualidade: 2,    // Chegar na hora vale (+2)
-            atraso: -1,         // Atraso desconta pouco (-1)
-            clean_sheet: 3,     // Defesa não vazada (+3)
-            vitoria: 2,         // Vitória (+2 cada)
-            gol: 3,             // Gol mantém o prestígio (+3)
-            assistencia: 2,     // Assistência vale um pouco menos (+2)
-            cartao: -2,         // Punição média (-2)
-            furo: -10           // Punição severa mantida (-10)
+            presenca: 5, pontualidade: 2, atraso: -1, clean_sheet: 3,
+            vitoria: 2, gol: 3, assistencia: 2, cartao: -2, furo: -10
         };
 
         let allMatches = [];
         let globalAggregated = [];
 
         // =================================================================
-        // CONEXÃO SEGURA COM GOOGLE SHEETS
+        // CONEXÃO
         // =================================================================
         async function init() {
             const errorMsg = document.getElementById('error-message');
             
             if(SHEET_URL.includes("COLE_SEU")) {
-                errorMsg.innerText = "Link não configurado. Abra o index.html e cole o link CSV.";
+                errorMsg.innerText = "ERRO: Cole o link CSV no código!";
                 errorMsg.classList.remove('hidden');
                 return;
             }
@@ -181,20 +144,15 @@
                 const response = await fetch(SHEET_URL);
                 const txt = await response.text();
 
-                // VERIFICA SE O LINK ESTÁ ERRADO (Se baixou HTML em vez de CSV)
                 if(txt.trim().startsWith("<!DOCTYPE") || txt.trim().startsWith("<html")) {
-                    throw new Error("Link incorreto! Você usou o link da página, não o link CSV (Publicar na Web).");
+                    throw new Error("Link incorreto! Use o link CSV.");
                 }
 
                 processData(txt);
                 
-                // Sucesso
                 document.getElementById('loading-screen').classList.add('hidden');
                 document.getElementById('dashboard-content').classList.remove('hidden');
-                
-                const status = document.getElementById('status-indicator');
-                status.classList.remove('bg-red-500');
-                status.classList.add('bg-green-500');
+                document.getElementById('status-indicator').classList.replace('bg-red-500', 'bg-green-500');
                 document.getElementById('status-text').innerText = "Online";
                 document.getElementById('status-text').classList.add('text-green-500');
 
@@ -202,16 +160,14 @@
 
             } catch (err) {
                 console.error(err);
-                errorMsg.innerHTML = `Erro: ${err.message}<br>Verifique se publicou como CSV.`;
+                errorMsg.innerHTML = `Erro: ${err.message}`;
                 errorMsg.classList.remove('hidden');
-                document.getElementById('status-text').innerText = "Erro";
             }
         }
 
         function processData(csvText) {
             const rows = csvText.split('\n').map(r => r.split(','));
-            // Normaliza cabeçalhos (remove espaços e aspas, tudo minúsculo para evitar erros)
-            const headers = rows[0].map(h => h.trim().replace(/^"|"$/g, '').toLowerCase());
+            const headers = rows[0].map(h => h.trim().replaceAll('"', '').toLowerCase());
             
             allMatches = [];
             
@@ -219,13 +175,10 @@
                 const row = rows[i];
                 if(row.length < headers.length) continue;
 
-                // Função auxiliar segura para pegar dados
                 const getVal = (keyPart) => {
-                    // Procura coluna que contenha o nome (ex: procura 'gols' acha 'qtdgols')
                     const idx = headers.findIndex(h => h.includes(keyPart.toLowerCase()));
                     if(idx === -1) return 0;
-                    
-                    let val = row[idx] ? row[idx].replace(/^"|"$/g, '').trim() : "0";
+                    let val = row[idx] ? row[idx].replaceAll('"', '').trim() : "0";
                     if(val.toUpperCase() === 'S') return 1;
                     if(val.toUpperCase() === 'N') return 0;
                     return Number(val) || 0;
@@ -233,10 +186,10 @@
 
                 const getStr = (keyPart) => {
                     const idx = headers.findIndex(h => h.includes(keyPart.toLowerCase()));
-                    return (idx !== -1 && row[idx]) ? row[idx].replace(/^"|"$/g, '').trim() : "";
+                    return (idx !== -1 && row[idx]) ? row[idx].replaceAll('"', '').trim() : "";
                 };
 
-                const nome = getStr('nomeatleta'); // Procura 'nomeatleta'
+                const nome = getStr('nomeatleta');
                 if(!nome) continue;
 
                 const match = {
@@ -254,10 +207,8 @@
                     furo: getVal('confirmou_e_naofoi'),
                     timeRodada: (getStr('timerodada').toUpperCase() === 'S' ? 1 : 0)
                 };
-                
                 allMatches.push(match);
             }
-
             globalAggregated = aggregateData(allMatches);
         }
 
@@ -265,12 +216,7 @@
             const map = {};
             matchesList.forEach(m => {
                 if(!map[m.nome]) {
-                    map[m.nome] = { ...m };
-                    // Zera acumuladores
-                    map[m.nome].gols = 0; map[m.nome].assis = 0; map[m.nome].vitoria = 0;
-                    map[m.nome].presenca = 0; map[m.nome].pontual = 0; map[m.nome].atraso = 0;
-                    map[m.nome].clean = 0; map[m.nome].cartao = 0; map[m.nome].furo = 0;
-                    map[m.nome].timeRodada = 0;
+                    map[m.nome] = { ...m, gols:0, assis:0, vitoria:0, presenca:0, pontual:0, atraso:0, clean:0, cartao:0, furo:0, timeRodada:0 };
                 }
                 const p = map[m.nome];
                 p.gols += m.gols; p.assis += m.assis; p.vitoria += m.vitoria;
@@ -299,11 +245,10 @@
         }
 
         // =================================================================
-        // LÓGICA DE DATAS (SELEÇÃO)
+        // LÓGICA DE DATAS
         // =================================================================
         function getMonthKey(dateStr) {
             if(!dateStr) return "";
-            // Tenta lidar com DD/MM/YYYY
             const parts = dateStr.split('/');
             if(parts.length >= 3) return `${parts[1]}/${parts[2]}`;
             return ""; 
@@ -333,9 +278,7 @@
         const imgError = `this.onerror=null; this.src='${FOTO_GENERICA}';`;
 
         function renderDashboard() {
-            renderTopLists();
-            renderTable();
-            renderLegend();
+            renderList(); // Renderiza a nova lista
             
             const latestMonth = getLatestMonth();
             if(latestMonth) {
@@ -346,118 +289,106 @@
             }
         }
 
-        function renderLegend() {
-            if(!document.getElementById('score-legend')) {
-                const legendHTML = `
-                    <div id="score-legend" class="grid grid-cols-2 md:grid-cols-5 gap-2 text-[10px] md:text-xs text-gray-500 mb-4 font-mono border-b border-gray-800 pb-4">
-                        <span class="text-green-500">✅ Presença +10</span>
-                        <span class="text-green-500">⏰ Pontual +2</span>
-                        <span class="text-red-500">🐢 Atraso -2</span>
-                        <span class="text-gold">⚽ Gol/Assis +3</span>
-                        <span class="text-blue-400">🛡️ SG +5</span>
-                        <span class="text-green-500">✌️ Vitória +5</span>
-                        <span class="text-red-500">🟨 Cartão -2</span>
-                        <span class="text-red-700 font-bold">❌ Furão -10</span>
-                    </div>`;
-                const tableSection = document.getElementById('search-input').closest('section').querySelector('.rounded-lg');
-                tableSection.insertAdjacentHTML('beforebegin', legendHTML);
-            }
-        }
-
-        function renderTopLists() {
-            const dataWithPoints = globalAggregated.map(p => ({...p, total: calcPoints(p)}));
-            const createRow = (p, value, label, index) => `
-                <div class="flex justify-between items-center py-2 border-b border-gray-800 last:border-0">
-                    <div class="flex items-center gap-3">
-                        <span class="font-mono text-gray-600 w-4">${index + 1}.</span>
-                        <div class="h-8 w-8 rounded-full overflow-hidden border border-gray-700 bg-gray-900">
-                            <img src="${getFoto(p.nome)}" class="w-full h-full object-cover" onerror="${imgError}">
-                        </div>
-                        <span class="${index === 0 ? 'text-gold font-bold text-lg' : 'text-gray-300'}">${p.nome}</span>
-                    </div>
-                    <div class="font-mono font-bold text-white bg-gray-800 px-2 rounded">
-                        ${value} <span class="text-xs text-gray-500 font-normal">${label}</span>
-                    </div>
-                </div>`;
-
-            const topGols = [...dataWithPoints].sort((a,b) => b.gols - a.gols).slice(0, 5);
-            document.getElementById('top-scorers').innerHTML = topGols.map((p, i) => createRow(p, p.gols, 'GOLS', i)).join('');
-
-            const topAssis = [...dataWithPoints].sort((a,b) => b.assis - a.assis).slice(0, 5);
-            document.getElementById('top-assists').innerHTML = topAssis.map((p, i) => createRow(p, p.assis, 'ASS', i)).join('');
-
-            const topTeam = [...dataWithPoints].sort((a,b) => b.timeRodada - a.timeRodada || b.total - a.total).slice(0, 5);
-            document.getElementById('top-team').innerHTML = topTeam.map((p, i) => createRow(p, p.timeRodada, 'VEZES', i)).join('');
-        }
-
+        // Renderiza Seleção (Mesma lógica)
         function renderSelection(targetMonth) {
             const monthlyMatches = allMatches.filter(m => getMonthKey(m.data) === targetMonth);
             const monthlyStats = aggregateData(monthlyMatches);
             const statsWithPoints = monthlyStats.map(p => ({ ...p, total: calcPoints(p) }));
 
             const getBest = (pos, count) => {
-                return statsWithPoints
-                    .filter(p => p.posicao === pos)
-                    .sort((a,b) => b.total - a.total)
-                    .slice(0, count);
+                return statsWithPoints.filter(p => p.posicao === pos).sort((a,b) => b.total - a.total).slice(0, count);
             };
 
             const selecao = [...getBest('GOL', 1), ...getBest('ZAG', 1), ...getBest('MEI', 2), ...getBest('ATA', 2)];
 
             const html = selecao.map(p => `
-                <div class="card-panel rounded-lg p-4 flex flex-col items-center justify-center group relative overflow-hidden min-h-[200px]">
-                    <div class="absolute inset-0 bg-gold/5 opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                    <div class="text-xs font-mono text-gold mb-2 tracking-widest border border-gold/30 px-2 rounded-full bg-black z-10">${p.posicao}</div>
-                    <div class="w-16 h-16 rounded-full border-2 border-gold shadow-[0_0_15px_rgba(255,215,0,0.3)] overflow-hidden mb-2 z-10 bg-gray-900">
-                         <img src="${getFoto(p.nome)}" alt="${p.nome}" class="w-full h-full object-cover transition transform group-hover:scale-110 duration-500" onerror="${imgError}">
+                <div class="card-panel rounded-lg p-3 flex flex-col items-center justify-center relative overflow-hidden min-w-[140px] flex-shrink-0 md:flex-shrink">
+                    <div class="absolute inset-0 bg-gold/5 opacity-0 hover:opacity-100 transition duration-500"></div>
+                    <div class="text-[10px] font-mono text-gold mb-1 border border-gold/30 px-2 rounded-full bg-black z-10">${p.posicao}</div>
+                    <div class="w-14 h-14 rounded-full border-2 border-gold shadow-lg overflow-hidden mb-1 z-10 bg-gray-900">
+                         <img src="${getFoto(p.nome)}" class="w-full h-full object-cover" onerror="${imgError}">
                     </div>
-                    <div class="text-xl font-bold text-white uppercase font-['Teko'] mb-1 relative z-10">${p.nome}</div>
-                    <div class="text-2xl font-black text-gold z-10 drop-shadow-md">
-                        ${p.total} <span class="text-[10px] text-gray-500 font-normal align-middle">PTS</span>
-                    </div>
+                    <div class="text-lg font-bold text-white font-['Teko'] z-10 leading-none">${p.nome}</div>
+                    <div class="text-xl font-black text-gold z-10 leading-none mt-1">${p.total} <span class="text-[8px] text-gray-500 font-normal">PTS</span></div>
                 </div>
             `).join('');
             document.getElementById('selection-grid').innerHTML = html;
         }
 
-        function renderTable(searchTerm = "") {
+        // *** A NOVA RENDERIZAÇÃO DA LISTA (ACCORDION) ***
+        function renderList(searchTerm = "") {
             let processed = globalAggregated.map(p => ({...p, total: calcPoints(p)}));
             if (searchTerm) {
                 const term = searchTerm.toLowerCase();
                 processed = processed.filter(p => p.nome.toLowerCase().includes(term) || p.posicao.toLowerCase().includes(term));
             }
             const sorted = processed.sort((a,b) => b.total - a.total);
-            const getCls = (v) => v < 0 ? 'text-red-500 font-bold' : (v > 0 ? 'text-green-400' : 'text-gray-600');
             
             const html = sorted.map((p, i) => `
-                <tr class="${i % 2 === 0 ? 'bg-white/[0.02]' : ''} hover:bg-gray-800 transition-colors">
-                    <td class="py-3 px-3 sticky left-0 bg-[#0a0a0a] group-hover:bg-gray-800 transition-colors z-10 border-r border-gray-800">
-                        <div class="flex items-center gap-3">
-                            <span class="font-mono text-gray-500 w-4 text-xs">${i+1}º</span>
-                            <div class="h-10 w-10 rounded-full overflow-hidden border border-gray-600 bg-gray-900 shrink-0">
+                <div class="player-row cursor-pointer" onclick="this.classList.toggle('active')">
+                    <div class="flex items-center p-3">
+                        <div class="w-12 text-center font-mono ${i<3 ? 'text-gold font-bold text-lg' : 'text-gray-500'}">${i+1}º</div>
+                        
+                        <div class="flex-grow flex items-center gap-3">
+                            <div class="h-10 w-10 rounded-full border border-gray-600 bg-gray-900 overflow-hidden shrink-0">
                                 <img src="${getFoto(p.nome)}" class="w-full h-full object-cover" onerror="${imgError}">
                             </div>
                             <div>
-                                <div class="font-bold text-gray-200 uppercase text-sm">${p.nome}</div>
-                                <span class="text-[10px] text-gold border border-gold/30 px-1 rounded bg-black/30 font-mono">${p.posicao}</span>
+                                <div class="font-bold text-gray-200 text-sm leading-tight">${p.nome}</div>
+                                <span class="text-[9px] text-gold border border-gold/30 px-1.5 rounded bg-black/30 font-mono">${p.posicao}</span>
                             </div>
                         </div>
-                    </td>
-                    <td class="text-center py-3 px-3 font-black text-2xl text-gold bg-gold/5 border-x border-gray-800 align-middle">${p.total}</td>
-                    <td class="text-center px-3 font-mono text-sm border-r border-gray-800/50 align-middle ${getCls(p.presenca)}">${p.presenca * REGRAS.presenca}</td>
-                    <td class="text-center px-3 font-mono text-sm border-r border-gray-800/50 align-middle ${getCls(p.pontual)}">${p.pontual * REGRAS.pontualidade}</td>
-                    <td class="text-center px-3 font-mono text-sm border-r border-gray-800/50 align-middle ${getCls(p.atraso)}">${p.atraso * REGRAS.atraso}</td>
-                    <td class="text-center px-3 font-bold text-sm border-r border-gray-800/50 align-middle text-gray-300">${(p.gols * REGRAS.gol) + (p.assis * REGRAS.assistencia)}</td>
-                    <td class="text-center px-3 font-mono text-sm border-r border-gray-800/50 align-middle ${getCls(p.clean)}">${p.clean * REGRAS.clean_sheet}</td>
-                    <td class="text-center px-3 font-mono text-sm border-r border-gray-800/50 align-middle ${getCls(p.vitoria)}">${p.vitoria * REGRAS.vitoria}</td>
-                    <td class="text-center px-3 font-mono text-sm border-r border-gray-800/50 align-middle ${getCls(p.cartao)}">${p.cartao * REGRAS.cartao}</td>
-                    <td class="text-center px-3 font-mono text-sm align-middle ${getCls(p.furo)}">${p.furo * REGRAS.furo}</td>
-                </tr>`).join('');
+                        
+                        <div class="w-16 text-center font-black text-xl text-gold">${p.total}</div>
+                        <div class="w-8 text-center text-gray-500 rotate-icon"><i class="fas fa-chevron-down"></i></div>
+                    </div>
+
+                    <div class="player-details px-4">
+                        <div class="grid grid-cols-4 gap-2 text-center mt-2 bg-gray-900/50 rounded-lg p-3 border border-gray-800">
+                            <div class="flex flex-col p-1 rounded hover:bg-white/5">
+                                <span class="text-[10px] text-gray-500 uppercase">Gols</span>
+                                <span class="font-bold text-white text-lg"><i class="fas fa-futbol text-white mr-1 text-xs"></i>${p.gols}</span>
+                            </div>
+                            <div class="flex flex-col p-1 rounded hover:bg-white/5">
+                                <span class="text-[10px] text-gray-500 uppercase">Assis</span>
+                                <span class="font-bold text-white text-lg"><i class="fas fa-shoe-prints text-gray-400 mr-1 text-xs"></i>${p.assis}</span>
+                            </div>
+                            <div class="flex flex-col p-1 rounded hover:bg-white/5">
+                                <span class="text-[10px] text-gray-500 uppercase">Vitórias</span>
+                                <span class="font-bold text-green-400 text-lg"><i class="fas fa-trophy text-green-500 mr-1 text-xs"></i>${p.vitoria}</span>
+                            </div>
+                            <div class="flex flex-col p-1 rounded hover:bg-white/5">
+                                <span class="text-[10px] text-gray-500 uppercase">SG</span>
+                                <span class="font-bold text-blue-400 text-lg"><i class="fas fa-shield-alt text-blue-500 mr-1 text-xs"></i>${p.clean}</span>
+                            </div>
+
+                            <div class="col-span-4 h-px bg-gray-800 my-1"></div>
+
+                            <div class="flex flex-col p-1">
+                                <span class="text-[9px] text-gray-500">Presença</span>
+                                <span class="font-mono text-gray-300">${p.presenca}</span>
+                            </div>
+                            <div class="flex flex-col p-1">
+                                <span class="text-[9px] text-gray-500">Pontual</span>
+                                <span class="font-mono text-blue-300">${p.pontual}</span>
+                            </div>
+                            <div class="flex flex-col p-1">
+                                <span class="text-[9px] text-gray-500">Atraso</span>
+                                <span class="font-mono text-yellow-500">${p.atraso}</span>
+                            </div>
+                            <div class="flex flex-col p-1">
+                                <span class="text-[9px] text-gray-500">Cartão</span>
+                                <span class="font-mono text-red-500">${p.cartao}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
             
-            document.getElementById('ranking-body').innerHTML = sorted.length ? html : `<tr><td colspan="12" class="text-center py-8 text-gray-500">Nenhum atleta encontrado.</td></tr>`;
+            document.getElementById('ranking-list').innerHTML = sorted.length ? html : `<div class="p-8 text-center text-gray-500">Nenhum atleta encontrado.</div>`;
         }
 
-        document.getElementById('search-input').addEventListener('keyup', (e) => renderTable(e.target.value));
+        document.getElementById('search-input').addEventListener('keyup', (e) => renderList(e.target.value));
         init();
     </script>
 </body>
