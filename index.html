@@ -149,9 +149,17 @@
         const FORMATO_FOTO = ".jpg";
         const FOTO_GENERICA = "https://cdn-icons-png.flaticon.com/512/847/847969.png";
 
+        // NOVAS REGRAS - PONTUAÇÃO REALISTA (MÁX ~30 PTS)
         const REGRAS = {
-            presenca: 10, pontualidade: 2, atraso: -2, clean_sheet: 5,
-            vitoria: 5, gol: 3, assistencia: 3, cartao: -2, furo: -10
+            presenca: 2,        // Valor baixo, apenas participação
+            pontualidade: 1,    // Bônus pequeno
+            atraso: -1,         // Punição leve
+            clean_sheet: 3,     // Defesa sólida vale +3 (apenas ZAG/GOL)
+            vitoria: 2,         // Como jogam muitas partidas, vitória vale 2
+            gol: 3,             // O gol continua valioso
+            assistencia: 2,     // Assistência vale um pouco menos
+            cartao: -2,         // Cartão tira quase um gol
+            furo: -5            // Punição por não ir
         };
 
         let allMatches = [];
