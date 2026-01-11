@@ -86,7 +86,7 @@
                 </div>
                 <div class="card-panel p-4 rounded-xl relative overflow-hidden group">
                     <div class="absolute right-0 top-0 p-3 opacity-10"><i class="fas fa-trophy text-6xl text-white"></i></div>
-                    <h2 class="text-lg text-gray-400 mb-3 flex items-center gap-2"><i class="fas fa-crown text-gold"></i> Qtd Vezes Craque</h2>
+                    <h2 class="text-lg text-gray-400 mb-3 flex items-center gap-2"><i class="fas fa-crown text-gold"></i> Craque da rordada</h2>
                     <div id="top-winner" class="space-y-2 relative z-10"></div>
                 </div>
             </section>
@@ -359,7 +359,7 @@
             const topTeam = [...dataWithPoints].filter(p => p.timeRodada > 0).sort((a,b) => b.timeRodada - a.timeRodada || b.total - a.total).slice(0, 5);
             document.getElementById('top-team').innerHTML = topTeam.length ? topTeam.map((p, i) => createRow(p, p.timeRodada, 'VEZES', i)).join('') : '<div class="text-xs text-gray-500">Sem dados</div>';
             
-            // Qtd Vezes Craque (> 0 vezes)
+            // Qtd Vezes Craque da rodada (> 0 vezes)
             const topWinner = [...dataWithPoints].filter(p => p.vencedorTimeRodada > 0).sort((a,b) => b.vencedorTimeRodada - a.vencedorTimeRodada || b.total - a.total).slice(0, 5);
             document.getElementById('top-winner').innerHTML = topWinner.length ? topWinner.map((p, i) => createRow(p, p.vencedorTimeRodada, 'VEZES', i)).join('') : '<div class="text-xs text-gray-500">Sem dados</div>';
         }
