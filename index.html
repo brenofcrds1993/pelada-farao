@@ -30,7 +30,7 @@
         /* Estilos Específicos para a Lista Expansível (Mobile) */
         .player-row { border-bottom: 1px solid #222; transition: background 0.2s; }
         .player-details { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out, padding 0.3s ease; background: #0a0a0a; }
-        .player-row.active .player-details { max-height: 500px; padding-bottom: 1rem; border-bottom: 1px solid var(--pharaoh-gold); }
+        .player-row.active .player-details { max-height: 800px; padding-bottom: 1rem; border-bottom: 1px solid var(--pharaoh-gold); }
         .player-row.active { background-color: rgba(255, 215, 0, 0.05); }
         .rotate-icon { transition: transform 0.3s; }
         .player-row.active .rotate-icon { transform: rotate(180deg); }
@@ -86,7 +86,7 @@
                 </div>
                 <div class="card-panel p-4 rounded-xl relative overflow-hidden group">
                     <div class="absolute right-0 top-0 p-3 opacity-10"><i class="fas fa-trophy text-6xl text-white"></i></div>
-                    <h2 class="text-lg text-gray-400 mb-3 flex items-center gap-2"><i class="fas fa-crown text-gold"></i> Campeão Rodada</h2>
+                    <h2 class="text-lg text-gray-400 mb-3 flex items-center gap-2"><i class="fas fa-crown text-gold"></i> Qtd Vezes Craque</h2>
                     <div id="top-winner" class="space-y-2 relative z-10"></div>
                 </div>
             </section>
@@ -116,7 +116,6 @@
                     <div class="p-3 bg-gray-900 border-b border-gray-800 flex justify-between text-xs text-gray-500 font-bold uppercase tracking-wider">
                         <span class="w-10 text-center">#</span>
                         <span class="flex-grow pl-2">Atleta</span>
-                        <span class="w-12 text-center text-red-500" title="Cartões"><i class="fas fa-square"></i></span>
                         <span class="w-16 text-center text-gold">PTS</span>
                         <span class="w-8 text-center"></span>
                     </div>
@@ -139,7 +138,7 @@
         // =================================================================
         
         // 👇👇 COLE O LINK CSV AQUI 👇👇
-        const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTQfAWxpKRn7PA9URd6u2tpPwEGOt_J-U4YrtbJOobjEjLISJOr7U0hQNCjJYbGO-9jAaeAbn8hW_dw/pub?gid=0&single=true&output=csv";
+        const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTQfAWxpKRn7PA9URd6u2tpPwEGOt_J-U4YrtbJOobjEjLISJOr7U0hQNCjJYbG0-9jAaeAbn8hW_dw/pub?gid=0&single=true&output=csv"; 
         // --------------------------------------------------
 
         const CAMINHO_FOTOS = "./fotos/";
@@ -231,8 +230,8 @@
                     clean: getVal('clean_sheet'),
                     cartao: getVal('cartao'),
                     furo: getVal('confirmou_e_naofoi'),
+                    gols_contra: getVal('gols_contra'), // NOVA COLUNA
                     timeRodada: (getStr('timerodada').toUpperCase() === 'S' ? 1 : 0),
-                    // NOVA COLUNA ADICIONADA: Vencedor Time Rodada
                     vencedorTimeRodada: (getStr('vencedor_time_rodada').toUpperCase() === 'S' ? 1 : 0)
                 };
                 allMatches.push(match);
@@ -244,14 +243,14 @@
             const map = {};
             matchesList.forEach(m => {
                 if(!map[m.nome]) {
-                    map[m.nome] = { ...m, gols:0, assis:0, vitoria:0, presenca:0, pontual:0, atraso:0, clean:0, cartao:0, furo:0, timeRodada:0, vencedorTimeRodada:0 };
+                    map[m.nome] = { ...m, gols:0, assis:0, vitoria:0, presenca:0, pontual:0, atraso:0, clean:0, cartao:0, furo:0, gols_contra:0, timeRodada:0, vencedorTimeRodada:0 };
                 }
                 const p = map[m.nome];
                 p.gols += m.gols; p.assis += m.assis; p.vitoria += m.vitoria;
                 p.presenca += m.presenca; p.pontual += m.pontual; p.atraso += m.atraso;
                 p.clean += m.clean; p.cartao += m.cartao; p.furo += m.furo;
+                p.gols_contra += m.gols_contra;
                 p.timeRodada += m.timeRodada;
-                // Agrega a nova coluna
                 p.vencedorTimeRodada += m.vencedorTimeRodada;
             });
             return Object.values(map);
@@ -304,12 +303,18 @@
         // =================================================================
         // RENDERIZAÇÃO
         // =================================================================
-        function getFoto(nome) { return `${CAMINHO_FOTOS}${nome.toLowerCase().trim()}${FORMATO_FOTO}`; }
+        function getFoto(nome) { 
+            let cleanName = nome.toLowerCase().trim();
+            // CORREÇÃO ESPECÍFICA PARA MÓVEL
+            if(cleanName === "movel") cleanName = "móvel";
+            
+            return `${CAMINHO_FOTOS}${cleanName}${FORMATO_FOTO}`; 
+        }
         const imgError = `this.onerror=null; this.src='${FOTO_GENERICA}';`;
 
         function renderDashboard() {
-            renderTopLists(); // RENDERIZA OS TOP CARDS
-            renderList();     // RENDERIZA A LISTA EXPANSÍVEL
+            renderTopLists(); 
+            renderList();    
             
             const latestMonth = getLatestMonth();
             if(latestMonth) {
@@ -320,9 +325,8 @@
             }
         }
 
-        // FUNÇÃO ATUALIZADA: AGORA RENDERIZA 4 CARDS
+        // FUNÇÃO TOP LISTS (COM FILTRO > 0)
         function renderTopLists() {
-            // Calcula pontos para critério de desempate
             const dataWithPoints = globalAggregated.map(p => ({...p, total: calcPoints(p)}));
 
             const createRow = (p, value, label, index) => {
@@ -343,24 +347,24 @@
                 `;
             };
 
-            // Artilheiros
-            const topGols = [...dataWithPoints].sort((a,b) => b.gols - a.gols || b.total - a.total).slice(0, 5);
-            document.getElementById('top-scorers').innerHTML = topGols.map((p, i) => createRow(p, p.gols, 'GOLS', i)).join('');
+            // Artilheiros (> 0 gols)
+            const topGols = [...dataWithPoints].filter(p => p.gols > 0).sort((a,b) => b.gols - a.gols || b.total - a.total).slice(0, 5);
+            document.getElementById('top-scorers').innerHTML = topGols.length ? topGols.map((p, i) => createRow(p, p.gols, 'GOLS', i)).join('') : '<div class="text-xs text-gray-500">Sem dados</div>';
 
-            // Assistentes
-            const topAssis = [...dataWithPoints].sort((a,b) => b.assis - a.assis || b.total - a.total).slice(0, 5);
-            document.getElementById('top-assists').innerHTML = topAssis.map((p, i) => createRow(p, p.assis, 'ASS', i)).join('');
+            // Assistentes (> 0 assis)
+            const topAssis = [...dataWithPoints].filter(p => p.assis > 0).sort((a,b) => b.assis - a.assis || b.total - a.total).slice(0, 5);
+            document.getElementById('top-assists').innerHTML = topAssis.length ? topAssis.map((p, i) => createRow(p, p.assis, 'ASS', i)).join('') : '<div class="text-xs text-gray-500">Sem dados</div>';
 
-            // Time da Rodada
-            const topTeam = [...dataWithPoints].sort((a,b) => b.timeRodada - a.timeRodada || b.total - a.total).slice(0, 5);
-            document.getElementById('top-team').innerHTML = topTeam.map((p, i) => createRow(p, p.timeRodada, 'VEZES', i)).join('');
+            // Time da Rodada (> 0 vezes)
+            const topTeam = [...dataWithPoints].filter(p => p.timeRodada > 0).sort((a,b) => b.timeRodada - a.timeRodada || b.total - a.total).slice(0, 5);
+            document.getElementById('top-team').innerHTML = topTeam.length ? topTeam.map((p, i) => createRow(p, p.timeRodada, 'VEZES', i)).join('') : '<div class="text-xs text-gray-500">Sem dados</div>';
             
-            // NOVO: Vencedor Time Rodada
-            const topWinner = [...dataWithPoints].sort((a,b) => b.vencedorTimeRodada - a.vencedorTimeRodada || b.total - a.total).slice(0, 5);
-            document.getElementById('top-winner').innerHTML = topWinner.map((p, i) => createRow(p, p.vencedorTimeRodada, 'VEZES', i)).join('');
+            // Qtd Vezes Craque (> 0 vezes)
+            const topWinner = [...dataWithPoints].filter(p => p.vencedorTimeRodada > 0).sort((a,b) => b.vencedorTimeRodada - a.vencedorTimeRodada || b.total - a.total).slice(0, 5);
+            document.getElementById('top-winner').innerHTML = topWinner.length ? topWinner.map((p, i) => createRow(p, p.vencedorTimeRodada, 'VEZES', i)).join('') : '<div class="text-xs text-gray-500">Sem dados</div>';
         }
 
-        // RENDERIZAÇÃO DA SELEÇÃO
+        // RENDERIZAÇÃO DA SELEÇÃO (GOLEIRO SEM PONTOS)
         function renderSelection(targetMonth) {
             const monthlyMatches = allMatches.filter(m => getMonthKey(m.data) === targetMonth);
             const monthlyStats = aggregateData(monthlyMatches);
@@ -380,15 +384,21 @@
                          <img src="${getFoto(p.nome)}" class="w-full h-full object-cover" onerror="${imgError}">
                     </div>
                     <div class="text-lg font-bold text-white font-['Teko'] z-10 leading-none">${p.nome}</div>
+                    ${p.posicao !== 'GOL' ? `
                     <div class="text-xl font-black text-gold z-10 leading-none mt-1">${p.total} <span class="text-[8px] text-gray-500 font-normal">PTS</span></div>
+                    ` : '<div class="h-6"></div>'} 
                 </div>
             `).join('');
             document.getElementById('selection-grid').innerHTML = html;
         }
 
-        // RENDERIZAÇÃO DA LISTA EXPANSÍVEL (ATUALIZADA COM COLUNA CARTÃO)
+        // RENDERIZAÇÃO DA LISTA (SEM GOLEIRO + EXTRATO DETALHADO)
         function renderList(searchTerm = "") {
             let processed = globalAggregated.map(p => ({...p, total: calcPoints(p)}));
+            
+            // FILTRA GOLEIROS FORA DO RANKING
+            processed = processed.filter(p => p.posicao !== 'GOL');
+
             if (searchTerm) {
                 const term = searchTerm.toLowerCase();
                 processed = processed.filter(p => p.nome.toLowerCase().includes(term) || p.posicao.toLowerCase().includes(term));
@@ -410,50 +420,50 @@
                             </div>
                         </div>
                         
-                        <div class="w-12 text-center font-bold text-red-500 text-sm">
-                            ${p.cartao > 0 ? `<i class="fas fa-square mr-1 text-[10px]"></i>${p.cartao}` : '<span class="text-gray-700">-</span>'}
-                        </div>
-
                         <div class="w-16 text-center font-black text-xl text-gold">${p.total}</div>
                         <div class="w-8 text-center text-gray-500 rotate-icon"><i class="fas fa-chevron-down"></i></div>
                     </div>
 
                     <div class="player-details px-4">
-                        <div class="grid grid-cols-4 gap-2 text-center mt-2 bg-gray-900/50 rounded-lg p-3 border border-gray-800">
-                            <div class="flex flex-col p-1 rounded hover:bg-white/5">
-                                <span class="text-[10px] text-gray-500 uppercase">Gols</span>
-                                <span class="font-bold text-white text-lg"><i class="fas fa-futbol text-white mr-1 text-xs"></i>${p.gols}</span>
-                            </div>
-                            <div class="flex flex-col p-1 rounded hover:bg-white/5">
-                                <span class="text-[10px] text-gray-500 uppercase">Assis</span>
-                                <span class="font-bold text-white text-lg"><i class="fas fa-shoe-prints text-gray-400 mr-1 text-xs"></i>${p.assis}</span>
-                            </div>
-                            <div class="flex flex-col p-1 rounded hover:bg-white/5">
-                                <span class="text-[10px] text-gray-500 uppercase">Vitórias</span>
-                                <span class="font-bold text-green-400 text-lg"><i class="fas fa-trophy text-green-500 mr-1 text-xs"></i>${p.vitoria}</span>
-                            </div>
-                            <div class="flex flex-col p-1 rounded hover:bg-white/5">
-                                <span class="text-[10px] text-gray-500 uppercase">SG</span>
-                                <span class="font-bold text-blue-400 text-lg"><i class="fas fa-shield-alt text-blue-500 mr-1 text-xs"></i>${p.clean}</span>
-                            </div>
+                        
+                        <div class="text-[10px] text-gray-500 font-bold uppercase mb-2 tracking-widest border-b border-gray-800 pb-1">Extrato de Pontos</div>
+                        <div class="grid grid-cols-2 gap-2 text-xs mb-4">
+                             <div class="space-y-1">
+                                <div class="flex justify-between text-green-400"><span>✅ Presença (${p.presenca}x)</span> <span>+${p.presenca * REGRAS.presenca}</span></div>
+                                ${p.gols > 0 ? `<div class="flex justify-between text-gray-300"><span>⚽ Gols (${p.gols}x)</span> <span class="text-gold">+${p.gols * REGRAS.gol}</span></div>` : ''}
+                                ${p.assis > 0 ? `<div class="flex justify-between text-gray-300"><span>👟 Assis (${p.assis}x)</span> <span class="text-gold">+${p.assis * REGRAS.assistencia}</span></div>` : ''}
+                                ${p.vitoria > 0 ? `<div class="flex justify-between text-gray-300"><span>✌️ Vitórias (${p.vitoria}x)</span> <span class="text-gold">+${p.vitoria * REGRAS.vitoria}</span></div>` : ''}
+                                ${p.clean > 0 ? `<div class="flex justify-between text-gray-300"><span>🛡️ SG (${p.clean}x)</span> <span class="text-gold">+${p.clean * REGRAS.clean_sheet}</span></div>` : ''}
+                                ${p.pontual > 0 ? `<div class="flex justify-between text-gray-300"><span>⏰ Pontual (${p.pontual}x)</span> <span class="text-gold">+${p.pontual * REGRAS.pontualidade}</span></div>` : ''}
+                             </div>
+                             <div class="space-y-1">
+                                ${p.atraso > 0 ? `<div class="flex justify-between text-red-400"><span>🐢 Atrasos (${p.atraso}x)</span> <span>${p.atraso * REGRAS.atraso}</span></div>` : ''}
+                                ${p.cartao > 0 ? `<div class="flex justify-between text-red-400"><span>🟨 Cartões (${p.cartao}x)</span> <span>${p.cartao * REGRAS.cartao}</span></div>` : ''}
+                                ${p.furo > 0 ? `<div class="flex justify-between text-red-600 font-bold"><span>❌ Furos (${p.furo}x)</span> <span>${p.furo * REGRAS.furo}</span></div>` : ''}
+                             </div>
+                        </div>
 
-                            <div class="col-span-4 h-px bg-gray-800 my-1"></div>
-
+                        <div class="text-[10px] text-gray-500 font-bold uppercase mb-2 tracking-widest border-b border-gray-800 pb-1">Estatísticas</div>
+                        <div class="grid grid-cols-4 gap-2 text-center bg-gray-900/50 rounded-lg p-3 border border-gray-800">
                             <div class="flex flex-col p-1">
-                                <span class="text-[9px] text-gray-500">Presença</span>
-                                <span class="font-mono text-gray-300">${p.presenca}</span>
+                                <span class="text-[9px] text-gray-500 uppercase">Gols</span>
+                                <span class="font-bold text-white">${p.gols}</span>
                             </div>
                             <div class="flex flex-col p-1">
-                                <span class="text-[9px] text-gray-500">Pontual</span>
-                                <span class="font-mono text-blue-300">${p.pontual}</span>
+                                <span class="text-[9px] text-gray-500 uppercase">Gols Contra</span>
+                                <span class="font-bold text-red-400">${p.gols_contra}</span>
                             </div>
                             <div class="flex flex-col p-1">
-                                <span class="text-[9px] text-gray-500">Atraso</span>
-                                <span class="font-mono text-yellow-500">${p.atraso}</span>
+                                <span class="text-[9px] text-gray-500 uppercase">Assis</span>
+                                <span class="font-bold text-white">${p.assis}</span>
                             </div>
                             <div class="flex flex-col p-1">
-                                <span class="text-[9px] text-gray-500">Cartão</span>
-                                <span class="font-mono text-red-500">${p.cartao}</span>
+                                <span class="text-[9px] text-gray-500 uppercase">SG</span>
+                                <span class="font-bold text-blue-400">${p.clean}</span>
+                            </div>
+                            <div class="flex flex-col p-1">
+                                <span class="text-[9px] text-gray-500 uppercase">Cartões</span>
+                                <span class="font-bold text-yellow-500">${p.cartao}</span>
                             </div>
                         </div>
                     </div>
