@@ -68,21 +68,26 @@
 
         <div id="dashboard-content" class="hidden space-y-12">
             
-            <section class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 animate-entry">
-                <div class="card-panel p-4 md:p-6 rounded-xl relative overflow-hidden group">
-                    <div class="absolute right-0 top-0 p-4 opacity-10"><i class="fas fa-futbol text-7xl md:text-8xl text-white"></i></div>
-                    <h2 class="text-xl md:text-2xl text-gray-400 mb-4 flex items-center gap-2"><i class="fas fa-crosshairs text-gold"></i> Artilharia</h2>
+            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-entry">
+                <div class="card-panel p-4 rounded-xl relative overflow-hidden group">
+                    <div class="absolute right-0 top-0 p-3 opacity-10"><i class="fas fa-futbol text-6xl text-white"></i></div>
+                    <h2 class="text-lg text-gray-400 mb-3 flex items-center gap-2"><i class="fas fa-crosshairs text-gold"></i> Artilharia</h2>
                     <div id="top-scorers" class="space-y-2 relative z-10"></div>
                 </div>
-                <div class="card-panel p-4 md:p-6 rounded-xl relative overflow-hidden group">
-                    <div class="absolute right-0 top-0 p-4 opacity-10"><i class="fas fa-shoe-prints text-7xl md:text-8xl text-white"></i></div>
-                    <h2 class="text-xl md:text-2xl text-gray-400 mb-4 flex items-center gap-2"><i class="fas fa-handshake text-gold"></i> Assistências</h2>
+                <div class="card-panel p-4 rounded-xl relative overflow-hidden group">
+                    <div class="absolute right-0 top-0 p-3 opacity-10"><i class="fas fa-shoe-prints text-6xl text-white"></i></div>
+                    <h2 class="text-lg text-gray-400 mb-3 flex items-center gap-2"><i class="fas fa-handshake text-gold"></i> Assistências</h2>
                     <div id="top-assists" class="space-y-2 relative z-10"></div>
                 </div>
-                <div class="card-panel p-4 md:p-6 rounded-xl relative overflow-hidden group">
-                    <div class="absolute right-0 top-0 p-4 opacity-10"><i class="fas fa-shield-alt text-7xl md:text-8xl text-white"></i></div>
-                    <h2 class="text-xl md:text-2xl text-gray-400 mb-4 flex items-center gap-2"><i class="fas fa-users text-gold"></i> Time da Rodada</h2>
+                <div class="card-panel p-4 rounded-xl relative overflow-hidden group">
+                    <div class="absolute right-0 top-0 p-3 opacity-10"><i class="fas fa-shield-alt text-6xl text-white"></i></div>
+                    <h2 class="text-lg text-gray-400 mb-3 flex items-center gap-2"><i class="fas fa-users text-gold"></i> Time da Rodada</h2>
                     <div id="top-team" class="space-y-2 relative z-10"></div>
+                </div>
+                <div class="card-panel p-4 rounded-xl relative overflow-hidden group">
+                    <div class="absolute right-0 top-0 p-3 opacity-10"><i class="fas fa-trophy text-6xl text-white"></i></div>
+                    <h2 class="text-lg text-gray-400 mb-3 flex items-center gap-2"><i class="fas fa-crown text-gold"></i> Campeão Rodada</h2>
+                    <div id="top-winner" class="space-y-2 relative z-10"></div>
                 </div>
             </section>
 
@@ -109,10 +114,12 @@
 
                 <div class="rounded-lg shadow-2xl border border-gray-800 bg-[#0f0f0f] overflow-hidden">
                     <div class="p-3 bg-gray-900 border-b border-gray-800 flex justify-between text-xs text-gray-500 font-bold uppercase tracking-wider">
-                        <span class="w-12 text-center">#</span>
+                        <span class="w-10 text-center">#</span>
                         <span class="flex-grow pl-2">Atleta</span>
+                        <span class="w-12 text-center text-red-500" title="Cartões"><i class="fas fa-square"></i></span>
                         <span class="w-16 text-center text-gold">PTS</span>
-                        <span class="w-8 text-center"></span> </div>
+                        <span class="w-8 text-center"></span>
+                    </div>
                     
                     <div id="ranking-list" class="divide-y divide-gray-800">
                         </div>
@@ -132,7 +139,7 @@
         // =================================================================
         
         // 👇👇 COLE O LINK CSV AQUI 👇👇
-        const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTQfAWxpKRn7PA9URd6u2tpPwEGOt_J-U4YrtbJOobjEjLISJOr7U0hQNCjJYbGO-9jAaeAbn8hW_dw/pub?gid=0&single=true&output=csv"; 
+        const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTQfAWxpKRn7PA9URd6u2tpPwEGOt_J-U4YrtbJOobjEjLISJOr7U0hQNCjJYbG0-9jAaeAbn8hW_dw/pub?gid=0&single=true&output=csv"; 
         // --------------------------------------------------
 
         const CAMINHO_FOTOS = "./fotos/";
@@ -224,7 +231,9 @@
                     clean: getVal('clean_sheet'),
                     cartao: getVal('cartao'),
                     furo: getVal('confirmou_e_naofoi'),
-                    timeRodada: (getStr('timerodada').toUpperCase() === 'S' ? 1 : 0)
+                    timeRodada: (getStr('timerodada').toUpperCase() === 'S' ? 1 : 0),
+                    // NOVA COLUNA ADICIONADA: Vencedor Time Rodada
+                    vencedorTimeRodada: (getStr('vencedor_time_rodada').toUpperCase() === 'S' ? 1 : 0)
                 };
                 allMatches.push(match);
             }
@@ -235,13 +244,15 @@
             const map = {};
             matchesList.forEach(m => {
                 if(!map[m.nome]) {
-                    map[m.nome] = { ...m, gols:0, assis:0, vitoria:0, presenca:0, pontual:0, atraso:0, clean:0, cartao:0, furo:0, timeRodada:0 };
+                    map[m.nome] = { ...m, gols:0, assis:0, vitoria:0, presenca:0, pontual:0, atraso:0, clean:0, cartao:0, furo:0, timeRodada:0, vencedorTimeRodada:0 };
                 }
                 const p = map[m.nome];
                 p.gols += m.gols; p.assis += m.assis; p.vitoria += m.vitoria;
                 p.presenca += m.presenca; p.pontual += m.pontual; p.atraso += m.atraso;
                 p.clean += m.clean; p.cartao += m.cartao; p.furo += m.furo;
                 p.timeRodada += m.timeRodada;
+                // Agrega a nova coluna
+                p.vencedorTimeRodada += m.vencedorTimeRodada;
             });
             return Object.values(map);
         }
@@ -297,7 +308,7 @@
         const imgError = `this.onerror=null; this.src='${FOTO_GENERICA}';`;
 
         function renderDashboard() {
-            renderTopLists(); // RENDERIZA OS TOP 5
+            renderTopLists(); // RENDERIZA OS TOP CARDS
             renderList();     // RENDERIZA A LISTA EXPANSÍVEL
             
             const latestMonth = getLatestMonth();
@@ -309,43 +320,47 @@
             }
         }
 
-        // FUNÇÃO RESTAURADA: RENDERIZA OS TOP 5
+        // FUNÇÃO ATUALIZADA: AGORA RENDERIZA 4 CARDS
         function renderTopLists() {
             // Calcula pontos para critério de desempate
             const dataWithPoints = globalAggregated.map(p => ({...p, total: calcPoints(p)}));
 
             const createRow = (p, value, label, index) => {
-                const colorClass = index === 0 ? "text-gold font-bold text-base md:text-lg" : "text-gray-300 text-sm md:text-base";
+                const colorClass = index === 0 ? "text-gold font-bold text-base" : "text-gray-300 text-sm";
                 return `
                     <div class="flex justify-between items-center py-2 border-b border-gray-800 last:border-0">
-                        <div class="flex items-center gap-2 md:gap-3">
-                            <span class="font-mono text-gray-600 w-4 text-xs md:text-sm">${index + 1}.</span>
-                            <div class="h-6 w-6 md:h-8 md:w-8 rounded-full overflow-hidden border border-gray-700 bg-gray-900">
+                        <div class="flex items-center gap-2">
+                            <span class="font-mono text-gray-600 w-4 text-xs">${index + 1}.</span>
+                            <div class="h-6 w-6 rounded-full overflow-hidden border border-gray-700 bg-gray-900 shrink-0">
                                 <img src="${getFoto(p.nome)}" class="w-full h-full object-cover" onerror="${imgError}">
                             </div>
-                            <span class="${colorClass} truncate">${p.nome}</span>
+                            <span class="${colorClass} truncate max-w-[80px] md:max-w-none">${p.nome}</span>
                         </div>
-                        <div class="font-mono font-bold text-white bg-gray-800 px-2 rounded text-xs md:text-sm">
-                            ${value} <span class="text-[10px] md:text-xs text-gray-500 font-normal">${label}</span>
+                        <div class="font-mono font-bold text-white bg-gray-800 px-2 rounded text-xs">
+                            ${value} <span class="text-[10px] text-gray-500 font-normal">${label}</span>
                         </div>
                     </div>
                 `;
             };
 
-            // Artilheiros (Desempate por total de pontos)
+            // Artilheiros
             const topGols = [...dataWithPoints].sort((a,b) => b.gols - a.gols || b.total - a.total).slice(0, 5);
             document.getElementById('top-scorers').innerHTML = topGols.map((p, i) => createRow(p, p.gols, 'GOLS', i)).join('');
 
-            // Assistentes (Desempate por total de pontos)
+            // Assistentes
             const topAssis = [...dataWithPoints].sort((a,b) => b.assis - a.assis || b.total - a.total).slice(0, 5);
             document.getElementById('top-assists').innerHTML = topAssis.map((p, i) => createRow(p, p.assis, 'ASS', i)).join('');
 
-            // Time da Rodada (Desempate por total de pontos)
+            // Time da Rodada
             const topTeam = [...dataWithPoints].sort((a,b) => b.timeRodada - a.timeRodada || b.total - a.total).slice(0, 5);
             document.getElementById('top-team').innerHTML = topTeam.map((p, i) => createRow(p, p.timeRodada, 'VEZES', i)).join('');
+            
+            // NOVO: Vencedor Time Rodada
+            const topWinner = [...dataWithPoints].sort((a,b) => b.vencedorTimeRodada - a.vencedorTimeRodada || b.total - a.total).slice(0, 5);
+            document.getElementById('top-winner').innerHTML = topWinner.map((p, i) => createRow(p, p.vencedorTimeRodada, 'VEZES', i)).join('');
         }
 
-        // RENDERIZAÇÃO DA SELEÇÃO (Mantida)
+        // RENDERIZAÇÃO DA SELEÇÃO
         function renderSelection(targetMonth) {
             const monthlyMatches = allMatches.filter(m => getMonthKey(m.data) === targetMonth);
             const monthlyStats = aggregateData(monthlyMatches);
@@ -371,7 +386,7 @@
             document.getElementById('selection-grid').innerHTML = html;
         }
 
-        // RENDERIZAÇÃO DA LISTA EXPANSÍVEL (Mantida)
+        // RENDERIZAÇÃO DA LISTA EXPANSÍVEL (ATUALIZADA COM COLUNA CARTÃO)
         function renderList(searchTerm = "") {
             let processed = globalAggregated.map(p => ({...p, total: calcPoints(p)}));
             if (searchTerm) {
@@ -383,7 +398,7 @@
             const html = sorted.map((p, i) => `
                 <div class="player-row cursor-pointer" onclick="this.classList.toggle('active')">
                     <div class="flex items-center p-3">
-                        <div class="w-12 text-center font-mono ${i<3 ? 'text-gold font-bold text-lg' : 'text-gray-500'}">${i+1}º</div>
+                        <div class="w-10 text-center font-mono ${i<3 ? 'text-gold font-bold text-lg' : 'text-gray-500'}">${i+1}º</div>
                         
                         <div class="flex-grow flex items-center gap-3">
                             <div class="h-10 w-10 rounded-full border border-gray-600 bg-gray-900 overflow-hidden shrink-0">
@@ -395,6 +410,10 @@
                             </div>
                         </div>
                         
+                        <div class="w-12 text-center font-bold text-red-500 text-sm">
+                            ${p.cartao > 0 ? `<i class="fas fa-square mr-1 text-[10px]"></i>${p.cartao}` : '<span class="text-gray-700">-</span>'}
+                        </div>
+
                         <div class="w-16 text-center font-black text-xl text-gold">${p.total}</div>
                         <div class="w-8 text-center text-gray-500 rotate-icon"><i class="fas fa-chevron-down"></i></div>
                     </div>
