@@ -94,8 +94,8 @@
             <section class="animate-entry" style="animation-delay: 0.2s;">
                 <div class="flex items-center justify-between mb-4">
                     <div>
-                        <h2 class="text-2xl md:text-4xl text-white border-l-4 border-gold pl-3">SELEÇÃO DA TEMPORADA</h2>
-                        <span class="ml-3 text-[10px] md:text-xs text-gold font-mono uppercase border border-gold/30 px-2 py-1 rounded bg-black/50">TOP 6 GERAL</span>
+                        <h2 class="text-2xl md:text-4xl text-white border-l-4 border-gold pl-3">SELEÇÃO DO ANO</h2>
+                        <span class="ml-3 text-[10px] md:text-xs text-gold font-mono uppercase border border-gold/30 px-2 py-1 rounded bg-black/50">2 ZAG • 2 MEI • 2 ATA</span>
                     </div>
                 </div>
                 <div class="overflow-x-auto pb-4 -mx-4 px-4 md:mx-0 md:px-0">
@@ -146,17 +146,19 @@
         let globalData = [];
 
         // =================================================================
-        // CONEXÃO
+        // CONEXÃO E PROCESSAMENTO
         // =================================================================
         async function init() {
             const errorMsg = document.getElementById('error-message');
             
             try {
-                const response = await fetch(SHEET_URL);
+                // Forçamos o uso do TSV para evitar bugs com as vírgulas decimais do Excel Brasileiro
+                const fetchUrl = SHEET_URL.replace('output=csv', 'output=tsv');
+                const response = await fetch(fetchUrl);
                 const txt = await response.text();
 
                 if(txt.trim().startsWith("<!DOCTYPE") || txt.trim().startsWith("<html")) {
-                    throw new Error("Link incorreto! Use o link CSV.");
+                    throw new Error("Link incorreto! Verifique a publicação da planilha.");
                 }
 
                 processData(txt);
@@ -176,30 +178,19 @@
             }
         }
 
-        // Função nativa para interpretar CSV e lidar corretamente com aspas e vírgulas (Ex: "26,40")
-        function parseCSV(str) {
-            const arr = [];
-            let quote = false;
-            let row = 0, col = 0;
-            for (let c = 0; c < str.length; c++) {
-                let cc = str[c], nc = str[c+1];
-                arr[row] = arr[row] || [];
-                arr[row][col] = arr[row][col] || '';
-
-                if (cc == '"' && quote && nc == '"') { arr[row][col] += cc; ++c; continue; }
-                if (cc == '"') { quote = !quote; continue; }
-                if (cc == ',' && !quote) { ++col; continue; }
-                if (cc == '\r' && nc == '\n' && !quote) { ++row; col = 0; ++c; continue; }
-                if (cc == '\n' && !quote) { ++row; col = 0; continue; }
-                if (cc == '\r' && !quote) { ++row; col = 0; continue; }
-
-                arr[row][col] += cc;
-            }
-            return arr;
+        // Função para classificar a posição baseada no texto da sua planilha
+        function normalizePos(pos) {
+            if (!pos) return 'MEI'; 
+            pos = pos.toLowerCase();
+            if(pos.includes('zaga') || pos.includes('zag') || pos.includes('def')) return 'ZAG';
+            if(pos.includes('meio') || pos.includes('mei') || pos.includes('mid')) return 'MEI';
+            if(pos.includes('ataque') || pos.includes('ata') || pos.includes('atq')) return 'ATA';
+            return 'MEI';
         }
 
-        function processData(csvText) {
-            const rows = parseCSV(csvText);
+        function processData(tsvText) {
+            // Divide as linhas e depois as colunas pelo caracter 'TAB' (\t)
+            const rows = tsvText.trim().split('\n').map(r => r.split('\t'));
             const headers = rows[0].map(h => h.trim().toLowerCase());
             
             globalData = [];
@@ -215,7 +206,7 @@
                     if(idx === -1) return 0;
                     
                     let val = row[idx] ? row[idx].trim() : "0";
-                    val = val.replace(',', '.'); 
+                    val = val.replace(',', '.'); // Converte "26,40" para "26.40"
                     return Number(val) || 0;
                 };
 
@@ -228,9 +219,9 @@
                 const nome = getStr('atleta'); 
                 if(!nome) continue;
 
-                // Lê EXATAMENTE como está na planilha, sem agregar ou somar nada
                 const match = {
                     nome: nome,
+                    posicao: normalizePos(getStr('posição') || getStr('posicao')),
                     gols: getVal('gols'), 
                     assis: getVal('assistências'), 
                     presenca: getVal('quantidade partidas'), 
@@ -296,20 +287,33 @@
         }
 
         function renderSelection() {
-            // Como a planilha é geral, pegamos o TOP 6 absoluto
-            const selecao = [...globalData].sort((a,b) => b.total - a.total).slice(0, 6);
+            const data = [...globalData];
+
+            // Busca os melhores por posição baseando-se na pontuação total
+            const getBest = (pos, count) => {
+                return data.filter(p => p.posicao === pos).sort((a,b) => b.total - a.total).slice(0, count);
+            };
+
+            // Seleção de Ouro: 2 Zagueiros, 2 Meias e 2 Atacantes
+            const zagueiros = getBest('ZAG', 2);
+            const meias = getBest('MEI', 2);
+            const atacantes = getBest('ATA', 2);
+            
+            const selecao = [...zagueiros, ...meias, ...atacantes];
 
             const html = selecao.map(p => `
                 <div class="card-panel rounded-lg p-3 flex flex-col items-center justify-center relative overflow-hidden min-w-[140px] flex-shrink-0 md:flex-shrink">
                     <div class="absolute inset-0 bg-gold/5 opacity-0 hover:opacity-100 transition duration-500"></div>
-                    <div class="w-20 h-20 rounded-full border-2 border-gold shadow-lg overflow-hidden mb-2 z-10 bg-gray-900 mt-2">
+                    <div class="text-[10px] font-mono text-gold mb-2 border border-gold/30 px-2 rounded-full bg-black z-10">${p.posicao}</div>
+                    <div class="w-20 h-20 rounded-full border-2 border-gold shadow-lg overflow-hidden mb-2 z-10 bg-gray-900">
                          <img src="${getFoto(p.nome)}" class="w-full h-full object-cover" onerror="${imgError}">
                     </div>
                     <div class="text-xl font-bold text-white font-['Teko'] z-10 leading-none">${p.nome}</div>
                     <div class="text-xl font-black text-gold z-10 leading-none mt-1">${p.total} <span class="text-[8px] text-gray-500 font-normal">PTS</span></div>
                 </div>
             `).join('');
-            document.getElementById('selection-grid').innerHTML = html;
+            
+            document.getElementById('selection-grid').innerHTML = html ? html : `<div class="p-4 text-xs text-gray-500 w-full text-center col-span-6">Verifique a coluna Posição.</div>`;
         }
 
         function renderList(searchTerm = "") {
@@ -333,6 +337,7 @@
 
                             <div>
                                 <div class="font-black text-gray-100 text-2xl md:text-3xl leading-tight tracking-wider uppercase font-['Teko']">${p.nome}</div>
+                                <span class="text-[10px] text-gold border border-gold/30 px-1.5 rounded bg-black/30 font-mono">${p.posicao}</span>
                             </div>
                         </div>
                         <div class="w-20 text-center font-black text-3xl md:text-4xl text-gold">${p.total}</div>
