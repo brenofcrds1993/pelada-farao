@@ -137,8 +137,8 @@
         // CONFIGURAÇÕES
         // =================================================================
         
-        // 👇👇 COLE O LINK CSV AQUI 👇👇
-        const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTQfAWxpKRn7PA9URd6u2tpPwEGOt_J-U4YrtbJOobjEjLISJOr7U0hQNCjJYbGO-9jAaeAbn8hW_dw/pub?gid=0&single=true&output=csv"; 
+        // NOVA URL DO CSV
+        const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTPAKd_MA4c6oerk1D4nIoykmE09zh_Ff3adKHiw-ByR9XVfkXKXhR7BnVZvpGObFyhRiRhkreZSI7T/pub?gid=1503533834&single=true&output=csv"; 
         // --------------------------------------------------
 
         const CAMINHO_FOTOS = "./fotos/";
@@ -147,7 +147,7 @@
 
         const REGRAS = {
             presenca: 5, pontualidade: 2, atraso: -1, clean_sheet: 3,
-            vitoria: 2, gol: 3, assistencia: 2, cartao: -2, furo: -10
+            vitoria: 3, gol: 3, assistencia: 2, cartao: -2, furo: -10
         };
 
         let allMatches = [];
@@ -214,27 +214,28 @@
                     return (idx !== -1 && row[idx]) ? row[idx].replaceAll('"', '').trim() : "";
                 };
 
-                const nome = getStr('nomeatleta');
+                // Lógica de mapeamento ajustada para as colunas da nova planilha
+                const nome = getStr('atleta'); 
                 if(!nome) continue;
 
                 const match = {
-                    data: getStr('data'),
+                    data: getStr('data'), // Se a planilha não tiver data, as funções retornarão string vazia
                     nome: nome,
-                    posicao: normalizePos(getStr('posicao')),
-                    gols: getVal('qtdgols'),
-                    assis: getVal('qtdassistencias'),
-                    vitoria: getVal('qtdvitorias'),
-                    presenca: getVal('presenca'),
-                    pontual: getVal('chegou_nahora'),
-                    atraso: getVal('chegou_atrasado'),
-                    clean: getVal('clean_sheet'),
-                    cartao: getVal('cartao'),
-                    furo: getVal('confirmou_e_naofoi'),
-                    gols_contra: getVal('gols_contra'),
+                    posicao: normalizePos(getStr('posicao')), // Se não houver, adotará MEI como padrão
+                    gols: getVal('gols'), 
+                    assis: getVal('assist'), 
+                    vitoria: getVal('vitoria'), 
+                    presenca: getVal('quantidade partidas'), 
+                    pontual: getVal('pontualidade'), 
+                    atraso: getVal('atrasos'), 
+                    clean: getVal('clean_sheet'), 
+                    cartao: getVal('cart'), 
+                    furo: getVal('furo'), 
+                    gols_contra: getVal('gols contra'), 
                     
-                    // AQUI ESTÁ A CORREÇÃO: LÊ DUAS COLUNAS DIFERENTES
-                    timeRodada: (getStr('timerodada').toUpperCase() === 'S' ? 1 : 0), // Coluna antiga
-                    craqueRodada: (getStr('vencedor_melhor_rodada').toUpperCase() === 'S' ? 1 : 0) // Coluna nova
+                    // Lendo diretamente os valores (já chegam somados)
+                    timeRodada: getVal('time da rodada'),
+                    craqueRodada: getVal('craque da rodada')
                 };
                 allMatches.push(match);
             }
@@ -245,7 +246,6 @@
             const map = {};
             matchesList.forEach(m => {
                 if(!map[m.nome]) {
-                    // Inicializa as variáveis, incluindo a nova craqueRodada
                     map[m.nome] = { ...m, gols:0, assis:0, vitoria:0, presenca:0, pontual:0, atraso:0, clean:0, cartao:0, furo:0, gols_contra:0, timeRodada:0, craqueRodada:0 };
                 }
                 const p = map[m.nome];
@@ -254,8 +254,8 @@
                 p.clean += m.clean; p.cartao += m.cartao; p.furo += m.furo;
                 p.gols_contra += m.gols_contra;
                 
-                p.timeRodada += m.timeRodada;   // Soma Time da Rodada
-                p.craqueRodada += m.craqueRodada; // Soma Craque da Rodada
+                p.timeRodada += m.timeRodada;   
+                p.craqueRodada += m.craqueRodada; 
             });
             return Object.values(map);
         }
@@ -323,7 +323,7 @@
                 document.getElementById('month-label').innerText = getMonthName(latestMonth);
                 renderSelection(latestMonth);
             } else {
-                document.getElementById('month-label').innerText = "SEM DADOS";
+                document.getElementById('month-label').innerText = "GERAL / SEM DADOS MENSAIS";
             }
         }
 
@@ -348,19 +348,15 @@
                 `;
             };
 
-            // 1. Artilheiros (> 0)
             const topGols = [...dataWithPoints].filter(p => p.gols > 0).sort((a,b) => b.gols - a.gols || b.total - a.total).slice(0, 5);
             document.getElementById('top-scorers').innerHTML = topGols.length ? topGols.map((p, i) => createRow(p, p.gols, 'GOLS', i)).join('') : '<div class="text-xs text-gray-500">Sem dados</div>';
 
-            // 2. Assistentes (> 0)
             const topAssis = [...dataWithPoints].filter(p => p.assis > 0).sort((a,b) => b.assis - a.assis || b.total - a.total).slice(0, 5);
             document.getElementById('top-assists').innerHTML = topAssis.length ? topAssis.map((p, i) => createRow(p, p.assis, 'ASS', i)).join('') : '<div class="text-xs text-gray-500">Sem dados</div>';
 
-            // 3. Time da Rodada (> 0) - USA A VARIÁVEL timeRodada
             const topTeam = [...dataWithPoints].filter(p => p.timeRodada > 0).sort((a,b) => b.timeRodada - a.timeRodada || b.total - a.total).slice(0, 5);
             document.getElementById('top-team').innerHTML = topTeam.length ? topTeam.map((p, i) => createRow(p, p.timeRodada, 'VEZES', i)).join('') : '<div class="text-xs text-gray-500">Sem dados</div>';
             
-            // 4. Qtd Vezes Craque (> 0) - USA A NOVA VARIÁVEL craqueRodada
             const topWinner = [...dataWithPoints].filter(p => p.craqueRodada > 0).sort((a,b) => b.craqueRodada - a.craqueRodada || b.total - a.total).slice(0, 5);
             document.getElementById('top-winner').innerHTML = topWinner.length ? topWinner.map((p, i) => createRow(p, p.craqueRodada, 'VEZES', i)).join('') : '<div class="text-xs text-gray-500">Sem dados</div>';
         }
@@ -395,7 +391,6 @@
         function renderList(searchTerm = "") {
             let processed = globalAggregated.map(p => ({...p, total: calcPoints(p)}));
             
-            // Remove Goleiros do Ranking Geral
             processed = processed.filter(p => p.posicao !== 'GOL');
 
             if (searchTerm) {
