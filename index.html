@@ -1,398 +1,568 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pelada do Faraó - Ranking Ao Vivo</title>
-    
+    <title>JOGADATA | REVISTA DIGITAL FARAÓ - FEV 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@300;400;600;700&family=Roboto:wght@400;500;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* CONFIGURAÇÕES VISUAIS */
-        :root { --pharaoh-black: #050505; --pharaoh-gold: #FFD700; --text-white: #ffffff; }
-        body { background-color: var(--pharaoh-black); color: var(--text-white); font-family: 'Roboto', sans-serif; 
-               background-image: linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.95)), url('https://www.transparenttextures.com/patterns/cubes.png'); }
-        h1, h2, th, .font-teko { font-family: 'Teko', sans-serif; text-transform: uppercase; }
-        .text-gold { color: var(--pharaoh-gold); }
-        .bg-gold { background-color: var(--pharaoh-gold); color: black; }
+        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Inter:wght@300;400;700;900&display=swap');
         
-        .card-panel { background: linear-gradient(145deg, #0f0f0f, #0a0a0a); border: 1px solid #222; border-top: 3px solid var(--pharaoh-gold); transition: transform 0.3s ease; }
-        .card-panel:hover { transform: translateY(-5px); border-color: var(--pharaoh-gold); }
+        :root {
+            --farao-yellow: #FFD700;
+            --farao-black: #050505;
+            --farao-card: #111111;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--farao-black); 
+            color: #ffffff; 
+            scroll-behavior: smooth;
+        }
+
+        h1, h2, h3, h4 { font-family: 'Oswald', sans-serif; text-transform: uppercase; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: var(--farao-yellow); border-radius: 10px; }
+
+        /* Magazine Layout Utils */
+        .page-container { max-width: 500px; margin: 0 auto; }
+        .magazine-page { min-height: 100vh; padding: 2.5rem 1.5rem; border-bottom: 2px solid #222; display: flex; flex-direction: column; }
+        .farao-border { border-left: 6px solid var(--farao-yellow); padding-left: 1rem; }
+        .card-atleta { background: var(--farao-card); border: 1px solid #222; border-radius: 1rem; transition: 0.3s; }
+        .text-farao { color: var(--farao-yellow); }
+        .bg-farao { background-color: var(--farao-yellow); }
         
-        /* Loader */
-        .loader { border: 3px solid #333; border-top: 3px solid var(--pharaoh-gold); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; display: inline-block; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-entry { animation: slideIn 0.6s ease-out forwards; }
-        
-        /* Estilos Específicos para a Lista Expansível */
-        .player-row { border-bottom: 1px solid #222; transition: background 0.2s; }
-        .player-details { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out, padding 0.3s ease; background: #0a0a0a; }
-        .player-row.active .player-details { max-height: 800px; padding-bottom: 1rem; border-bottom: 1px solid var(--pharaoh-gold); }
-        .player-row.active { background-color: rgba(255, 215, 0, 0.05); }
-        .rotate-icon { transition: transform 0.3s; }
-        .player-row.active .rotate-icon { transform: rotate(180deg); }
+        .dropcap::first-letter {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: var(--farao-yellow);
+            float: left;
+            margin-right: 10px;
+            line-height: 1;
+        }
+
+        .stat-badge {
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid var(--farao-yellow);
+            color: var(--farao-yellow);
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body>
 
-    <header class="border-b border-gray-800 bg-black/80 backdrop-blur-md sticky top-0 z-50">
-        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <div class="h-14 w-14 md:h-16 md:w-16 bg-gray-900 rounded-full border-2 border-gold flex items-center justify-center overflow-hidden shadow-[0_0_15px_rgba(255,215,0,0.4)]">
-                    <img src="logo_farao.png" alt="Logo" class="w-full h-full object-contain">
+<div class="page-container">
+
+    <section class="magazine-page justify-center text-center">
+        <div class="mb-10">
+            <h4 class="tracking-[0.5em] text-farao font-bold text-xs mb-4">DATA DRIVEN FOOTBALL</h4>
+            <h1 class="text-7xl font-black leading-none italic">JOGA<br><span class="text-farao">DATA</span></h1>
+            <div class="w-20 h-2 bg-white mx-auto mt-6"></div>
+        </div>
+        <div class="mt-auto text-left">
+            <h2 class="text-4xl font-bold leading-tight">RELATÓRIO MENSAL<br><span class="text-farao">FEVEREIRO 2026</span></h2>
+            <p class="text-gray-400 mt-4 italic text-sm">Onde a resenha encontra a precisão matemática. Analisamos cada passo dos 33 guerreiros da Faraó.</p>
+        </div>
+        <div class="mt-10 animate-bounce text-farao">
+            <span class="text-[10px] font-bold uppercase tracking-widest">Deslize para entrar no Dossiê</span><br>↓
+        </div>
+    </section>
+
+    <section class="magazine-page bg-white text-black">
+        <h2 class="text-4xl font-black mb-8 border-b-8 border-black inline-block">EDITORIAL</h2>
+        <p class="dropcap text-lg leading-snug font-medium mb-10 text-justify">
+            Fevereiro não foi apenas um mês de futebol; foi um laboratório humano. Vimos o surgimento de máquinas de pontuar e o declínio daqueles que subestimaram o despertador. Nesta edição, não escondemos nada. Do MVP ao "turista" do WhatsApp, todos os dados estão aqui para provar quem realmente decide quando a bola rola.
+        </p>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div class="bg-black text-white p-6 rounded-2xl">
+                <p class="text-[10px] text-farao font-bold uppercase">Gols no Mês</p>
+                <p class="text-5xl font-black italic">74</p>
+            </div>
+            <div class="bg-farao p-6 rounded-2xl">
+                <p class="text-[10px] text-black font-bold uppercase">Média Jogos/Dom</p>
+                <p class="text-5xl font-black italic">10.3</p>
+            </div>
+        </div>
+
+        <div class="mt-8 space-y-3">
+            <h3 class="font-bold text-sm uppercase border-l-4 border-black pl-2">Detalhamento por Domingo</h3>
+            <div class="flex justify-between text-sm py-2 border-b border-gray-200"><span>01 de Fevereiro</span> <strong>11 Partidas</strong></div>
+            <div class="flex justify-between text-sm py-2 border-b border-gray-200"><span>08 de Fevereiro</span> <strong>11 Partidas</strong></div>
+            <div class="flex justify-between text-sm py-2"><span>22 de Fevereiro</span> <strong>09 Partidas</strong></div>
+        </div>
+    </section>
+	
+	<section class="magazine-page bg-farao text-black">
+    <div class="mb-8">
+        <h2 class="text-5xl font-black italic leading-none">MELHORES<br>DO MÊS</h2>
+        <p class="text-xs font-bold uppercase tracking-[0.2em] border-b-2 border-black pb-2">A Seleção Oficial de Fevereiro</p>
+    </div>
+
+    <div class="space-y-8">
+        <div>
+            <h3 class="text-lg font-black bg-black text-farao px-3 py-1 inline-block mb-3 italic">🛡️ DEFESA (ZAG)</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="border-l-4 border-black pl-3">
+                    <p class="font-black text-xl leading-none">BRUNO</p>
+                    <p class="text-[10px] font-bold">52 PONTOS</p>
                 </div>
-                <div>
-                    <h1 class="text-2xl md:text-4xl font-bold leading-none tracking-wide">PELADA DO <span class="text-gold">FARAÓ</span></h1>
-                    <p class="text-gray-500 text-[10px] md:text-sm font-medium tracking-widest uppercase">Domingo • 09h - 11h30 • Park Barro</p>
+                <div class="border-l-4 border-black pl-3">
+                    <p class="font-black text-xl leading-none">ZARA</p>
+                    <p class="text-[10px] font-bold">38 PONTOS</p>
                 </div>
             </div>
-            <div class="hidden md:block text-right">
-                <div class="text-gold font-bold text-lg font-mono">TEMPORADA 2026</div>
-                <div class="text-xs text-gray-500 uppercase flex items-center justify-end gap-1">
-                    <div id="status-indicator" class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div> 
-                    <span id="status-text">Conectando...</span>
+        </div>
+
+        <div>
+            <h3 class="text-lg font-black bg-black text-farao px-3 py-1 inline-block mb-3 italic">🧠 MAESTROS (MEI)</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="border-l-4 border-black pl-3">
+                    <p class="font-black text-xl leading-none">DAVI</p>
+                    <p class="text-[10px] font-bold">60 PONTOS</p>
+                </div>
+                <div class="border-l-4 border-black pl-3">
+                    <p class="font-black text-xl leading-none">ZACA</p>
+                    <p class="text-[10px] font-bold">58 PONTOS</p>
                 </div>
             </div>
         </div>
-    </header>
 
-    <main class="flex-grow container mx-auto p-4 md:p-8 space-y-8">
-        <div id="loading-screen" class="text-center py-20">
-            <div class="loader"></div>
-            <p class="text-gray-400 font-mono animate-pulse mt-2">Sincronizando dados...</p>
-            <p id="error-message" class="text-red-500 mt-4 hidden font-bold"></p>
+        <div>
+            <h3 class="text-lg font-black bg-black text-farao px-3 py-1 inline-block mb-3 italic">⚡ CARRASCOS (ATA)</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="border-l-4 border-black pl-3">
+                    <p class="font-black text-xl leading-none">BRENO</p>
+                    <p class="text-[10px] font-bold">84 PONTOS</p>
+                </div>
+                <div class="border-l-4 border-black pl-3">
+                    <p class="font-black text-xl leading-none">MOVEL</p>
+                    <p class="text-[10px] font-bold">63 PONTOS</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-auto pt-6 text-center border-t border-black/20">
+        <p class="text-[9px] font-black uppercase tracking-widest italic">Critério: Performance Individual Consolidada / JOGADATA</p>
+    </div>
+</section>
+
+    <section class="magazine-page">
+        <h2 class="text-farao text-5xl font-black italic mb-2">O PULSO</h2>
+        <p class="text-gray-500 uppercase tracking-tighter text-xs mb-10 font-bold">A temperatura da competição</p>
+
+        <div class="card-farao p-8 mb-8">
+            <div class="flex justify-between items-end mb-4">
+                <span class="text-xs font-bold uppercase">Termômetro de Equilíbrio</span>
+                <span class="text-4xl font-black text-farao">41.9%</span>
+            </div>
+            <div class="w-full bg-gray-900 h-4 rounded-full overflow-hidden">
+                <div class="bg-farao h-full" style="width: 41.9%"></div>
+            </div>
+            <p class="text-xs text-gray-400 mt-4 leading-relaxed">
+                Quase metade das partidas (41,9%) foi decidida no limite máximo de gols (2x1). Na Faraó, ninguém ganha de véspera.
+            </p>
         </div>
 
-        <div id="dashboard-content" class="hidden space-y-12">
-            
-            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-entry">
-                <div class="card-panel p-4 rounded-xl relative overflow-hidden group">
-                    <div class="absolute right-0 top-0 p-3 opacity-10"><i class="fas fa-futbol text-6xl text-white"></i></div>
-                    <h2 class="text-lg text-gray-400 mb-3 flex items-center gap-2"><i class="fas fa-crosshairs text-gold"></i> Artilharia</h2>
-                    <div id="top-scorers" class="space-y-3 relative z-10"></div>
-                </div>
-                <div class="card-panel p-4 rounded-xl relative overflow-hidden group">
-                    <div class="absolute right-0 top-0 p-3 opacity-10"><i class="fas fa-shoe-prints text-6xl text-white"></i></div>
-                    <h2 class="text-lg text-gray-400 mb-3 flex items-center gap-2"><i class="fas fa-handshake text-gold"></i> Assistências</h2>
-                    <div id="top-assists" class="space-y-3 relative z-10"></div>
-                </div>
-                <div class="card-panel p-4 rounded-xl relative overflow-hidden group">
-                    <div class="absolute right-0 top-0 p-3 opacity-10"><i class="fas fa-shield-alt text-6xl text-white"></i></div>
-                    <h2 class="text-lg text-gray-400 mb-3 flex items-center gap-2"><i class="fas fa-users text-gold"></i> Time da Rodada</h2>
-                    <div id="top-team" class="space-y-3 relative z-10"></div>
-                </div>
-                <div class="card-panel p-4 rounded-xl relative overflow-hidden group">
-                    <div class="absolute right-0 top-0 p-3 opacity-10"><i class="fas fa-trophy text-6xl text-white"></i></div>
-                    <h2 class="text-lg text-gray-400 mb-3 flex items-center gap-2"><i class="fas fa-crown text-gold"></i> Craque da rodada</h2>
-                    <div id="top-winner" class="space-y-3 relative z-10"></div>
-                </div>
-            </section>
-
-            <section class="animate-entry" style="animation-delay: 0.2s;">
-                <div class="flex items-center justify-between mb-4">
-                    <div>
-                        <h2 class="text-2xl md:text-4xl text-white border-l-4 border-gold pl-3">SELEÇÃO DO ANO</h2>
-                        <span class="ml-3 text-[10px] md:text-xs text-gold font-mono uppercase border border-gold/30 px-2 py-1 rounded bg-black/50">2 ZAG • 2 MEI • 2 ATA</span>
-                    </div>
-                </div>
-                <div class="overflow-x-auto pb-4 -mx-4 px-4 md:mx-0 md:px-0">
-                    <div id="selection-grid" class="flex md:grid md:grid-cols-6 gap-4 min-w-[600px] md:min-w-0"></div>
-                </div>
-            </section>
-
-            <section class="animate-entry" style="animation-delay: 0.4s;">
-                <div class="flex flex-col md:flex-row items-center justify-between mb-4 gap-4">
-                    <h2 class="text-2xl md:text-4xl text-white border-l-4 border-gold pl-3 w-full md:w-auto">RANKING GERAL</h2>
-                    <div class="relative w-full md:w-64">
-                        <input type="text" id="search-input" placeholder="Buscar atleta..." class="w-full bg-black/50 border border-gray-700 text-white rounded-full py-3 pl-10 pr-4 focus:outline-none focus:border-gold">
-                        <i class="fas fa-search absolute left-3 top-3.5 text-gray-500"></i>
-                    </div>
-                </div>
-
-                <div class="rounded-lg shadow-2xl border border-gray-800 bg-[#0f0f0f] overflow-hidden">
-                    <div class="p-3 bg-gray-900 border-b border-gray-800 flex justify-between items-center text-xs text-gray-500 font-bold uppercase tracking-wider">
-                        <span class="w-12 text-center">Pos</span>
-                        <span class="flex-grow pl-4">Atleta</span>
-                        <span class="w-20 text-center text-gold">PTS</span>
-                        <span class="w-8 text-center"></span>
-                    </div>
-                    
-                    <div id="ranking-list" class="divide-y divide-gray-800">
-                        </div>
-                </div>
-            </section>
+        <div class="grid grid-cols-1 gap-4">
+            <div class="card-farao p-6 border-l-8 border-red-600">
+                <h3 class="text-red-600 font-bold italic mb-2">❄️ MALDIÇÃO: PÉS FRIOS</h3>
+                <p class="text-xs text-gray-400">Cruzamos os dias jogados com os resultados e o veredito é cruel:</p>
+                <ul class="mt-3 space-y-2 text-[11px]">
+                    <li><strong class="text-white">SAM:</strong> 100% de derrota. Jogou 4, perdeu 4.</li>
+                    <li><strong class="text-white">GOIABA & WELTON:</strong> Goiaba (80%) e Welton (75%) de taxa de derrota. Reze se caírem no seu time.</li>
+                </ul>
+            </div>
         </div>
-    </main>
+    </section>
 
-    <footer class="bg-black border-t border-gray-900 py-8 mt-8 text-center text-gray-600 text-sm">
-        <p class="text-gold font-bold text-xl font-['Teko'] tracking-widest mb-2">PELADA DO FARAÓ</p>
-        <p>© 2026 Recife.</p>
-    </footer>
+    <section class="magazine-page bg-white text-black">
+    <div class="mb-6">
+        <h2 class="text-5xl font-black italic leading-none">TABELA DA<br><span class="text-gray-600">VERDADE</span></h2>
+        <p class="text-[10px] font-bold uppercase tracking-[0.2em] border-b-2 border-black pb-2">O Ranking Geral de Fevereiro 2026</p>
+    </div>
 
-    <script>
-        // =================================================================
-        // CONFIGURAÇÕES
-        // =================================================================
-        
-        const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTPAKd_MA4c6oerk1D4nIoykmE09zh_Ff3adKHiw-ByR9XVfkXKXhR7BnVZvpGObFyhRiRhkreZSI7T/pub?gid=1503533834&single=true&output=csv"; 
-
-        const CAMINHO_FOTOS = "./fotos/";
-        const FORMATO_FOTO = ".jpg";
-        const FOTO_GENERICA = "https://cdn-icons-png.flaticon.com/512/847/847969.png";
-
-        let globalData = [];
-
-        // =================================================================
-        // CONEXÃO E PROCESSAMENTO
-        // =================================================================
-        async function init() {
-            const errorMsg = document.getElementById('error-message');
-            
-            try {
-                // Forçamos o uso do TSV para evitar bugs com as vírgulas decimais do Excel Brasileiro
-                const fetchUrl = SHEET_URL.replace('output=csv', 'output=tsv');
-                const response = await fetch(fetchUrl);
-                const txt = await response.text();
-
-                if(txt.trim().startsWith("<!DOCTYPE") || txt.trim().startsWith("<html")) {
-                    throw new Error("Link incorreto! Verifique a publicação da planilha.");
-                }
-
-                processData(txt);
+    <div class="overflow-hidden rounded-2xl border-2 border-black shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]">
+        <table class="w-full text-left text-[10px] leading-tight">
+            <thead class="bg-black text-farao font-black uppercase">
+                <tr>
+                    <th class="p-2 text-center">POS</th>
+                    <th class="p-2">ATLETA</th>
+                    <th class="p-2 text-center">GOLS</th>
+                    <th class="p-2 text-center">AST</th>
+                    <th class="p-2 text-center">JOGOS</th>
+                    <th class="p-2 text-center bg-gray-800 text-white">TOTAL</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                <tr class="bg-farao/10 font-bold"> <td class="p-2 text-center">1º</td> <td class="p-2">BRENO</td> <td class="p-2 text-center">10</td> <td class="p-2 text-center">9</td> <td class="p-2 text-center">15</td> <td class="p-2 text-center font-black">84.0</td> </tr>
+                <tr class="bg-farao/10 font-bold"> <td class="p-2 text-center">2º</td> <td class="p-2">MOVEL</td> <td class="p-2 text-center">7</td> <td class="p-2 text-center">4</td> <td class="p-2 text-center">15</td> <td class="p-2 text-center font-black">63.0</td> </tr>
+                <tr class="bg-farao/10 font-bold"> <td class="p-2 text-center">3º</td> <td class="p-2">DAVI</td> <td class="p-2 text-center">7</td> <td class="p-2 text-center">7</td> <td class="p-2 text-center">10</td> <td class="p-2 text-center font-black">60.0</td> </tr>
+                <tr class="bg-farao/10 font-bold"> <td class="p-2 text-center">4º</td> <td class="p-2">ZACA</td> <td class="p-2 text-center">6</td> <td class="p-2 text-center">6</td> <td class="p-2 text-center">14</td> <td class="p-2 text-center font-black">58.0</td> </tr>
+                <tr class="bg-farao/10 font-bold"> <td class="p-2 text-center">5º</td> <td class="p-2">CAIO</td> <td class="p-2 text-center">9</td> <td class="p-2 text-center">1</td> <td class="p-2 text-center">11</td> <td class="p-2 text-center font-black">58.0</td> </tr>
+                <tr class="bg-farao/5"> <td class="p-2 text-center">6º</td> <td class="p-2">NEDSON</td> <td class="p-2 text-center">3</td> <td class="p-2 text-center">5</td> <td class="p-2 text-center">14</td> <td class="p-2 text-center font-bold">54.0</td> </tr>
+                <tr class="bg-farao/5"> <td class="p-2 text-center">7º</td> <td class="p-2">BRUNO</td> <td class="p-2 text-center">4</td> <td class="p-2 text-center">3</td> <td class="p-2 text-center">13</td> <td class="p-2 text-center font-bold">52.0</td> </tr>
+                <tr class="bg-farao/5"> <td class="p-2 text-center">8º</td> <td class="p-2">KLEBNALDO</td> <td class="p-2 text-center">3</td> <td class="p-2 text-center">2</td> <td class="p-2 text-center">10</td> <td class="p-2 text-center font-bold">42.0</td> </tr>
+                <tr class="bg-farao/5"> <td class="p-2 text-center">9º</td> <td class="p-2">YGOR</td> <td class="p-2 text-center">2</td> <td class="p-2 text-center">2</td> <td class="p-2 text-center">14</td> <td class="p-2 text-center font-bold">41.0</td> </tr>
+                <tr class="bg-farao/5"> <td class="p-2 text-center">10º</td> <td class="p-2">ZARA</td> <td class="p-2 text-center">3</td> <td class="p-2 text-center">0</td> <td class="p-2 text-center">15</td> <td class="p-2 text-center font-bold">38.0</td> </tr>
                 
-                document.getElementById('loading-screen').classList.add('hidden');
-                document.getElementById('dashboard-content').classList.remove('hidden');
-                document.getElementById('status-indicator').classList.replace('bg-red-500', 'bg-green-500');
-                document.getElementById('status-text').innerText = "Online";
-                document.getElementById('status-text').classList.add('text-green-500');
+                <tr> <td class="p-2 text-center italic">11º</td> <td class="p-2">YUSHIN</td> <td class="p-2 text-center">1</td> <td class="p-2 text-center">0</td> <td class="p-2 text-center">16</td> <td class="p-2 text-center font-bold">30.0</td> </tr>
+                <tr> <td class="p-2 text-center italic">12º</td> <td class="p-2">DENILSON</td> <td class="p-2 text-center">3</td> <td class="p-2 text-center">3</td> <td class="p-2 text-center">6</td> <td class="p-2 text-center font-bold">28.0</td> </tr>
+                <tr> <td class="p-2 text-center italic">13º</td> <td class="p-2">BRAULIO</td> <td class="p-2 text-center">1</td> <td class="p-2 text-center">3</td> <td class="p-2 text-center">16</td> <td class="p-2 text-center font-bold">28.0</td> </tr>
+                <tr> <td class="p-2 text-center italic">14º</td> <td class="p-2">PIPI</td> <td class="p-2 text-center">3</td> <td class="p-2 text-center">0</td> <td class="p-2 text-center">7</td> <td class="p-2 text-center font-bold">27.0</td> </tr>
+                <tr> <td class="p-2 text-center italic">15º</td> <td class="p-2">RODRIGO01</td> <td class="p-2 text-center">2</td> <td class="p-2 text-center">1</td> <td class="p-2 text-center">8</td> <td class="p-2 text-center font-bold">26.0</td> </tr>
+                <tr> <td class="p-2 text-center italic">16º</td> <td class="p-2">PITO</td> <td class="p-2 text-center">2</td> <td class="p-2 text-center">1</td> <td class="p-2 text-center">6</td> <td class="p-2 text-center font-bold">23.0</td> </tr>
+                <tr> <td class="p-2 text-center italic">17º</td> <td class="p-2">WANDERSON</td> <td class="p-2 text-center">0</td> <td class="p-2 text-center">1</td> <td class="p-2 text-center">7</td> <td class="p-2 text-center font-bold">20.0</td> </tr>
+                <tr> <td class="p-2 text-center italic">18º</td> <td class="p-2">AQUILES</td> <td class="p-2 text-center">1</td> <td class="p-2 text-center">1</td> <td class="p-2 text-center">6</td> <td class="p-2 text-center font-bold">19.0</td> </tr>
+                <tr> <td class="p-2 text-center italic">19º</td> <td class="p-2">JUNINHO</td> <td class="p-2 text-center">2</td> <td class="p-2 text-center">1</td> <td class="p-2 text-center">3</td> <td class="p-2 text-center font-bold">18.0</td> </tr>
+                <tr> <td class="p-2 text-center italic">20º</td> <td class="p-2">FILIPEPOOF</td> <td class="p-2 text-center">0</td> <td class="p-2 text-center">1</td> <td class="p-2 text-center">6</td> <td class="p-2 text-center font-bold">17.0</td> </tr>
+                <tr> <td class="p-2 text-center italic">21º</td> <td class="p-2">MARCOS</td> <td class="p-2 text-center">0</td> <td class="p-2 text-center">2</td> <td class="p-2 text-center">6</td> <td class="p-2 text-center font-bold">16.0</td> </tr>
+                <tr> <td class="p-2 text-center italic">22º</td> <td class="p-2">GUIGA</td> <td class="p-2 text-center">1</td> <td class="p-2 text-center">1</td> <td class="p-2 text-center">4</td> <td class="p-2 text-center font-bold">15.0</td> </tr>
+                <tr> <td class="p-2 text-center italic">23º</td> <td class="p-2">WILKER</td> <td class="p-2 text-center">1</td> <td class="p-2 text-center">1</td> <td class="p-2 text-center">3</td> <td class="p-2 text-center font-bold">15.0</td> </tr>
+                <tr> <td class="p-2 text-center italic">24º</td> <td class="p-2">GOIABA</td> <td class="p-2 text-center">1</td> <td class="p-2 text-center">1</td> <td class="p-2 text-center">5</td> <td class="p-2 text-center font-bold">13.0</td> </tr>
+                <tr> <td class="p-2 text-center italic">25º</td> <td class="p-2">NOE</td> <td class="p-2 text-center">1</td> <td class="p-2 text-center">1</td> <td class="p-2 text-center">3</td> <td class="p-2 text-center font-bold">11.0</td> </tr>
+                <tr> <td class="p-2 text-center italic">26º</td> <td class="p-2">RENNATO</td> <td class="p-2 text-center">0</td> <td class="p-2 text-center">0</td> <td class="p-2 text-center">4</td> <td class="p-2 text-center font-bold">10.0</td> </tr>
+                <tr> <td class="p-2 text-center italic">27º</td> <td class="p-2">DANILOVE</td> <td class="p-2 text-center">0</td> <td class="p-2 text-center">0</td> <td class="p-2 text-center">3</td> <td class="p-2 text-center font-bold">10.0</td> </tr>
+                <tr> <td class="p-2 text-center italic">28º</td> <td class="p-2">ANDRÉ NEURO</td> <td class="p-2 text-center">1</td> <td class="p-2 text-center">0</td> <td class="p-2 text-center">4</td> <td class="p-2 text-center font-bold">9.0</td> </tr>
+                <tr> <td class="p-2 text-center italic">29º</td> <td class="p-2">WELTON</td> <td class="p-2 text-center">0</td> <td class="p-2 text-center">0</td> <td class="p-2 text-center">8</td> <td class="p-2 text-center font-bold">8.0</td> </tr>
+                <tr> <td class="p-2 text-center italic">30º</td> <td class="p-2">SAM</td> <td class="p-2 text-center">0</td> <td class="p-2 text-center">0</td> <td class="p-2 text-center">4</td> <td class="p-2 text-center font-bold">7.0</td> </tr>
+                <tr> <td class="p-2 text-center italic">31º</td> <td class="p-2">JACKSON</td> <td class="p-2 text-center">0</td> <td class="p-2 text-center">0</td> <td class="p-2 text-center">4</td> <td class="p-2 text-center font-bold">6.0</td> </tr>
+                <tr> <td class="p-2 text-center italic">32º</td> <td class="p-2">GUSTAVO</td> <td class="p-2 text-center">0</td> <td class="p-2 text-center">0</td> <td class="p-2 text-center">3</td> <td class="p-2 text-center font-bold">6.0</td> </tr>
+                <tr class="bg-red-50 text-red-900"> <td class="p-2 text-center italic">33º</td> <td class="p-2 font-black">MARCIO</td> <td class="p-2 text-center">0</td> <td class="p-2 text-center">0</td> <td class="p-2 text-center">0</td> <td class="p-2 text-center font-black">-10.0</td> </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
 
-                renderDashboard();
+    <section class="magazine-page">
+        <h2 class="text-farao text-5xl font-black italic mb-8">O LADO B</h2>
 
-            } catch (err) {
-                console.error(err);
-                errorMsg.innerHTML = `Erro: ${err.message}`;
-                errorMsg.classList.remove('hidden');
-            }
-        }
-
-        // Função para classificar a posição baseada no texto da sua planilha
-        function normalizePos(pos) {
-            if (!pos) return 'MEI'; 
-            pos = pos.toLowerCase();
-            if(pos.includes('zaga') || pos.includes('zag') || pos.includes('def')) return 'ZAG';
-            if(pos.includes('meio') || pos.includes('mei') || pos.includes('mid')) return 'MEI';
-            if(pos.includes('ataque') || pos.includes('ata') || pos.includes('atq')) return 'ATA';
-            return 'MEI';
-        }
-
-        function processData(tsvText) {
-            // Divide as linhas e depois as colunas pelo caracter 'TAB' (\t)
-            const rows = tsvText.trim().split('\n').map(r => r.split('\t'));
-            const headers = rows[0].map(h => h.trim().toLowerCase());
+        <div class="card-farao p-6 border-b-8 border-gray-600 mb-8">
+            <h3 class="text-gray-400 font-bold mb-4 italic">🏮 REIS DA LANTERNA</h3>
+            <p class="text-xs text-gray-500 mb-6">Repetir a lanterna no mês é para poucos. Eles conseguiram 2 vezes:</p>
+            <div class="flex gap-2 mb-6">
+                <span class="stat-badge">RODRIGO01</span>
+                <span class="stat-badge">MOVEL</span>
+                <span class="stat-badge">ZARA</span>
+            </div>
             
-            globalData = [];
-            
-            for(let i=1; i<rows.length; i++) {
-                const row = rows[i];
-                if(row.length === 0 || !row[0]) continue; 
+            <div class="bg-farao text-black p-4 rounded-xl">
+                <h4 class="font-black text-sm uppercase">O Milagre de Movel</h4>
+                <p class="text-[11px] mt-2 font-medium leading-tight italic">
+                    Mesmo vivendo na lanterna em dois domingos, Movel provou que artilheiro não escolhe tempo. Terminou como o 2º melhor atacante do mês (63 pts). O faro de gol ignora a crise do time.
+                </p>
+            </div>
+        </div>
 
-                const getVal = (keyPart) => {
-                    let idx = headers.findIndex(h => h === keyPart.toLowerCase());
-                    if (idx === -1) idx = headers.findIndex(h => h.includes(keyPart.toLowerCase()));
-                    
-                    if(idx === -1) return 0;
-                    
-                    let val = row[idx] ? row[idx].trim() : "0";
-                    val = val.replace(',', '.'); // Converte "26,40" para "26.40"
-                    return Number(val) || 0;
-                };
+        <div class="card-farao p-6 border-l-8 border-farao">
+            <h3 class="text-farao font-bold mb-2 italic">A TRAGÉDIA DE YUSHIN</h3>
+            <p class="text-xs text-gray-400 leading-relaxed">
+                Líder absoluto em Clean Sheets (6 jogos sem sofrer gol). Tinha a vaga na Seleção do Mês garantida. Perdeu tudo (-10 pts) por confirmar e não ir no dia 22/02. O JOGADATA não perdoa o W.O.
+            </p>
+        </div>
+    </section>
 
-                const getStr = (keyPart) => {
-                    let idx = headers.findIndex(h => h === keyPart.toLowerCase());
-                    if (idx === -1) idx = headers.findIndex(h => h.includes(keyPart.toLowerCase()));
-                    return (idx !== -1 && row[idx]) ? row[idx].trim() : "";
-                };
+    <section class="magazine-page px-4">
+    <h2 class="text-farao text-4xl font-black mb-8 border-b border-farao inline-block">O RAIO-X COMPLETO</h2>
 
-                const nome = getStr('atleta'); 
-                if(!nome) continue;
+    <div class="card-atleta p-4 gold-border">
+        <h4 class="font-bold text-farao">1. BRENO</h4>
+        <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-tighter">84 PTS | 15 JOGOS</p>
+        <p class="text-[10px] italic leading-snug text-gray-200">O Carregador de Piano. Em 15 partidas no mês, seu time ganhou apenas um terço (33,3%), mas ele entregou o prêmio de MVP. Fez incríveis 10 gols, deu 9 assistências e não chegou atrasado um único dia!</p>
+    </div>
 
-                const match = {
-                    nome: nome,
-                    posicao: normalizePos(getStr('posição') || getStr('posicao')),
-                    gols: getVal('gols'), 
-                    assis: getVal('assistências'), 
-                    presenca: getVal('quantidade partidas'), 
-                    pontual: getVal('pontualidade'), 
-                    atraso: getVal('atrasos'), 
-                    clean: getVal('clean_sheet'), 
-                    cartao: getVal('cartões'), 
-                    gols_contra: getVal('gols contra'), 
-                    timeRodada: getVal('time da rodada'),
-                    craqueRodada: getVal('craque da rodada'),
-                    total: getVal('pontuação total'),
-                    media: getVal('média pontuação por partida')
-                };
-                globalData.push(match);
-            }
-        }
+    <div class="card-atleta p-4 gold-border">
+        <h4 class="font-bold text-farao">2. MOVEL</h4>
+        <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-tighter">63 PTS | 15 JOGOS</p>
+        <p class="text-[10px] italic leading-snug text-gray-200">O Atacante Açougueiro. Jogou a mesma quantidade de jogos do artilheiro (15), mas fica a denúncia: Movel tem 2 cartões. É aquele atacante que chega rasgando!</p>
+    </div>
 
-        function getFoto(nome) { 
-            let cleanName = nome.toLowerCase().trim();
-            if(cleanName === "movel") cleanName = "móvel";
-            return `${CAMINHO_FOTOS}${cleanName}${FORMATO_FOTO}`; 
-        }
-        const imgError = `this.onerror=null; this.src='${FOTO_GENERICA}';`;
+    <div class="card-atleta p-4 gold-border">
+        <h4 class="font-bold text-farao">3. DAVI</h4>
+        <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-tighter">60 PTS | 10 JOGOS</p>
+        <p class="text-[10px] italic leading-snug text-gray-200">A Eficiência Pura. Davi fez mais pontos por partida que muita gente. Jogou "apenas" 10 vezes no mês, mas fez 7 gols e distribuiu 7 assistências cravadas. O maestro da galera.</p>
+    </div>
 
-        function renderDashboard() {
-            renderTopLists(); 
-            renderList();    
-            renderSelection();
-        }
+    <div class="card-atleta p-4 gold-border">
+        <h4 class="font-bold text-farao text-white">4. ZACA <span class="text-red-500">⏰</span></h4>
+        <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-tighter">58 PTS | 14 JOGOS</p>
+        <p class="text-[10px] italic leading-snug text-gray-200">O Relógio Quebrado. Jogou bastante, faturou vaga na Seleção, mas perdeu pontos bobos porque levou 2 faltas por atraso. Se tivesse chegado no horário, passaria o Davi fácil.</p>
+    </div>
 
-        function renderTopLists() {
-            const data = [...globalData];
+    <div class="card-atleta p-4 gold-border">
+        <h4 class="font-bold text-farao">5. CAIO</h4>
+        <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-tighter">58 PTS | 11 JOGOS</p>
+        <p class="text-[10px] italic leading-snug text-gray-200">O Cometa Halley. Desses 11 jogos no mês, ele fez estrago mesmo em um único dia. Todos os seus 9 gols foram marcados em 08/02. Ele oscila entre a preguiça num domingo e o espírito de Ronaldo Fenômeno no outro.</p>
+    </div>
 
-            const createRow = (p, value, label, index) => {
-                const colorClass = index === 0 ? "text-gold font-bold text-base" : "text-gray-300 text-sm";
-                return `
-                    <div class="flex justify-between items-center py-2 border-b border-gray-800 last:border-0">
-                        <div class="flex items-center gap-3">
-                            <span class="font-mono text-gray-600 w-4 text-xs">${index + 1}.</span>
-                            <div class="h-10 w-10 rounded-full overflow-hidden border border-gray-700 bg-gray-900 shrink-0">
-                                <img src="${getFoto(p.nome)}" class="w-full h-full object-cover" onerror="${imgError}">
-                            </div>
-                            <span class="${colorClass} truncate max-w-[80px] md:max-w-none">${p.nome}</span>
-                        </div>
-                        <div class="font-mono font-bold text-white bg-gray-800 px-2 rounded text-xs">
-                            ${value} <span class="text-[10px] text-gray-500 font-normal">${label}</span>
-                        </div>
-                    </div>
-                `;
-            };
+    <div class="card-atleta p-4 gold-border">
+        <h4 class="font-bold text-farao">6. NEDSON</h4>
+        <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-tighter">54 PTS | 14 JOGOS</p>
+        <p class="text-[10px] italic leading-snug text-gray-200">O Cérebro do Meio. Disputou 14 partidas. Não precisa fazer gols (fez só 3) se deixa os companheiros na cara do goleiro (5 assistências). Jogador silencioso que arruma a casa.</p>
+    </div>
 
-            const topGols = [...data].filter(p => p.gols > 0).sort((a,b) => b.gols - a.gols || b.total - a.total).slice(0, 5);
-            document.getElementById('top-scorers').innerHTML = topGols.length ? topGols.map((p, i) => createRow(p, p.gols, 'GOLS', i)).join('') : '<div class="text-xs text-gray-500">Sem dados</div>';
+    <div class="card-atleta p-4 gold-border">
+        <h4 class="font-bold text-farao">7. BRUNO</h4>
+        <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-tighter">52 PTS | 13 JOGOS</p>
+        <p class="text-[10px] italic leading-snug text-gray-200">O Zagueiro-Artilheiro. Nessas 13 partidas, ele liderou a zaga como ninguém, chegou no horário em todos os dias e ainda marcou 4 gols. Defensor que joga de cabeça erguida.</p>
+    </div>
 
-            const topAssis = [...data].filter(p => p.assis > 0).sort((a,b) => b.assis - a.assis || b.total - a.total).slice(0, 5);
-            document.getElementById('top-assists').innerHTML = topAssis.length ? topAssis.map((p, i) => createRow(p, p.assis, 'ASS', i)).join('') : '<div class="text-xs text-gray-500">Sem dados</div>';
+    <div class="card-atleta p-4 gold-border">
+        <h4 class="font-bold text-farao">8. KLEBNALDO</h4>
+        <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-tighter">42 PTS | 10 JOGOS</p>
+        <p class="text-[10px] italic leading-snug text-gray-200">O Homem Cara-ou-Coroa. Jogou exatos 10 jogos e ganhou 5 (50% de vitória). Se o Klebnaldo tá no seu time, as chances são meio a meio!</p>
+    </div>
 
-            const topTeam = [...data].filter(p => p.timeRodada > 0).sort((a,b) => b.timeRodada - a.timeRodada || b.total - a.total).slice(0, 5);
-            document.getElementById('top-team').innerHTML = topTeam.length ? topTeam.map((p, i) => createRow(p, p.timeRodada, 'VEZES', i)).join('') : '<div class="text-xs text-gray-500">Sem dados</div>';
-            
-            const topWinner = [...data].filter(p => p.craqueRodada > 0).sort((a,b) => b.craqueRodada - a.craqueRodada || b.total - a.total).slice(0, 5);
-            document.getElementById('top-winner').innerHTML = topWinner.length ? topWinner.map((p, i) => createRow(p, p.craqueRodada, 'VEZES', i)).join('') : '<div class="text-xs text-gray-500">Sem dados</div>';
-        }
+    <div class="card-atleta p-4 gold-border text-white">
+        <h4 class="font-bold text-farao">9. YGOR <span class="text-red-500">⏰</span></h4>
+        <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-tighter">41 PTS | 14 JOGOS</p>
+        <p class="text-[10px] italic leading-snug text-gray-200">Dividiu o pódio da falta de compromisso com o despertador: chegou atrasado em dois domingos diferentes mesmo com 14 partidas disputadas.</p>
+    </div>
 
-        function renderSelection() {
-            const data = [...globalData];
+    <div class="card-atleta p-4 gold-border text-white">
+        <h4 class="font-bold text-farao">10. ZARA <span class="text-red-500">⏰</span></h4>
+        <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-tighter">38 PTS | 15 JOGOS</p>
+        <p class="text-[10px] italic leading-snug text-gray-200">O Zagueiro Herdeiro. O homem suou a camisa! Fez 15 jogos no mês. Herdou a vaga na Seleção do Mês graças ao vacilo de Yushin, mas provou que regularidade conta.</p>
+    </div>
 
-            // Busca os melhores por posição baseando-se na pontuação total
-            const getBest = (pos, count) => {
-                return data.filter(p => p.posicao === pos).sort((a,b) => b.total - a.total).slice(0, count);
-            };
+    <div class="card-atleta p-4 silver-border">
+        <h4 class="font-bold text-gray-300">11. YUSHIN</h4>
+        <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-tighter">30 PTS | 16 JOGOS</p>
+        <p class="text-[10px] italic leading-snug">O Auto-Nocaute. É o cara que mais pisou em quadra (16 partidas)! Tem taxa absurda de vitória (62,5%). Seria o Melhor Zagueiro do Mês, mas o W.O. no WhatsApp custou caro.</p>
+    </div>
 
-            // Seleção de Ouro: 2 Zagueiros, 2 Meias e 2 Atacantes
-            const zagueiros = getBest('ZAG', 2);
-            const meias = getBest('MEI', 2);
-            const atacantes = getBest('ATA', 2);
-            
-            const selecao = [...zagueiros, ...meias, ...atacantes];
+    <div class="card-atleta p-4 silver-border">
+        <h4 class="font-bold text-gray-300">12. DENILSON</h4>
+        <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-tighter">28 PTS | 6 JOGOS</p>
+        <p class="text-[10px] italic leading-snug text-farao">O Amuleto. Reparem na proporção: ele fez 28 pontos jogando APENAS 6 VEZES. Denilson entra em quadra para decidir (66,7% vit).</p>
+    </div>
 
-            const html = selecao.map(p => `
-                <div class="card-panel rounded-lg p-3 flex flex-col items-center justify-center relative overflow-hidden min-w-[140px] flex-shrink-0 md:flex-shrink">
-                    <div class="absolute inset-0 bg-gold/5 opacity-0 hover:opacity-100 transition duration-500"></div>
-                    <div class="text-[10px] font-mono text-gold mb-2 border border-gold/30 px-2 rounded-full bg-black z-10">${p.posicao}</div>
-                    <div class="w-20 h-20 rounded-full border-2 border-gold shadow-lg overflow-hidden mb-2 z-10 bg-gray-900">
-                         <img src="${getFoto(p.nome)}" class="w-full h-full object-cover" onerror="${imgError}">
-                    </div>
-                    <div class="text-xl font-bold text-white font-['Teko'] z-10 leading-none">${p.nome}</div>
-                    <div class="text-xl font-black text-gold z-10 leading-none mt-1">${p.total} <span class="text-[8px] text-gray-500 font-normal">PTS</span></div>
+    <div class="card-atleta p-4 silver-border">
+        <h4 class="font-bold text-gray-300">13. BRAULIO</h4>
+        <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-tighter">28 PTS | 16 JOGOS</p>
+        <p class="text-[10px] italic leading-snug">O Confuso. Também é o "jogador de ferro", com 16 partidas disputadas. Precisou suar o dobro para compensar a penalidade de Turista do dia 08.</p>
+    </div>
+
+    <div class="card-atleta p-4 silver-border">
+        <h4 class="font-bold text-gray-300">14. PIPI</h4>
+        <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-tighter">27 PTS | 7 JOGOS</p>
+        <p class="text-[10px] italic leading-snug text-farao font-bold">O Talismã Incontestável. O maior taxa de vitória da rodada: assustadora de 71,4%. Quem tem Pipi, ganha!</p>
+    </div>
+
+    <div class="card-atleta p-4 silver-border">
+        <h4 class="font-bold text-gray-300">15. RODRIGO01</h4>
+        <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-tighter">26 PTS | 8 JOGOS</p>
+        <p class="text-[10px] italic leading-snug">O Sofredor. Ganhou apenas 25% dos 8 joguinhos que fez. Faltou sorte no sorteio dos times em fevereiro.</p>
+    </div>
+
+    <div class="card-atleta p-4 silver-border">
+        <h4 class="font-bold text-gray-300">16. PITO</h4>
+        <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-tighter">23 PTS | 6 JOGOS</p>
+        <p class="text-[10px] italic leading-snug">Eficiência Silenciosa. Outro que tem um aproveitamento ótimo: ganhou 4 de seus 6 jogos. Entrou e faturou.</p>
+    </div>
+
+    <div class="card-atleta p-4 silver-border">
+        <h4 class="font-bold text-gray-300">17. WANDERSON</h4>
+        <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-tighter">20 PTS | 7 JOGOS</p>
+        <p class="text-[10px] italic leading-snug text-farao font-bold">O Gêmeo do Pipi. Wanderson também jogou só 7 vezes e ostenta os mesmos 71,4% de vitória. É um monstro na armação.</p>
+    </div>
+
+    <div class="card-atleta p-4 silver-border">
+        <h4 class="font-bold text-gray-300">18. AQUILES</h4>
+        <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-tighter">19 PTS | 6 JOGOS</p>
+        <p class="text-[10px] italic leading-snug">Zagueiro Raiz. Fez só 6 partidas, não tomou gol em duas delas, mas ainda sim arrumou um tempinho pra levar um cartão amarelo.</p>
+    </div>
+
+    <div class="card-atleta p-4 silver-border">
+        <h4 class="font-bold text-gray-300">19. JUNINHO</h4>
+        <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-tighter">18 PTS | 3 JOGOS</p>
+        <p class="text-[10px] italic leading-snug">O Franco-Atirador. Jogou míseras 3 partidas no dia 22/02, fez 2 gols e já pontuou mais que muita gente que jogou o triplo!</p>
+    </div>
+
+    <div class="card-atleta p-4 silver-border">
+        <h4 class="font-bold text-gray-300">20. FILIPEPOOF</h4>
+        <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-tighter">17 PTS | 6 JOGOS</p>
+        <p class="text-[10px] italic leading-snug">O Toca de Lado. Ganhou 4 das 6 que jogou, não chuta no gol de jeito nenhum, mas ajuda o time a cadenciar.</p>
+    </div>
+
+    <div class="card-atleta p-4 border-2 border-dashed border-red-900">
+        <h4 class="font-bold text-red-600 font-black uppercase">21. MARCOS</h4>
+        <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-tighter">16 PTS | 6 JOGOS</p>
+        <p class="text-[10px] italic leading-snug">O "Felipe Melo" da Pelada. Jogou apenas 6 vezes, mas seu impacto foi sentido: 2 cartões amarelos distribuídos.</p>
+    </div>
+
+    <div class="card-atleta p-4 border-2 border-dashed border-red-900">
+        <h4 class="font-bold text-red-600 font-black uppercase">22. GUIGA</h4>
+        <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-tighter">15 PTS | 4 JOGOS</p>
+        <p class="text-[10px] italic leading-snug text-gray-400">Fogo de Palha. Caiu em quadra 4 vezes. Fez 1 gol e deu 1 assistência. Fim de papo.</p>
+    </div>
+
+    <div class="card-atleta p-4 border-2 border-dashed border-red-900">
+        <h4 class="font-bold text-red-600 font-black uppercase">23. WILKER</h4>
+        <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-tighter">15 PTS | 3 JOGOS</p>
+        <p class="text-[10px] italic leading-snug text-gray-400">Adaptando-se. Com apenas 3 partidas, Wilker chegou agora pra sentir o clima da Faraó.</p>
+    </div>
+
+    <div class="card-atleta p-4 border-2 border-dashed border-red-900">
+        <h4 class="font-bold text-red-700 font-black uppercase">24. GOIABA <span class="text-white italic">❄️</span></h4>
+        <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-tighter">13 PTS | 5 JOGOS</p>
+        <p class="text-[10px] italic leading-snug text-red-500 font-bold">O Pé Frio. Dos 5 jogos em que entrou, seu time perdeu 4 (80% de derrota). Vai precisar benzer a chuteira!</p>
+    </div>
+
+    <div class="card-atleta p-4 border-2 border-dashed border-red-900">
+        <h4 class="font-bold text-red-600 font-black uppercase">25. NOE</h4>
+        <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-tighter">11 PTS | 3 JOGOS</p>
+        <p class="text-[10px] italic leading-snug text-gray-400">O Minimalista. Jogou 3 vezes no dia 22/02, deixou um gol e vazou.</p>
+    </div>
+
+    <div class="card-atleta p-4 border-2 border-dashed border-red-900">
+        <h4 class="font-bold text-red-600 font-black uppercase">26. DANILOVE</h4>
+        <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-tighter">10 PTS | 3 JOGOS</p>
+        <p class="text-[10px] italic leading-snug text-gray-400">Presença VIP: 3 jogos na zaga e nenhum golzinho para contar história.</p>
+    </div>
+
+    <div class="card-atleta p-4 border-2 border-dashed border-red-900">
+        <h4 class="font-bold text-red-600 font-black uppercase">27. RENNATO</h4>
+        <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-tighter">10 PTS | 4 JOGOS</p>
+        <p class="text-[10px] italic leading-snug text-gray-400">O Clube do 10. Apenas bateu ponto na zaga em 4 partidas no dia 22.</p>
+    </div>
+
+    <div class="card-atleta p-4 border-2 border-dashed border-red-900">
+        <h4 class="font-bold text-red-700 font-black uppercase">28. ANDRÉ NEURO</h4>
+        <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-tighter">9 PTS | 4 JOGOS</p>
+        <p class="text-[10px] italic leading-snug text-red-500 font-bold">Azarado: Disputou 4 partidas, fez seu golzinho, mas o time não ajudava (perdeu 75%).</p>
+    </div>
+
+    <div class="card-atleta p-4 border-2 border-dashed border-red-900">
+        <h4 class="font-bold text-red-700 font-black uppercase">29. WELTON <span class="text-white italic">❄️</span></h4>
+        <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-tighter">8 PTS | 8 JOGOS</p>
+        <p class="text-[10px] italic leading-snug text-red-500 font-bold">O Alvo Fácil. 2 atrasos, 2 cartões e 75% de derrota no mês. A fase tá braba!</p>
+    </div>
+
+    <div class="card-atleta p-4 border-2 border-dashed border-red-900 bg-red-950/20">
+        <h4 class="font-bold text-red-800 font-black uppercase">30. SAM <span class="text-white italic">❄️</span></h4>
+        <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-tighter">7 PTS | 4 JOGOS</p>
+        <p class="text-[10px] italic leading-snug text-red-600 font-black uppercase">100% DE DERROTA. Um mês para ser deletado da memória. Voltou pra casa sem um ponto.</p>
+    </div>
+
+    <div class="card-atleta p-4 border-2 border-dashed border-red-900">
+        <h4 class="font-bold text-red-600 font-black uppercase">31. JACKSON</h4>
+        <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-tighter">6 PTS | 4 JOGOS</p>
+        <p class="text-[10px] italic leading-snug text-gray-500">Na base da pirâmide, pelo menos não está devendo pontos na tabela.</p>
+    </div>
+
+    <div class="card-atleta p-4 border-2 border-dashed border-red-900">
+        <h4 class="font-bold text-red-600 font-black uppercase">32. GUSTAVO</h4>
+        <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-tighter">6 PTS | 3 JOGOS</p>
+        <p class="text-[10px] italic leading-snug text-gray-500">Discreção absoluta. Passou pelo mês de fevereiro sem ser notado pela defesa adversária.</p>
+    </div>
+
+    <div class="card-atleta p-4 border-2 border-dashed border-red-900 bg-black">
+        <h4 class="font-bold text-gray-600 font-black uppercase">33. MARCIO</h4>
+        <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-tighter">-10 PTS | 0 JOGOS</p>
+        <p class="text-[10px] italic leading-snug text-red-900 font-black">O Fantasma. Conseguiu a proeza de não jogar nenhuma partida, tomar punição por ausência não justificada, e fechar o mês no SPC do JOGADATA.</p>
+    </div>
+</section>
+
+<section class="magazine-page bg-black text-white relative overflow-hidden flex flex-col justify-between">
+    
+    <div class="absolute top-0 right-0 w-64 h-64 bg-farao/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+    
+    <div class="z-10">
+        <h4 class="text-farao font-black tracking-widest text-xs mb-2">ENCERRAMENTO</h4>
+        <h2 class="text-6xl font-black italic leading-none mb-4">FALTA <span class="text-farao text-7xl">VOCÊ</span></h2>
+        <p class="text-gray-400 text-sm leading-tight border-l-2 border-farao pl-3">
+            A história de Fevereiro foi escrita com suor e dados. Os tronos estão ocupados, mas os desafios para Março já começaram. Você vai ficar assistindo ou vai entrar para o ranking?
+        </p>
+    </div>
+
+    <div class="z-10 mt-8 space-y-6">
+        
+        <div>
+            <div class="flex items-center gap-2 mb-3">
+                <span class="bg-farao text-black font-black px-2 py-0.5 text-[10px] italic">ARTILHARIA DO ANO</span>
+                <div class="h-[1px] bg-farao/30 flex-grow"></div>
+            </div>
+            <div class="flex justify-between items-end px-2">
+                <div class="text-center"><p class="text-[10px] font-bold">1º BRENO</p><p class="text-farao font-black text-xl">18</p></div>
+                <div class="text-center opacity-70"><p class="text-[8px] font-bold">2º MOVEL</p><p class="text-white font-black text-lg">14</p></div>
+                <div class="text-center opacity-60"><p class="text-[8px] font-bold">3º CAIO</p><p class="text-white font-black text-md">9</p></div>
+                <div class="text-center opacity-50"><p class="text-[8px] font-bold">4º ZACA</p><p class="text-white font-black text-md">8</p></div>
+                <div class="text-center opacity-40"><p class="text-[8px] font-bold">5º DAVI</p><p class="text-white font-black text-md">7</p></div>
+            </div>
+        </div>
+
+        <div>
+            <div class="flex items-center gap-2 mb-3">
+                <span class="bg-white text-black font-black px-2 py-0.5 text-[10px] italic">GARÇOM DO ANO</span>
+                <div class="h-[1px] bg-white/30 flex-grow"></div>
+            </div>
+            <div class="flex justify-between items-end px-2 text-farao">
+                <div class="text-center"><p class="text-[10px] font-bold text-white">1º BRENO</p><p class="font-black text-xl">14</p></div>
+                <div class="text-center opacity-70"><p class="text-[8px] font-bold text-white">2º NEDSON</p><p class="font-black text-lg">10</p></div>
+                <div class="text-center opacity-60"><p class="text-[8px] font-bold text-white">3º ZACA</p><p class="font-black text-md">10</p></div>
+                <div class="text-center opacity-50"><p class="text-[8px] font-bold text-white">4º BRAULIO</p><p class="font-black text-md">10</p></div>
+                <div class="text-center opacity-40"><p class="text-[8px] font-bold text-white">5º MOVEL</p><p class="font-black text-md">8</p></div>
+            </div>
+        </div>
+
+        <div class="card-farao p-4 bg-gradient-to-r from-farao/20 to-transparent">
+            <h3 class="text-farao font-black italic text-sm mb-4">🏆 A CORRIDA PELO CRAQUE DO ANO (TOP 5)</h3>
+            <div class="space-y-2">
+                <div class="flex justify-between items-center text-xs">
+                    <span class="font-black">1. BRENO</span>
+                    <span class="text-farao font-black">157 PTS</span>
                 </div>
-            `).join('');
-            
-            document.getElementById('selection-grid').innerHTML = html ? html : `<div class="p-4 text-xs text-gray-500 w-full text-center col-span-6">Verifique a coluna Posição.</div>`;
-        }
-
-        function renderList(searchTerm = "") {
-            let processed = [...globalData]; 
-
-            if (searchTerm) {
-                const term = searchTerm.toLowerCase();
-                processed = processed.filter(p => p.nome.toLowerCase().includes(term));
-            }
-            const sorted = processed.sort((a,b) => b.total - a.total);
-            
-            const html = sorted.map((p, i) => `
-                <div class="player-row cursor-pointer" onclick="this.classList.toggle('active')">
-                    <div class="flex items-center p-3 md:p-5">
-                        <div class="w-12 text-center font-mono ${i<3 ? 'text-gold font-bold text-2xl' : 'text-gray-500 text-xl'}">${i+1}º</div>
-                        <div class="flex-grow flex items-center gap-5 md:gap-8">
-                            
-                            <div class="h-28 w-28 rounded-full border-2 border-gray-600 bg-gray-900 overflow-hidden shrink-0 shadow-[0_0_10px_rgba(0,0,0,0.5)]">
-                                <img src="${getFoto(p.nome)}" class="w-full h-full object-cover" onerror="${imgError}">
-                            </div>
-
-                            <div>
-                                <div class="font-black text-gray-100 text-2xl md:text-3xl leading-tight tracking-wider uppercase font-['Teko']">${p.nome}</div>
-                                <span class="text-[10px] text-gold border border-gold/30 px-1.5 rounded bg-black/30 font-mono">${p.posicao}</span>
-                            </div>
-                        </div>
-                        <div class="w-20 text-center font-black text-3xl md:text-4xl text-gold">${p.total}</div>
-                        <div class="w-10 text-center text-gray-500 rotate-icon text-xl"><i class="fas fa-chevron-down"></i></div>
-                    </div>
-
-                    <div class="player-details px-4 md:px-8">
-                        <div class="text-[10px] text-gray-500 font-bold uppercase mb-3 tracking-widest border-b border-gray-800 pb-1">Extrato de Registros</div>
-                        <div class="grid grid-cols-2 gap-3 text-sm mb-6">
-                             <div class="space-y-2">
-                                <div class="flex justify-between text-gray-300"><span>✅ Qtd. Partidas</span> <span class="font-bold">${p.presenca}x</span></div>
-                                ${p.gols > 0 ? `<div class="flex justify-between text-gray-300"><span>⚽ Gols</span> <span class="text-gold font-bold">${p.gols}x</span></div>` : ''}
-                                ${p.assis > 0 ? `<div class="flex justify-between text-gray-300"><span>👟 Assis</span> <span class="text-gold font-bold">${p.assis}x</span></div>` : ''}
-                                ${p.clean > 0 ? `<div class="flex justify-between text-gray-300"><span>🛡️ Clean Sheet</span> <span class="text-blue-400 font-bold">${p.clean}x</span></div>` : ''}
-                             </div>
-                             <div class="space-y-2">
-                                ${p.pontual > 0 ? `<div class="flex justify-between text-gray-300"><span>⏰ Pontual</span> <span class="text-green-400 font-bold">${p.pontual}x</span></div>` : ''}
-                                ${p.atraso > 0 ? `<div class="flex justify-between text-gray-300"><span>🐢 Atrasos</span> <span class="text-red-400 font-bold">${p.atraso}x</span></div>` : ''}
-                                ${p.cartao > 0 ? `<div class="flex justify-between text-gray-300"><span>🟨 Cartões</span> <span class="text-yellow-500 font-bold">${p.cartao}x</span></div>` : ''}
-                                ${p.gols_contra > 0 ? `<div class="flex justify-between text-gray-300"><span>❌ Gols Contra</span> <span class="text-red-600 font-bold">${p.gols_contra}x</span></div>` : ''}
-                             </div>
-                        </div>
-
-                        <div class="text-[10px] text-gray-500 font-bold uppercase mb-3 tracking-widest border-b border-gray-800 pb-1">Indicadores</div>
-                        <div class="grid grid-cols-5 gap-2 text-center bg-gray-900/50 rounded-lg p-4 border border-gray-800 mb-4">
-                            <div class="flex flex-col p-1">
-                                <span class="text-[9px] md:text-xs text-gray-500 uppercase">Média Pts/Jogo</span>
-                                <span class="font-bold text-gold text-xl md:text-2xl">${p.media}</span>
-                            </div>
-                            <div class="flex flex-col p-1">
-                                <span class="text-[9px] md:text-xs text-gray-500 uppercase">Gols</span>
-                                <span class="font-bold text-white text-xl md:text-2xl">${p.gols}</span>
-                            </div>
-                            <div class="flex flex-col p-1">
-                                <span class="text-[9px] md:text-xs text-gray-500 uppercase">Assis</span>
-                                <span class="font-bold text-white text-xl md:text-2xl">${p.assis}</span>
-                            </div>
-                            <div class="flex flex-col p-1">
-                                <span class="text-[9px] md:text-xs text-gray-500 uppercase">SG</span>
-                                <span class="font-bold text-blue-400 text-xl md:text-2xl">${p.clean}</span>
-                            </div>
-                            <div class="flex flex-col p-1">
-                                <span class="text-[9px] md:text-xs text-gray-500 uppercase">Cartões</span>
-                                <span class="font-bold text-yellow-500 text-xl md:text-2xl">${p.cartao}</span>
-                            </div>
-                        </div>
-                    </div>
+                <div class="flex justify-between items-center text-xs opacity-80">
+                    <span class="font-bold">2. MOVEL</span>
+                    <span class="font-bold">125 PTS</span>
                 </div>
-            `).join('');
-            
-            document.getElementById('ranking-list').innerHTML = sorted.length ? html : `<div class="p-8 text-center text-gray-500">Nenhum atleta encontrado.</div>`;
-        }
+                <div class="flex justify-between items-center text-xs opacity-70">
+                    <span class="font-bold">3. NEDSON</span>
+                    <span class="font-bold">106 PTS</span>
+                </div>
+                <div class="flex justify-between items-center text-xs opacity-60">
+                    <span class="font-bold">4. BRUNO</span>
+                    <span class="font-bold">103 PTS</span>
+                </div>
+                <div class="flex justify-between items-center text-xs opacity-50">
+                    <span class="font-bold">5. YUSHIN</span>
+                    <span class="font-bold">98 PTS</span>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        document.getElementById('search-input').addEventListener('keyup', (e) => renderList(e.target.value));
-        init();
-    </script>
+    <div class="z-10 grid grid-cols-2 gap-3 mt-6">
+        <div class="bg-zinc-900 p-3 rounded-lg border border-zinc-800">
+            <p class="text-farao font-black text-lg">12</p>
+            <p class="text-[8px] uppercase font-bold text-gray-400 leading-tight">Clean Sheets de Yushin<br><span class="text-[7px] italic text-zinc-600">Com ele no time não leva gol</span></p>
+        </div>
+        <div class="bg-zinc-900 p-3 rounded-lg border border-zinc-800">
+            <p class="text-white font-black text-lg">30.0</p>
+            <p class="text-[8px] uppercase font-bold text-gray-400 leading-tight">Média Pts/Jogo Davi<br><span class="text-[7px] italic text-zinc-600">Eficiência cirúrgica</span></p>
+        </div>
+    </div>
+
+    <div class="z-10 mt-auto pt-8 text-center">
+        <div class="inline-block bg-farao text-black font-black px-6 py-3 rounded-full text-sm uppercase tracking-tighter mb-4 shadow-[0_0_20px_rgba(255,215,0,0.4)]">
+            GARANTA SUA VAGA EM MARÇO
+        </div>
+        <p class="text-[8px] text-gray-600 font-bold uppercase tracking-widest">Jogadata • A métrica da sua glória</p>
+    </div>
+
+</section>
+
+</div>
+
 </body>
 </html>
