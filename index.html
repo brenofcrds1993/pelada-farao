@@ -1,477 +1,425 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="antialiased">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pelada do Faraó - Ao Vivo</title>
+    <title>Pelada do Faraó - Ranking Ao Vivo</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* CONFIGURAÇÕES DE DESIGN APPLE */
+        /* APPLE STYLE & FARAÓ COLORS */
         :root {
-            --apple-bg: #000000;
-            --apple-card: #1C1C1E;
-            --apple-card-hover: #2C2C2E;
-            --apple-text: #FFFFFF;
-            --apple-text-muted: #8E8E93;
-            --apple-border: rgba(84, 84, 86, 0.34); 
-            --apple-blue: #0A84FF;
-            --apple-gold-light: #F5D061;
-            --apple-gold-dark: #B38B22;
+            --apple-black: #000000;
+            --apple-dark-gray: #1C1C1E;
+            --pharaoh-gold: #FFD700;
+            --pharaoh-gold-muted: rgba(255, 215, 0, 0.4);
         }
 
-        body {
-            background-color: var(--apple-bg);
-            color: var(--apple-text);
-            /* Font stack nativa da Apple */
-            font-family: -apple-system, BlinkMacSystemFont, 'Inter', Roboto, sans-serif;
-            -webkit-tap-highlight-color: transparent;
+        body { 
+            background-color: var(--apple-black); 
+            color: #ffffff;
+            /* Fontes de sistema padrão Apple (SF Pro, etc) */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-image: radial-gradient(circle at top right, rgba(255, 215, 0, 0.05), transparent 40%),
+                              radial-gradient(circle at bottom left, rgba(255, 215, 0, 0.03), transparent 40%);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
         }
 
-        h1, h2, h3 { letter-spacing: -0.02em; }
-        
-        /* Glassmorphism - Navbar e Blur */
-        .glass-nav {
-            background: rgba(0, 0, 0, 0.65);
-            backdrop-filter: saturate(180%) blur(20px);
-            -webkit-backdrop-filter: saturate(180%) blur(20px);
-            border-bottom: 0.5px solid var(--apple-border);
+        /* Efeito Glassmorphism (Vidro Fosco) */
+        .glass-card {
+            background: rgba(28, 28, 30, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease;
         }
 
-        /* Bento Grid Cards (Widgets iOS) */
-        .bento-card {
-            background-color: var(--apple-card);
-            border-radius: 22px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            position: relative;
-            overflow: hidden;
-            border: 0.5px solid var(--apple-border);
-            transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-        
-        .bento-icon-wrapper {
-            background-color: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 12px;
+        .glass-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 215, 0, 0.1);
+            border-color: rgba(255, 215, 0, 0.3);
         }
 
-        /* Apple List (Estilo Ajustes do iPhone) */
-        .apple-list {
-            background-color: var(--apple-card);
-            border-radius: 22px;
-            overflow: hidden;
-            border: 0.5px solid var(--apple-border);
+        .glass-header {
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
+        .text-gold { color: var(--pharaoh-gold); }
+        .bg-gold { background-color: var(--pharaoh-gold); }
+
+        /* Loader Apple Style */
+        .spinner {
+            width: 32px; height: 32px;
+            border: 3px solid rgba(255, 215, 0, 0.2);
+            border-top: 3px solid var(--pharaoh-gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Acordeão do Jogador */
         .player-row {
-            transition: background-color 0.2s;
-            cursor: pointer;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: background 0.3s;
         }
-
-        .player-row:active {
-            background-color: var(--apple-card-hover);
-        }
-
-        .apple-list-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 16px;
-        }
-
-        /* Linha divisória interna (não encosta na esquerda) */
-        .player-row:not(:last-child) .item-content {
-            border-bottom: 0.5px solid var(--apple-border);
-        }
-
-        .item-content {
-            flex-grow: 1;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding-bottom: 12px;
-            margin-bottom: -12px;
-        }
-
-        /* Detalhes expansíveis com animação suave */
-        .player-details {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s;
-            opacity: 0;
-            background-color: rgba(0,0,0,0.3);
-        }
+        .player-row:last-child { border-bottom: none; }
         
+        .player-details {
+            max-height: 0; overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), padding 0.4s ease, opacity 0.4s ease;
+            opacity: 0;
+            background: rgba(0, 0, 0, 0.3);
+        }
         .player-row.active .player-details {
             max-height: 500px;
+            padding: 1rem;
             opacity: 1;
-            padding: 16px;
-            border-bottom: 0.5px solid var(--apple-border);
         }
-        
-        /* Rotação da setinha */
-        .chevron {
-            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        .player-row.active {
+            background: rgba(255, 215, 0, 0.03);
         }
-        .player-row.active .chevron {
-            transform: rotate(90deg);
-        }
+        .rotate-icon { transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
+        .player-row.active .rotate-icon { transform: rotate(180deg); }
 
-        /* Pílulas de Estatísticas internas */
-        .stat-pill {
-            background: rgba(255, 255, 255, 0.06);
-            border-radius: 10px;
-            padding: 10px 8px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border: 0.5px solid rgba(255,255,255,0.02);
-        }
-
-        /* Avatares */
-        .avatar {
-            width: 46px;
-            height: 46px;
-            border-radius: 50%;
-            object-fit: cover;
-            background-color: #2C2C2E;
-            margin-right: 14px;
-            flex-shrink: 0;
-        }
-
-        /* Loading Skeletons */
-        .shimmer {
-            background: #2C2C2E;
-            background-image: linear-gradient(to right, #2C2C2E 0%, #3C3C3E 20%, #2C2C2E 40%, #2C2C2E 100%);
-            background-repeat: no-repeat;
-            background-size: 800px 104px;
-            animation-duration: 1.5s;
-            animation-fill-mode: forwards;
-            animation-iteration-count: infinite;
-            animation-name: placeholderShimmer;
-            animation-timing-function: linear;
-        }
-        @keyframes placeholderShimmer {
-            0% { background-position: -468px 0; }
-            100% { background-position: 468px 0; }
-        }
-        
-        /* Ocultar barra de rolagem */
-        ::-webkit-scrollbar { display: none; }
+        /* Scrollbar minimalista */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--pharaoh-gold); }
     </style>
 </head>
-<body class="pb-12 text-[15px]">
+<body class="flex flex-col">
 
-    <nav class="glass-nav sticky top-0 z-50 px-4 py-3 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#F5D061] to-[#B38B22] flex items-center justify-center shadow-lg">
-                <i data-lucide="crown" class="w-5 h-5 text-black"></i>
+    <header class="glass-header sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="h-12 w-12 bg-black rounded-full border border-yellow-500/50 flex items-center justify-center overflow-hidden shadow-[0_0_15px_rgba(255,215,0,0.2)]">
+                    <i class="fas fa-crown text-gold text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold tracking-tight">Faraó <span class="text-gold font-light">Estatísticas</span></h1>
+                    <p class="text-[11px] text-gray-400 font-medium tracking-wide uppercase">Domingo • 09h - 11h30</p>
+                </div>
             </div>
-            <div class="flex flex-col">
-                <span class="font-bold text-xl leading-none tracking-tight">Faraó</span>
-                <span class="text-[10px] font-semibold text-[#8E8E93] uppercase tracking-widest mt-0.5">Temporada 2026</span>
+            <div class="text-right flex items-center gap-2">
+                <div id="status-indicator" class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div> 
+                <span id="status-text" class="text-xs text-gray-400 font-medium">Sincronizando...</span>
             </div>
         </div>
-        <div class="flex items-center gap-2 px-3 py-1.5 bg-[#1C1C1E] rounded-full border border-[rgba(255,255,255,0.1)]">
-            <div id="status-dot" class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
-            <span id="status-text" class="text-xs font-semibold text-[#8E8E93]">Sincronizando</span>
-        </div>
-    </nav>
+    </header>
 
-    <main class="max-w-2xl mx-auto px-4 mt-6 space-y-8">
+    <main class="flex-grow container mx-auto px-4 md:px-6 py-8 space-y-10 max-w-5xl">
         
-        <div id="error-message" class="hidden bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl text-sm font-medium backdrop-blur-md"></div>
+        <div id="loading-screen" class="flex flex-col items-center justify-center py-32 space-y-4">
+            <div class="spinner"></div>
+            <p class="text-gray-400 text-sm font-medium">Buscando dados das planilhas...</p>
+            <p id="error-message" class="text-red-400 text-sm mt-4 hidden bg-red-900/20 px-4 py-2 rounded-lg border border-red-500/30"></p>
+        </div>
 
-        <section>
-            <h2 class="text-[22px] font-bold mb-4 tracking-tight px-1">Destaques</h2>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3" id="bento-grid">
-                <div class="bento-card h-32 shimmer border-none"></div>
-                <div class="bento-card h-32 shimmer border-none"></div>
-                <div class="bento-card h-32 shimmer border-none"></div>
-                <div class="bento-card h-32 shimmer border-none"></div>
-            </div>
-        </section>
-
-        <section class="px-1">
-            <div class="relative flex items-center w-full h-[42px] rounded-xl bg-[#1C1C1E] overflow-hidden focus-within:ring-1 focus-within:ring-[#0A84FF] transition-shadow">
-                <i data-lucide="search" class="w-[18px] h-[18px] text-[#8E8E93] ml-3 absolute"></i>
-                <input type="text" id="search-input" placeholder="Buscar atleta..." 
-                       class="w-full h-full bg-transparent border-none text-[16px] text-white placeholder-[#8E8E93] pl-10 pr-3 focus:outline-none focus:ring-0">
-            </div>
-        </section>
-
-        <section>
-            <div class="flex justify-between items-end mb-3 px-1">
-                <h2 class="text-[22px] font-bold tracking-tight">Classificação Geral</h2>
-            </div>
+        <div id="dashboard-content" class="hidden space-y-10">
             
-            <div class="apple-list" id="ranking-list">
-                <div class="apple-list-item shimmer h-[72px] border-b border-gray-800/50"></div>
-                <div class="apple-list-item shimmer h-[72px] border-b border-gray-800/50"></div>
-                <div class="apple-list-item shimmer h-[72px]"></div>
-            </div>
-        </section>
+            <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="glass-card p-5 relative overflow-hidden flex flex-col justify-between">
+                    <div class="text-gold mb-2"><i class="fas fa-futbol text-2xl opacity-80"></i></div>
+                    <h2 class="text-xs text-gray-400 uppercase font-semibold tracking-wider mb-1">Artilharia</h2>
+                    <div id="highlight-gols" class="text-2xl font-bold">--</div>
+                </div>
+                <div class="glass-card p-5 relative overflow-hidden flex flex-col justify-between">
+                    <div class="text-gold mb-2"><i class="fas fa-handshake text-2xl opacity-80"></i></div>
+                    <h2 class="text-xs text-gray-400 uppercase font-semibold tracking-wider mb-1">Assistências</h2>
+                    <div id="highlight-assis" class="text-2xl font-bold">--</div>
+                </div>
+                <div class="glass-card p-5 relative overflow-hidden flex flex-col justify-between">
+                    <div class="text-gold mb-2"><i class="fas fa-star text-2xl opacity-80"></i></div>
+                    <h2 class="text-xs text-gray-400 uppercase font-semibold tracking-wider mb-1">Maior Craque</h2>
+                    <div id="highlight-craque" class="text-2xl font-bold">--</div>
+                </div>
+                <div class="glass-card p-5 relative overflow-hidden flex flex-col justify-between">
+                    <div class="text-gold mb-2"><i class="fas fa-users text-2xl opacity-80"></i></div>
+                    <h2 class="text-xs text-gray-400 uppercase font-semibold tracking-wider mb-1">Time da Rodada</h2>
+                    <div id="highlight-time" class="text-2xl font-bold">--</div>
+                </div>
+            </section>
 
+            <section>
+                <div class="flex flex-col sm:flex-row items-center justify-between mb-6 gap-4">
+                    <h2 class="text-2xl font-semibold tracking-tight">Ranking Geral</h2>
+                    <div class="relative w-full sm:w-72">
+                        <input type="text" id="search-input" placeholder="Buscar atleta..." 
+                               class="w-full bg-[#1C1C1E]/80 backdrop-blur-md border border-gray-700/50 text-white rounded-2xl py-2.5 pl-10 pr-4 focus:outline-none focus:border-yellow-500/50 focus:ring-1 focus:ring-yellow-500/50 transition-all text-sm">
+                        <i class="fas fa-search absolute left-3.5 top-3 text-gray-500 text-sm"></i>
+                    </div>
+                </div>
+
+                <div class="glass-card overflow-hidden">
+                    <div class="px-5 py-3 bg-white/5 border-b border-white/10 flex text-xs text-gray-400 font-medium uppercase tracking-wider">
+                        <span class="w-8 text-center">#</span>
+                        <span class="flex-grow pl-3">Atleta</span>
+                        <span class="w-16 text-center text-gold">PTS</span>
+                        <span class="w-8 text-center"></span>
+                    </div>
+                    
+                    <div id="ranking-list" class="flex flex-col">
+                        </div>
+                </div>
+            </section>
+        </div>
     </main>
 
+    <footer class="py-8 mt-12 text-center text-gray-500 text-xs font-medium border-t border-white/5">
+        <p>Pelada do Faraó © 2026. Design estilo Apple.</p>
+    </footer>
+
     <script>
-        // Inicializa ícones lucide
-        lucide.createIcons();
-
-        // ==========================================
-        // CONFIGURAÇÕES - COLE SEU LINK AQUI 👇
-        // ==========================================
-        const SHEET_URL = "COLE_SEU_LINK_CSV_AQUI"; 
-        const CAMINHO_FOTOS = "./fotos/";
-        const FORMATO_FOTO = ".jpg";
+        // =================================================================
+        // CONFIGURAÇÕES: LÓGICA PARA MÚLTIPLOS CSVs
+        // =================================================================
+        // Adicione aqui todos os links dos seus arquivos CSV (como URLs geradas pelo Google Sheets ou outros servidores).
+        const CSV_URLS = [
+            "https://docs.google.com/spreadsheets/d/e/2PACX-1vTPAKd_MA4c6oerk1D4nIoykmE09zh_Ff3adKHiw-ByR9XVfkXKXhR7BnVZvpGObFyhRiRhkreZSI7T/pub?gid=429402302&single=true&output=csv",
+            "https://docs.google.com/spreadsheets/d/e/2PACX-1vTPAKd_MA4c6oerk1D4nIoykmE09zh_Ff3adKHiw-ByR9XVfkXKXhR7BnVZvpGObFyhRiRhkreZSI7T/pub?gid=0&single=true&output=csv"
+            "https://docs.google.com/spreadsheets/d/e/2PACX-1vTPAKd_MA4c6oerk1D4nIoykmE09zh_Ff3adKHiw-ByR9XVfkXKXhR7BnVZvpGObFyhRiRhkreZSI7T/pub?gid=429402302&single=true&output=csv"
+        ];
+        
         const FOTO_GENERICA = "https://cdn-icons-png.flaticon.com/512/847/847969.png";
+        
+        let atletasAgrupados = [];
 
-        let allAthletes = [];
-
-        // Converte o nome para buscar a imagem
-        function getFoto(nome) { 
-            let cleanName = nome.toLowerCase().trim();
-            if(cleanName === "movel") cleanName = "móvel";
-            return `${CAMINHO_FOTOS}${cleanName}${FORMATO_FOTO}`; 
-        }
-
+        // =================================================================
+        // CONEXÃO & LEITURA PARALELA DE DADOS
+        // =================================================================
         async function init() {
             const errorMsg = document.getElementById('error-message');
-            const statusDot = document.getElementById('status-dot');
-            const statusText = document.getElementById('status-text');
-
-            if(SHEET_URL.includes("COLE_SEU")) {
-                showError("ERRO: Cole o link do CSV no código na variável SHEET_URL!");
-                return;
+            
+            // Simulação local caso as URLs não sejam preenchidas (Para não quebrar visualmente o teste)
+            if(CSV_URLS.length === 0 || CSV_URLS[0].includes("URL_DO_CSV_1_AQUI")) {
+                errorMsg.innerText = "Aviso: Links não configurados. Por favor, preencha o Array CSV_URLS no código com as URLs corretas dos seus arquivos anexos.";
+                errorMsg.classList.remove('hidden');
+                // return; // Retire o comentário disso quando for para produção.
             }
 
             try {
-                const response = await fetch(SHEET_URL);
-                const csvText = await response.text();
+                // Lê todas as URLs do array simultaneamente
+                const fetchPromises = CSV_URLS.map(url => fetch(url).then(r => r.ok ? r.text() : ""));
+                const resultadosTextos = await Promise.all(fetchPromises);
                 
-                if(csvText.trim().startsWith("<!DOCTYPE") || csvText.trim().startsWith("<html")) {
-                    throw new Error("Link incorreto! Certifique-se de que é um arquivo CSV.");
+                let dadosAgregados = [];
+
+                resultadosTextos.forEach(textoCsv => {
+                    if (textoCsv.trim()) {
+                        const parsedData = processarCSV(textoCsv);
+                        dadosAgregados = [...dadosAgregados, ...parsedData];
+                    }
+                });
+
+                if (dadosAgregados.length > 0) {
+                    atletasAgrupados = unificarEstatísticas(dadosAgregados);
                 }
 
-                processData(csvText);
-
-                // Atualiza Status do Sistema (Verde)
-                statusDot.classList.replace('bg-blue-500', 'bg-green-500');
-                statusDot.classList.remove('animate-pulse');
-                statusText.innerText = "Atualizado Agora";
-                statusText.classList.replace('text-[#8E8E93]', 'text-green-500');
+                document.getElementById('loading-screen').classList.add('hidden');
+                document.getElementById('dashboard-content').classList.remove('hidden');
+                
+                const indicator = document.getElementById('status-indicator');
+                indicator.classList.remove('bg-red-500', 'animate-pulse');
+                indicator.classList.add('bg-green-500', 'shadow-[0_0_8px_#22c55e]');
+                document.getElementById('status-text').innerText = "Atualizado Agora";
+                document.getElementById('status-text').classList.replace('text-gray-400', 'text-green-400');
 
                 renderDashboard();
 
             } catch (err) {
-                showError(`Erro ao carregar dados: ${err.message}`);
-                statusDot.classList.replace('bg-blue-500', 'bg-red-500');
-                statusDot.classList.remove('animate-pulse');
-                statusText.innerText = "Offline";
-                statusText.classList.replace('text-[#8E8E93]', 'text-red-500');
+                console.error(err);
+                errorMsg.innerHTML = `Erro de conexão: ${err.message}`;
+                errorMsg.classList.remove('hidden');
             }
         }
 
-        function showError(msg) {
-            const el = document.getElementById('error-message');
-            el.innerText = msg;
-            el.classList.remove('hidden');
-        }
+        // =================================================================
+        // PROCESSAMENTO DE DADOS
+        // =================================================================
+        function processarCSV(csvText) {
+            const rows = csvText.split('\n').map(r => r.split(','));
+            if (rows.length < 2) return [];
+            
+            const headers = rows[0].map(h => h.trim().replaceAll('"', '').toLowerCase());
+            let partidas = [];
 
-        // LEITURA DO ARQUIVO CSV PRÉ-PROCESSADO
-        function processData(csvText) {
-            const rows = csvText.split('\n');
-            const headers = rows[0].split(',').map(h => h.trim().replace(/"/g, '').toLowerCase());
-
-            allAthletes = [];
-
-            for(let i=1; i<rows.length; i++) {
-                const rowStr = rows[i].trim();
-                if(!rowStr) continue;
-                
-                // Quebra o CSV respeitando as aspas
-                const row = rowStr.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(item => item.replace(/"/g, '').trim());
+            for(let i = 1; i < rows.length; i++) {
+                const row = rows[i];
                 if(row.length < headers.length) continue;
 
-                // Função de captura super flexível 
                 const getVal = (keyPart) => {
                     const idx = headers.findIndex(h => h.includes(keyPart.toLowerCase()));
                     if(idx === -1) return 0;
-                    let val = row[idx];
-                    if(!val) return 0;
-                    return Number(val.replace(',', '.')) || 0; // Transforma 12,50 em 12.50
+                    let val = row[idx] ? row[idx].replaceAll('"', '').trim() : "0";
+                    
+                    // Transforma 'S' ou 'N' em números, ou converte para float/int
+                    if(val.toUpperCase() === 'S') return 1;
+                    if(val.toUpperCase() === 'N') return 0;
+                    
+                    val = val.replace(',', '.'); // ajusta decimais pt-br
+                    return Number(val) || 0;
                 };
 
                 const getStr = (keyPart) => {
                     const idx = headers.findIndex(h => h.includes(keyPart.toLowerCase()));
-                    return (idx !== -1 && row[idx]) ? row[idx] : "";
+                    return (idx !== -1 && row[idx]) ? row[idx].replaceAll('"', '').trim() : "";
                 };
 
-                const nome = getStr('atleta');
+                // As variáveis obrigatórias que você solicitou:
+                const nome = getStr('atleta') || getStr('nome'); 
                 if(!nome) continue;
-                
-                // Ignora goleiros no rank principal caso existam (opcional)
-                const posicao = getStr('posi');
-                if(posicao.toLowerCase().includes('gol')) continue;
 
-                // Mapeia DIRETAMENTE as colunas do seu Excel processado
-                allAthletes.push({
+                partidas.push({
                     nome: nome,
-                    posicao: posicao,
-                    gols: getVal('gols'),
+                    posicao: getStr('posi'),
+                    gols: getVal('gol'),
                     assis: getVal('assist'),
-                    craque: getVal('craque da rodada'),
-                    timeRodada: getVal('time da rodada'),
-                    totalPts: getVal('pontuação total'),
-                    partidas: getVal('quantidade partidas'),
-                    cartoes: getVal('cartões'),
-                    cleanSheet: getVal('clean_sheet')
+                    timeRodada: getVal('time da rodada') || getVal('time_rodada'),
+                    craqueRodada: getVal('craque') || getVal('vencedor_melhor'),
+                    artilheiroRodada: getVal('artilheiro') || getVal('vencedor_artilharia'),
+                    partidasQtd: getVal('partida') || getVal('presenca'),
+                    pontuacaoTotal: getVal('pontua') || getVal('pontuacao_total')
                 });
             }
-
-            // Ordena unicamente pela sua coluna 'Pontuação Total' (do maior pro menor)
-            allAthletes.sort((a, b) => b.totalPts - a.totalPts);
+            return partidas;
         }
 
-        function createBentoCard(title, value, subtitle, icon, colorClass, borderClass) {
-            return `
-                <div class="bento-card">
-                    <div>
-                        <div class="bento-icon-wrapper">
-                            <i data-lucide="${icon}" class="w-[18px] h-[18px] ${colorClass}"></i>
-                        </div>
-                        <h3 class="text-[13px] font-medium text-[#8E8E93] leading-tight">${title}</h3>
-                    </div>
-                    <div class="mt-3">
-                        <div class="text-[26px] font-bold tracking-tight text-white leading-none mb-1">${value}</div>
-                        <div class="text-[12px] font-semibold ${colorClass} truncate bg-[${borderClass}]/10 inline-block px-2 py-0.5 rounded">${subtitle}</div>
-                    </div>
-                </div>
-            `;
+        function unificarEstatísticas(dadosBrutos) {
+            const map = {};
+            dadosBrutos.forEach(m => {
+                if(!map[m.nome]) {
+                    map[m.nome] = { 
+                        nome: m.nome, 
+                        posicao: m.posicao || 'N/A', 
+                        gols: 0, assis: 0, timeRodada: 0, 
+                        craqueRodada: 0, artilheiroRodada: 0, 
+                        partidasQtd: 0, pontuacaoTotal: 0 
+                    };
+                }
+                const p = map[m.nome];
+                
+                // Atualiza ou soma os dados de todas as planilhas cruzadas
+                if (m.posicao && m.posicao !== "") p.posicao = m.posicao; 
+                p.gols += m.gols;
+                p.assis += m.assis;
+                p.timeRodada += m.timeRodada;
+                p.craqueRodada += m.craqueRodada;
+                p.artilheiroRodada += m.artilheiroRodada;
+                p.partidasQtd += m.partidasQtd;
+                p.pontuacaoTotal += m.pontuacaoTotal;
+            });
+            return Object.values(map);
+        }
+
+        // =================================================================
+        // RENDERIZAÇÃO
+        // =================================================================
+        function getDestaque(lista, prop) {
+            if(!lista.length) return { nome: '--', val: 0 };
+            const top = [...lista].sort((a,b) => b[prop] - a[prop])[0];
+            return top[prop] > 0 ? { nome: top.nome, val: top[prop] } : { nome: '--', val: 0 };
         }
 
         function renderDashboard() {
-            // Separa os tops para os Cards superiores
-            const topGols = [...allAthletes].sort((a,b) => b.gols - a.gols)[0];
-            const topAssis = [...allAthletes].sort((a,b) => b.assis - a.assis)[0];
-            const topCraque = [...allAthletes].sort((a,b) => b.craque - a.craque)[0];
-            const topTime = [...allAthletes].sort((a,b) => b.timeRodada - a.timeRodada)[0];
-
-            document.getElementById('bento-grid').innerHTML = `
-                ${createBentoCard('Artilharia', topGols ? topGols.gols : 0, topGols ? topGols.nome : '-', 'target', 'text-red-400')}
-                ${createBentoCard('Assistências', topAssis ? topAssis.assis : 0, topAssis ? topAssis.nome : '-', 'footprints', 'text-blue-400')}
-                ${createBentoCard('Craque', topCraque ? topCraque.craque : 0, topCraque ? topCraque.nome : '-', 'star', 'text-yellow-400')}
-                ${createBentoCard('Presença', topTime ? topTime.timeRodada : 0, topTime ? topTime.nome : '-', 'shield-check', 'text-green-400')}
-            `;
+            if(!atletasAgrupados.length) return;
+            
+            // Popula os Highlights
+            const topGol = getDestaque(atletasAgrupados, 'gols');
+            document.getElementById('highlight-gols').innerHTML = `${topGol.val} <span class="text-xs text-gray-400 font-normal block truncate mt-1">${topGol.nome}</span>`;
+            
+            const topAssis = getDestaque(atletasAgrupados, 'assis');
+            document.getElementById('highlight-assis').innerHTML = `${topAssis.val} <span class="text-xs text-gray-400 font-normal block truncate mt-1">${topAssis.nome}</span>`;
+            
+            const topCraque = getDestaque(atletasAgrupados, 'craqueRodada');
+            document.getElementById('highlight-craque').innerHTML = `${topCraque.val}x <span class="text-xs text-gray-400 font-normal block truncate mt-1">${topCraque.nome}</span>`;
+            
+            const topTime = getDestaque(atletasAgrupados, 'timeRodada');
+            document.getElementById('highlight-time').innerHTML = `${topTime.val}x <span class="text-xs text-gray-400 font-normal block truncate mt-1">${topTime.nome}</span>`;
 
             renderList();
         }
 
-        // Lógica de sanfona (iOS Expansion)
-        function toggleRow(element) {
-            document.querySelectorAll('.player-row.active').forEach(row => {
-                if(row !== element) row.classList.remove('active');
-            });
-            element.classList.toggle('active');
-        }
-
         function renderList(searchTerm = "") {
-            let filtered = allAthletes;
+            let sorted = [...atletasAgrupados].sort((a,b) => b.pontuacaoTotal - a.pontuacaoTotal);
+            
             if (searchTerm) {
                 const term = searchTerm.toLowerCase();
-                filtered = filtered.filter(p => p.nome.toLowerCase().includes(term) || p.posicao.toLowerCase().includes(term));
+                sorted = sorted.filter(p => p.nome.toLowerCase().includes(term) || p.posicao.toLowerCase().includes(term));
             }
 
-            const imgError = "this.onerror=null; this.src='" + FOTO_GENERICA + "';";
-
-            const html = filtered.map((p, i) => {
-                
-                // Posições e Cores do Rank (Ouro, Prata, Bronze, Padrão)
-                let rankClass = "text-[#8E8E93] font-semibold";
-                if(i === 0) rankClass = "text-[#F5D061] font-bold text-[18px]"; 
-                else if(i === 1) rankClass = "text-[#E5E5EA] font-bold text-[17px]"; 
-                else if(i === 2) rankClass = "text-[#CD7F32] font-bold text-[17px]"; 
-
-                return `
-                <div class="player-row" onclick="toggleRow(this)">
-                    
-                    <div class="apple-list-item">
-                        <div class="w-8 text-center text-[15px] ${rankClass} shrink-0 mr-2">${i+1}</div>
+            const html = sorted.map((p, i) => `
+                <div class="player-row cursor-pointer" onclick="this.classList.toggle('active')">
+                    <div class="flex items-center px-5 py-4">
+                        <div class="w-8 text-center font-medium ${i < 3 ? 'text-gold' : 'text-gray-500'}">${i + 1}</div>
                         
-                        <img src="${getFoto(p.nome)}" class="avatar border border-gray-700/50" onerror="${imgError}" alt="${p.nome}">
+                        <div class="flex-grow flex items-center gap-4 pl-3">
+                            <div class="h-10 w-10 rounded-full border border-gray-600 bg-black overflow-hidden shrink-0 shadow-inner">
+                                <img src="${FOTO_GENERICA}" class="w-full h-full object-cover opacity-80" onerror="this.src='${FOTO_GENERICA}'">
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="font-semibold text-gray-100">${p.nome}</span>
+                                <span class="text-[10px] text-gray-400 uppercase tracking-wider">${p.posicao}</span>
+                            </div>
+                        </div>
                         
-                        <div class="item-content py-3 border-b border-gray-800/60">
-                            <div class="flex flex-col justify-center">
-                                <span class="font-semibold text-white text-[16px] tracking-tight leading-tight">${p.nome}</span>
-                                <span class="text-[11px] text-[#8E8E93] font-semibold mt-0.5 uppercase tracking-wider">${p.posicao}</span>
-                            </div>
-                            
-                            <div class="flex items-center gap-3">
-                                <div class="text-right">
-                                    <span class="font-bold text-[18px] text-white tracking-tight">${p.totalPts}</span>
-                                    <span class="text-[11px] text-[#8E8E93] font-semibold">pts</span>
-                                </div>
-                                <i data-lucide="chevron-right" class="chevron w-4 h-4 text-[#8E8E93]"></i>
-                            </div>
+                        <div class="w-16 text-center font-bold text-lg text-white">
+                            ${p.pontuacaoTotal.toFixed(1).replace('.0', '')}
+                        </div>
+                        
+                        <div class="w-8 text-center text-gray-500 rotate-icon">
+                            <i class="fas fa-chevron-down text-sm"></i>
                         </div>
                     </div>
 
                     <div class="player-details">
-                        <div class="grid grid-cols-4 gap-2 mb-3">
-                            <div class="stat-pill">
-                                <span class="text-[10px] text-[#8E8E93] font-semibold uppercase tracking-wider mb-0.5">Partidas</span>
-                                <span class="text-[17px] font-bold text-white tracking-tight">${p.partidas}</span>
+                        <div class="bg-black/40 rounded-xl p-4 border border-white/5">
+                            <h3 class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-3 border-b border-white/10 pb-2">Estatísticas Consolidadas</h3>
+                            
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+                                <div class="flex flex-col">
+                                    <span class="text-[10px] text-gray-500 uppercase">Partidas Jogadas</span>
+                                    <span class="font-semibold text-white">${p.partidasQtd}</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-[10px] text-gray-500 uppercase">Gols</span>
+                                    <span class="font-semibold text-white">${p.gols}</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-[10px] text-gray-500 uppercase">Assistências</span>
+                                    <span class="font-semibold text-white">${p.assis}</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-[10px] text-gold uppercase">Time da Rodada</span>
+                                    <span class="font-semibold text-white">${p.timeRodada}x</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-[10px] text-gold uppercase">Craque Rodada</span>
+                                    <span class="font-semibold text-white">${p.craqueRodada}x</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-[10px] text-gold uppercase">Artilheiro Rodada</span>
+                                    <span class="font-semibold text-white">${p.artilheiroRodada}x</span>
+                                </div>
                             </div>
-                            <div class="stat-pill">
-                                <span class="text-[10px] text-[#8E8E93] font-semibold uppercase tracking-wider mb-0.5">Gols</span>
-                                <span class="text-[17px] font-bold text-white tracking-tight">${p.gols}</span>
-                            </div>
-                            <div class="stat-pill">
-                                <span class="text-[10px] text-[#8E8E93] font-semibold uppercase tracking-wider mb-0.5">Assist</span>
-                                <span class="text-[17px] font-bold text-white tracking-tight">${p.assis}</span>
-                            </div>
-                            <div class="stat-pill">
-                                <span class="text-[10px] text-[#8E8E93] font-semibold uppercase tracking-wider mb-0.5">SG</span>
-                                <span class="text-[17px] font-bold text-blue-400 tracking-tight">${p.cleanSheet}</span>
-                            </div>
-                        </div>
-                        
-                        <div class="flex gap-2 flex-wrap">
-                            ${p.craque > 0 ? `<div class="bg-yellow-500/10 text-yellow-500 text-[11px] px-2.5 py-1 rounded-full font-semibold border border-yellow-500/20 flex items-center gap-1"><i data-lucide="star" class="w-3 h-3"></i> Craque (${p.craque}x)</div>` : ''}
-                            ${p.timeRodada > 0 ? `<div class="bg-green-500/10 text-green-500 text-[11px] px-2.5 py-1 rounded-full font-semibold border border-green-500/20 flex items-center gap-1"><i data-lucide="shield-check" class="w-3 h-3"></i> Seleção (${p.timeRodada}x)</div>` : ''}
-                            ${p.cartoes > 0 ? `<div class="bg-red-500/10 text-red-500 text-[11px] px-2.5 py-1 rounded-full font-semibold border border-red-500/20 flex items-center gap-1"><i data-lucide="square" class="w-3 h-3 bg-red-500 text-red-500 rounded-[2px]"></i> Cartões (${p.cartoes}x)</div>` : ''}
                         </div>
                     </div>
                 </div>
-                `;
-            }).join('');
+            `).join('');
 
-            const container = document.getElementById('ranking-list');
-            if(filtered.length > 0) {
-                container.innerHTML = html;
-                lucide.createIcons(); 
-            } else {
-                container.innerHTML = `<div class="p-8 text-center text-[#8E8E93] font-medium text-[15px]">Nenhum atleta encontrado.</div>`;
-            }
+            document.getElementById('ranking-list').innerHTML = sorted.length ? html : `<div class="p-8 text-center text-gray-500 text-sm">Nenhum atleta encontrado.</div>`;
         }
 
-        // Pesquisa Dinâmica
-        document.getElementById('search-input').addEventListener('input', (e) => {
-            renderList(e.target.value);
-        });
-
-        // Executar
+        document.getElementById('search-input').addEventListener('input', (e) => renderList(e.target.value));
+        
+        // Inicializa
         init();
     </script>
 </body>
