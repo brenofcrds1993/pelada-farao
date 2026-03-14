@@ -699,30 +699,56 @@ var UI = {
 // ══════════════════════════════════════════════════════════════
 //  CARGA DE DADOS
 // ══════════════════════════════════════════════════════════════
+// JSONP — contorna CORS do Apps Script sem precisar de proxy
+var _jsonpTimeout = null;
+
+window.jogadataCallback = function(json) {
+  clearTimeout(_jsonpTimeout);
+  // Remove script tag injetado
+  var el = document.getElementById('_jsonp_script');
+  if (el) el.parentNode.removeChild(el);
+
+  if (json.erro) {
+    showError('Erro nos dados: ' + json.erro);
+    return;
+  }
+  DATA.atletas       = json.atletas       || [];
+  DATA.totais        = json.totais        || {};
+  DATA.rankingPorMes = json.rankingPorMes || {};
+  initUI();
+  setTimeout(function(){
+    document.getElementById('loading-screen').classList.add('hidden');
+  }, 300);
+};
+
 function loadData() {
   document.getElementById('loading-screen').classList.remove('hidden');
   document.getElementById('error-screen').style.display = 'none';
 
-  fetch(API_URL)
-    .then(function(r) {
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.json();
-    })
-    .then(function(json) {
-      if (json.erro) throw new Error(json.erro);
-      DATA.atletas       = json.atletas       || [];
-      DATA.totais        = json.totais        || {};
-      DATA.rankingPorMes = json.rankingPorMes || {};
-      initUI();
-      setTimeout(function(){
-        document.getElementById('loading-screen').classList.add('hidden');
-      }, 300);
-    })
-    .catch(function(err) {
-      document.getElementById('loading-screen').classList.add('hidden');
-      document.getElementById('error-screen').style.display = 'flex';
-      document.getElementById('error-msg').textContent = 'Erro: ' + err.message + '. Verifique a URL da API em config.js ou recarregue.';
-    });
+  // Remove script anterior se existir
+  var old = document.getElementById('_jsonp_script');
+  if (old) old.parentNode.removeChild(old);
+
+  // Timeout de 15s caso o script não carregue
+  _jsonpTimeout = setTimeout(function(){
+    showError('Tempo esgotado. Verifique se a URL da API está correta e se a Web App está publicada como "Qualquer pessoa".');
+  }, 15000);
+
+  // Injeta <script src="API_URL?callback=jogadataCallback">
+  var script = document.createElement('script');
+  script.id  = '_jsonp_script';
+  script.src = API_URL + '?callback=jogadataCallback';
+  script.onerror = function() {
+    clearTimeout(_jsonpTimeout);
+    showError('Não foi possível carregar o script da API. Verifique a URL.');
+  };
+  document.head.appendChild(script);
+}
+
+function showError(msg) {
+  document.getElementById('loading-screen').classList.add('hidden');
+  document.getElementById('error-screen').style.display = 'flex';
+  document.getElementById('error-msg').textContent = msg;
 }
 
 // ══════════════════════════════════════════════════════════════
