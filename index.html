@@ -255,12 +255,31 @@ input, select, textarea { font-size: 16px !important; }
 .tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .dual-col-art{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .dtbl thead tr th{
-  position:sticky;
-  top:var(--thead-top, 50px);
-  z-index:20;
   background:#F4F4F2;
   box-shadow:0 1px 0 rgba(0,0,0,.12);
 }
+/* Sticky header clone — posicionado via JS */
+.sticky-hdr{
+  position:fixed;
+  left:0;right:0;
+  z-index:30;
+  display:none;
+  overflow:hidden;
+  background:#F4F4F2;
+  box-shadow:0 1px 3px rgba(0,0,0,.1);
+}
+.sticky-hdr table{
+  width:100%;
+  border-collapse:collapse;
+  table-layout:fixed;
+}
+.sticky-hdr th{
+  font-size:9.5px;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-lt);padding:9px 14px;
+  text-align:left;white-space:nowrap;
+}
+.sticky-hdr th.num{text-align:right}
 .dtbl th{
   padding:9px 14px;font-size:9.5px;font-weight:600;
   letter-spacing:.1em;text-transform:uppercase;color:var(--ink-lt);
@@ -614,8 +633,8 @@ svg.sparkline{width:100%;height:100%;overflow:visible}
           <option value="">Ano completo</option>
         </select>
       </div>
-      <div class="tbl-scroll">
-        <table class="dtbl">
+      <div class="tbl-scroll" id="ranking-scroll">
+        <table class="dtbl" id="ranking-table">
           <thead><tr>
             <th style="width:32px;text-align:center">#</th>
             <th onclick="srtR('atleta')">Atleta</th>
@@ -867,6 +886,10 @@ function navigate(view, el) {
 
   // Fecha sidebar em mobile após navegar
   document.getElementById('sidebar').classList.remove('open');
+  hideStickyHeader();
+  if (view === 'ranking') {
+    setTimeout(function(){ initStickyHeader('ranking-table','ranking-scroll'); }, 100);
+  }
 
   if (view==='ranking')    renderRanking();
   if (view==='artilharia') renderArtilharia();
@@ -989,6 +1012,10 @@ function renderRanking() {
   var mesLabel = UI.mes ? ((meses.find(function(m){return m.chave===UI.mes;})||{label:UI.mes}).label) : 'Ano completo';
   document.getElementById('ranking-pill').textContent = lista.length+' atletas · '+mesLabel;
 
+  // Inicia sticky header quando a view de ranking está visível
+  setTimeout(function(){
+    if (UI.view === 'ranking') initStickyHeader('ranking-table', 'ranking-scroll');
+  }, 50);
   document.getElementById('tbody-r').innerHTML = lista.map(function(a, i) {
     var rank = i+1;
     var ga   = (a.gols||0)+(a.assistencias||0);
@@ -1017,8 +1044,8 @@ function filtrarMes(v){ UI.mes=v; renderRanking(); }
 //  ARTILHARIA / GARÇOM
 // ══════════════════════════════════════════════════════════════
 function renderArtilharia() {
-  var art = sorted(DATA.atletas.filter(function(a){return (a.gols||0)>0;}), 'gols', false);
-  var gar = sorted(DATA.atletas.filter(function(a){return (a.assistencias||0)>0;}), 'assistencias', false);
+  var art = sorted(DATA.atletas.filter(function(a){return (a.gols||0)>0;}), 'gols', false).slice(0,10);
+  var gar = sorted(DATA.atletas.filter(function(a){return (a.assistencias||0)>0;}), 'assistencias', false).slice(0,10);
 
   function lb(lista, valKey, lbl) {
     return lista.map(function(a,i){
@@ -1340,17 +1367,69 @@ function closeModal(e) {
 // ══════════════════════════════════════════════════════════════
 //  INIT
 // ══════════════════════════════════════════════════════════════
-// Calcula altura real da topbar (inclui safe-area no iOS)
-// e passa como CSS variable para o thead sticky
-function updateTheadTop() {
-  var topbar = document.querySelector('.topbar');
-  if (topbar) {
-    var h = topbar.getBoundingClientRect().height;
-    document.documentElement.style.setProperty('--thead-top', h + 'px');
+// ── Sticky header manual (funciona em iOS e Android) ─────────
+// Clona o thead da tabela visível e o posiciona como overlay fixed.
+var _stickyActive = null;
+
+function initStickyHeader(tableId, scrollWrapperId) {
+  var table  = document.getElementById(tableId);
+  var wrap   = document.getElementById(scrollWrapperId);
+  if (!table || !wrap) return;
+
+  // Cria ou reutiliza o overlay
+  var overlay = document.getElementById('sticky-hdr-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'sticky-hdr-overlay';
+    overlay.className = 'sticky-hdr';
+    document.body.appendChild(overlay);
   }
+
+  // Clona o thead
+  var thead    = table.querySelector('thead');
+  var cloneDiv = document.createElement('div');
+  cloneDiv.style.marginLeft = (_stickyActive === 'sidebar') ? '224px' : '0';
+  cloneDiv.innerHTML = '<table class="dtbl"><thead>' + thead.innerHTML + '</thead></table>';
+  overlay.innerHTML = '';
+  overlay.appendChild(cloneDiv);
+
+  // Sincroniza scroll horizontal
+  wrap.addEventListener('scroll', function(){
+    cloneDiv.querySelector('table').style.transform = 'translateX(-' + wrap.scrollLeft + 'px)';
+  });
+
+  var topbar = document.querySelector('.topbar');
+
+  function onScroll() {
+    var topbarH = topbar ? topbar.getBoundingClientRect().bottom : 50;
+    var tableRect = table.getBoundingClientRect();
+    var theadH    = thead.getBoundingClientRect().height;
+
+    if (tableRect.top < topbarH && tableRect.bottom > topbarH + theadH * 2) {
+      // Mostrar sticky
+      overlay.style.display = 'block';
+      overlay.style.top     = topbarH + 'px';
+      // Sincroniza largura com o wrapper
+      var wrapRect = wrap.getBoundingClientRect();
+      overlay.style.left    = wrapRect.left + 'px';
+      overlay.style.right   = (window.innerWidth - wrapRect.right) + 'px';
+      overlay.style.width   = '';
+    } else {
+      overlay.style.display = 'none';
+    }
+  }
+
+  // Remove listener anterior
+  window.removeEventListener('scroll', _lastScrollHandler);
+  _lastScrollHandler = onScroll;
+  window.addEventListener('scroll', onScroll, { passive:true });
 }
-updateTheadTop();
-window.addEventListener('resize', updateTheadTop);
+var _lastScrollHandler = function(){};
+
+function hideStickyHeader() {
+  var overlay = document.getElementById('sticky-hdr-overlay');
+  if (overlay) overlay.style.display = 'none';
+}
 
 loadData();
 </script>
