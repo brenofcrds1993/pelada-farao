@@ -74,7 +74,7 @@ body{font-family:var(--fb);background:var(--surface);color:var(--ink);min-height
   height:50px;border-bottom:1px solid var(--bd);
   display:flex;align-items:center;justify-content:space-between;
   padding:0 28px;background:var(--surface);
-  position:sticky;top:0;z-index:100;
+  position:sticky;top:0;z-index:50;
 }
 .topbar-left{display:flex;align-items:center;gap:12px}
 .menu-btn{display:none;background:none;border:none;cursor:pointer;padding:6px;color:var(--ink-mid)}
@@ -220,7 +220,7 @@ body{font-family:var(--fb);background:var(--surface);color:var(--ink);min-height
 
 /* ─── Tabela de dados ────────────────────────────────────── */
 .dtbl{width:100%;border-collapse:collapse}
-.dtbl thead{position:sticky;top:50px;z-index:10;background:#F4F4F2}
+.dtbl thead{position:sticky;top:50px;z-index:20;background:#F4F4F2;box-shadow:0 1px 0 rgba(0,0,0,.1)}
 .dtbl th{
   padding:9px 14px;font-size:9.5px;font-weight:600;
   letter-spacing:.1em;text-transform:uppercase;color:var(--ink-lt);
@@ -624,9 +624,9 @@ svg.sparkline{width:100%;height:100%;overflow:visible}
         <table class="dtbl">
           <thead><tr>
             <th onclick="srtRec('atleta')">Atleta</th>
-            <th class="num" onclick="srtRec('melhorPontuacao',true)">Melhor pontuação</th>
-            <th class="num" onclick="srtRec('melhorGols',true)">Mais gols num dia</th>
-            <th class="num" onclick="srtRec('melhorAssist',true)">Mais assist. num dia</th>
+            <th class="num" onclick="srtRec('melhorPontuacao',true)">Melhor mês (pts)</th>
+            <th class="num" onclick="srtRec('melhorGols',true)">Gols (acum.)</th>
+            <th class="num" onclick="srtRec('melhorAssist',true)">Assist. (acum.)</th>
             <th class="num" onclick="srtRec('taxaPresenca',true)">Taxa presença</th>
           </tr></thead>
           <tbody id="tbody-rec"></tbody>
@@ -686,7 +686,7 @@ svg.sparkline{width:100%;height:100%;overflow:visible}
 var PROXY_URL = "https://script.google.com/macros/s/AKfycbzL1p6lDnTYsjo1NfciKa-pRo-NV6S4hnIu1P8zPJ_kGvVGSmx50JDaqWoCjZU5plc4/exec";
 
 // 2. URL original do Jogadata (mantida aqui só para referência)
-var API_URL = "https://script.google.com/macros/s/AKfycbzSh_v5q-kelnml9wVP5Dmc8qos0X2XvDKYOPUKD9-dNuF1nfPcYiLrxlVH07OG89HR/exec";
+var API_URL = "https://script.google.com/macros/s/SEU_JOGADATA_ID/exec";
 
 // ══════════════════════════════════════════════════════════════
 //  ESTADO GLOBAL
@@ -1019,20 +1019,31 @@ function srtD(col,nd){ UI.sortD={col:col,asc:UI.sortD.col===col?!UI.sortD.asc:!n
 //  STREAKS & RECORDS
 // ══════════════════════════════════════════════════════════════
 function calcularRecords() {
-  // Calcula records derivados dos dados acumulados
   return DATA.atletas.map(function(a) {
     var taxaP = (a.qtdPartidas||0)>0 ? (a.pontualidade||0)/(a.qtdPartidas||1) : 0;
-    // "Melhor pontuação num jogo" — aproximado: pontuacaoTotal / partidas * 1.4 (pico estimado)
-    // Idealmente viria do rankingPorMes, mas usamos o que temos
+
+    // Acha o melhor mês (pontuação mais alta) e guarda o nome do mês
     var melhorMes = 0;
-    Object.keys(DATA.rankingPorMes).forEach(function(chave) {
+    var melhorMesLabel = '—';
+    var nomeMesArr = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+                        'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+    Object.keys(DATA.rankingPorMes).sort().forEach(function(chave) {
       var atletaMes = (DATA.rankingPorMes[chave]||[]).find(function(x){return x.atleta===a.atleta;});
-      if (atletaMes && (atletaMes.pontuacao||0) > melhorMes) melhorMes = atletaMes.pontuacao;
+      if (atletaMes && (atletaMes.pontuacao||0) > melhorMes) {
+        melhorMes = atletaMes.pontuacao;
+        // chave = "03/2026" → "Março/26"
+        var partes = chave.split('/');
+        var numMes = parseInt(partes[0]);
+        melhorMesLabel = (nomeMesArr[numMes] || 'Mês '+numMes) + '/' + (partes[1]||'').slice(-2);
+      }
     });
+
     return {
       atleta:          a.atleta,
       posicao:         a.posicao,
       melhorPontuacao: melhorMes || 0,
+      melhorMesLabel:  melhorMesLabel,
       melhorGols:      a.gols || 0,
       melhorAssist:    a.assistencias || 0,
       taxaPresenca:    taxaP,
@@ -1060,13 +1071,20 @@ function renderStreaks() {
     .slice(0, 3);
 
   var streakCards = [
-    {
-      lbl:'Mais presente em 2026',
-      icon:'★',
-      name: topPresenca[0] ? topPresenca[0].atleta : '—',
-      val:  topPresenca[0] ? topPresenca[0].qtdPartidas+'/'+totalDom : '—',
-      desc: topPresenca[0] ? 'domingos jogados. ' + (topPresenca[1]?topPresenca[1].atleta+' e '+topPresenca[2].atleta+' logo atrás':'') : '',
-    },
+    (function(){
+      // Agrupa todos os empatados no topo
+      var maxDom = topPresenca[0] ? topPresenca[0].qtdPartidas : 0;
+      var empatados = DATA.atletas.filter(function(a){ return (a.qtdPartidas||0) === maxDom && maxDom > 0; });
+      var nomes = empatados.map(function(a){ return a.atleta; });
+      var label = nomes.length === 1 ? nomes[0] : nomes.slice(0,-1).join(', ') + ' e ' + nomes[nomes.length-1];
+      return {
+        lbl: 'Mais presente em 2026',
+        icon: '★',
+        name: label,
+        val:  maxDom + '/' + totalDom,
+        desc: nomes.length > 1 ? nomes.length + ' atletas empatados com ' + maxDom + ' domingos' : 'domingos jogados',
+      };
+    })(),
     {
       lbl:'Média gols por jogo',
       icon:'G',
@@ -1098,7 +1116,7 @@ function renderStreaks() {
       desc:'Taxa de pontualidade no ano',
     },
     {
-      lbl:'Maior confirmou & não foi',
+      lbl:'Mais vezes no time lanterna',
       icon:'✗',
       name:(function(){
         // artilheiro de "plantadas" — timeLanterna como proxy de má participação
@@ -1109,7 +1127,7 @@ function renderStreaks() {
         var top = DATA.atletas.sort(function(a,b){return (b.timeLanterna||0)-(a.timeLanterna||0);});
         return top[0]?(top[0].timeLanterna||0)+'x':'—';
       })(),
-      desc:'Vezes no time lanterna 🪳',
+      desc:'Vezes no time com menos pontos na rodada',
     },
   ];
 
@@ -1129,7 +1147,8 @@ function renderStreaks() {
     var bdg = pct>=90?'disc-ok':pct>=70?'disc-mid':'disc-bad';
     return '<tr>'+
       '<td>'+acell(a, true)+'</td>'+
-      '<td class="num"><span class="nfeat">'+a.melhorPontuacao+'</span></td>'+
+      '<td class="num"><span class="nfeat">'+a.melhorPontuacao+'</span> '+
+        '<span class="nmono" style="font-size:10px;color:var(--ink-lt)">'+a.melhorMesLabel+'</span></td>'+
       '<td class="num"><span class="nmono">'+a.melhorGols+'</span></td>'+
       '<td class="num"><span class="nmono">'+a.melhorAssist+'</span></td>'+
       '<td class="num"><span class="'+bdg+'">'+pct+'%</span></td>'+
@@ -1180,8 +1199,20 @@ function openProfile(nome) {
       }).join('')+
       '</div>'+
       '<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--ink-lt)">'+
-      mesHist.map(function(m){return '<span>'+m.pts+'</span>';}).join('')+
+      mesHist.map(function(m){return '<span title="'+m.chave+'">'+m.pts+'</span>';}).join('')+
       '</div>';
+
+    // Melhor mês destacado abaixo do gráfico
+    var melhorMesObj = mesHist.reduce(function(best,m){ return m.pts > best.pts ? m : best; }, {pts:0, chave:'—'});
+    var nomeMesArrL = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+                         'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    if (melhorMesObj.chave !== '—') {
+      var pp = melhorMesObj.chave.split('/');
+      var nmL = (nomeMesArrL[parseInt(pp[0])] || 'Mês '+pp[0]) + ' de ' + (pp[1]||'');
+      histHtml += '<div style="font-size:11px;color:var(--ink-lt);margin-top:6px">'+
+        'Melhor mês: <strong style="color:var(--pitch)">'+nmL+'</strong> com '+
+        '<strong style="color:var(--pitch)">'+melhorMesObj.pts+' pts</strong></div>';
+    }
   }
 
   // Records
