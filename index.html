@@ -55,14 +55,14 @@ html, body { max-width:100%; overflow-x:hidden; }
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
 }
-/* Evita bounce scroll horizontal no iOS */
-* { -webkit-overflow-scrolling: touch; }
+/* Evita bounce scroll horizontal no iOS — só em containers de scroll */
+.tbl-scroll, .sidebar-nav, .modal { -webkit-overflow-scrolling: touch; }
 /* Corrige inputs/selects no iOS que aumentam zoom automaticamente */
 input, select, textarea { font-size: 16px !important; }
 /* Remove tap highlight azul do iOS */
 * { -webkit-tap-highlight-color: transparent; }
 /* Garante que flex containers não excedam 100vw */
-.main { max-width: 100vw; overflow-x: hidden; }
+.main { max-width: 100vw; }
 
 /* ─── Sidebar ────────────────────────────────────────────── */
 .sidebar{
@@ -251,12 +251,12 @@ input, select, textarea { font-size: 16px !important; }
 .msel:focus{border-color:var(--pitch-mid)}
 
 /* ─── Tabela de dados ────────────────────────────────────── */
-.dtbl{width:100%;border-collapse:collapse;table-layout:fixed}
+.dtbl{width:100%;border-collapse:collapse}
 .tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .dual-col-art{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .dtbl thead tr th{
   position:sticky;
-  top:calc(50px + env(safe-area-inset-top));
+  top:var(--thead-top, 50px);
   z-index:20;
   background:#F4F4F2;
   box-shadow:0 1px 0 rgba(0,0,0,.12);
@@ -291,7 +291,7 @@ input, select, textarea { font-size: 16px !important; }
   display:flex;align-items:center;justify-content:center;flex-shrink:0;
 }
 .an{font-weight:500;font-size:13px}
-.as{font-size:10.5px;color:var(--ink-lt);margin-top:1px}
+.as{font-size:10px;color:var(--ink-lt);margin-top:1px}
 
 /* Tags de posição */
 .ptag{display:inline-block;font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:2px 7px;border-radius:2px}
@@ -452,7 +452,6 @@ svg.sparkline{width:100%;height:100%;overflow:visible}
   .acell{gap:7px}
   .av{width:24px;height:24px;font-size:.7rem;flex-shrink:0}
   .an{font-size:12px}
-  .as{display:none}
   .ptag{font-size:8px;padding:1px 5px}
   .nfeat{font-size:1rem}
   .lb-item{padding:9px 12px}
@@ -466,7 +465,14 @@ svg.sparkline{width:100%;height:100%;overflow:visible}
   .sc-val{font-size:1.7rem}
   .dual-col-art{grid-template-columns:1fr}
 }
-@media(max-width:480px){.hide-xs{display:none}}
+@media(max-width:600px){
+  .col-pos, .col-med, .col-ga { display:none }
+  .as { display:block !important }
+  .dtbl td, .dtbl th { padding:9px 8px }
+  .dtbl td:first-child, .dtbl th:first-child { padding-left:14px }
+  .btrack { min-width:50px }
+}
+@media(max-width:480px){ .hide-xs{display:none} }
 @media(max-width:380px){
   .view{padding:10px}
   .dtbl td{padding:7px 8px;font-size:11.5px}
@@ -611,13 +617,13 @@ svg.sparkline{width:100%;height:100%;overflow:visible}
       <div class="tbl-scroll">
         <table class="dtbl">
           <thead><tr>
-            <th style="width:36px;text-align:center">#</th>
+            <th style="width:32px;text-align:center">#</th>
             <th onclick="srtR('atleta')">Atleta</th>
-            <th onclick="srtR('posicao')">Pos.</th>
+            <th class="col-pos" onclick="srtR('posicao')">Pos.</th>
             <th class="num desc" onclick="srtR('pontuacaoTotal',true)" id="th-pts">Pts</th>
-            <th class="num" onclick="srtR('mediaPontuacao',true)">Média</th>
+            <th class="num col-med" onclick="srtR('mediaPontuacao',true)">Média</th>
             <th class="num" onclick="srtR('qtdPartidas',true)">Dom.</th>
-            <th class="num hide-xs">G+A</th>
+            <th class="num col-ga">G+A</th>
           </tr></thead>
           <tbody id="tbody-r"></tbody>
         </table>
@@ -989,11 +995,11 @@ function renderRanking() {
     return '<tr>'+
       '<td style="text-align:center"><span class="rnk '+rnkClass(rank)+'">'+rank+'</span></td>'+
       '<td>'+acell(a, true)+'</td>'+
-      '<td>'+ptag(a.posicao)+'</td>'+
+      '<td class="col-pos">'+ptag(a.posicao)+'</td>'+
       '<td class="num">'+bar(a.pontuacaoTotal||0, mx)+'</td>'+
-      '<td class="num"><span class="nmono">'+f1(a.mediaPontuacao||0)+'</span></td>'+
+      '<td class="num col-med"><span class="nmono">'+f1(a.mediaPontuacao||0)+'</span></td>'+
       '<td class="num"><span class="nmono">'+(a.qtdPartidas||0)+'</span></td>'+
-      '<td class="num hide-xs">'+(ga>0?'<span class="gabadge">'+ga+'</span>':'<span class="nmono">—</span>')+'</td>'+
+      '<td class="num col-ga">'+(ga>0?'<span class="gabadge">'+ga+'</span>':'<span class="nmono">—</span>')+'</td>'+
     '</tr>';
   }).join('');
 }
@@ -1334,6 +1340,18 @@ function closeModal(e) {
 // ══════════════════════════════════════════════════════════════
 //  INIT
 // ══════════════════════════════════════════════════════════════
+// Calcula altura real da topbar (inclui safe-area no iOS)
+// e passa como CSS variable para o thead sticky
+function updateTheadTop() {
+  var topbar = document.querySelector('.topbar');
+  if (topbar) {
+    var h = topbar.getBoundingClientRect().height;
+    document.documentElement.style.setProperty('--thead-top', h + 'px');
+  }
+}
+updateTheadTop();
+window.addEventListener('resize', updateTheadTop);
+
 loadData();
 </script>
 </body>
