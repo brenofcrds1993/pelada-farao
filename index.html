@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <meta name="description" content="Jogadata — Estatísticas do Faraó FC 2026">
 <title>Jogadata · Faraó FC</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -183,7 +183,7 @@ body{font-family:var(--fb);background:var(--surface);color:var(--ink);min-height
 .field-div{width:1px;height:90px;background:rgba(255,255,255,.1);flex-shrink:0;align-self:center}
 .pcard{
   background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);
-  border-radius:6px;padding:8px 14px;text-align:center;min-width:96px;
+  border-radius:6px;padding:8px 10px;text-align:center;min-width:80px;
   transition:background .18s,transform .15s;cursor:default;
 }
 .pcard:hover{background:rgba(255,255,255,.18);transform:translateY(-2px)}
@@ -194,7 +194,7 @@ body{font-family:var(--fb);background:var(--surface);color:var(--ink);min-height
 
 /* ─── Controles de tabela ────────────────────────────────── */
 .tbl-ctrl{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--bd);flex-wrap:wrap}
-.search-wrap{flex:1;min-width:160px;position:relative}
+.search-wrap{flex:1;min-width:120px;position:relative}
 .search-wrap svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);opacity:.3;pointer-events:none}
 .search-inp{
   width:100%;padding:6px 10px 6px 30px;
@@ -221,6 +221,7 @@ body{font-family:var(--fb);background:var(--surface);color:var(--ink);min-height
 /* ─── Tabela de dados ────────────────────────────────────── */
 .dtbl{width:100%;border-collapse:collapse}
 .tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.dual-col-art{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .dtbl thead tr th{
   position:sticky;
   top:0;
@@ -272,10 +273,10 @@ body{font-family:var(--fb);background:var(--surface);color:var(--ink);min-height
 .nwarn{color:#DC2626;font-weight:600}
 
 /* Barra */
-.barcell{display:flex;align-items:center;gap:7px;min-width:100px}
+.barcell{display:flex;align-items:center;gap:6px;min-width:0}
 .btrack{flex:1;height:3px;background:#E8E8E5;border-radius:99px;overflow:hidden}
 .bfill{height:100%;background:var(--pitch);border-radius:99px;transition:width .3s ease}
-.bval{font-family:var(--fm);font-size:11px;color:var(--ink-lt);min-width:28px;text-align:right}
+.bval{font-family:var(--fm);font-size:11px;color:var(--ink-lt);min-width:22px;text-align:right}
 
 /* GA badge */
 .gabadge{display:inline-block;background:#FEF3C7;color:#78350F;font-size:10.5px;font-weight:600;font-family:var(--fm);padding:2px 7px;border-radius:2px}
@@ -325,6 +326,7 @@ body{font-family:var(--fb);background:var(--surface);color:var(--ink);min-height
   background:var(--card);border-radius:var(--rlg);
   width:100%;max-width:680px;max-height:90vh;
   overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);
+  margin:0 8px;
 }
 .modal-hdr{
   background:var(--pitch);padding:28px 28px 22px;
@@ -393,20 +395,52 @@ svg.sparkline{width:100%;height:100%;overflow:visible}
 @media(max-width:900px){
   .sidebar{transform:translateX(-100%)}
   .sidebar.open{transform:translateX(0);box-shadow:4px 0 24px rgba(0,0,0,.3)}
-  .main{margin-left:0;padding-bottom:60px}
+  .main{margin-left:0;padding-bottom:64px}
   .mobile-nav{display:flex}
   .menu-btn{display:flex}
   .stat-grid{grid-template-columns:repeat(2,1fr)}
   .awards-grid{grid-template-columns:repeat(2,1fr)}
   .modal-kpis{grid-template-columns:repeat(2,1fr)}
+  .topbar{padding:0 16px}
+  .topbar-right{gap:10px;font-size:11px}
+  .hero-stats{gap:20px}
+  .hero{padding:28px 22px}
+  .box-hdr{padding:12px 16px}
 }
 @media(max-width:560px){
-  .view{padding:14px}
+  .view{padding:12px}
   .stat-grid{grid-template-columns:1fr 1fr;gap:8px}
-  .hero{padding:24px 20px}
-  .hero-kpis{gap:20px}
+  .hero{padding:22px 16px}
+  .hero-kpis{gap:16px}
+  .kpi-val{font-size:2rem}
   .awards-grid{grid-template-columns:1fr}
   .records-grid{grid-template-columns:1fr}
+  .dtbl td{padding:8px 10px;font-size:12px}
+  .dtbl th{padding:8px 10px;font-size:8.5px}
+  .acell{gap:7px}
+  .av{width:24px;height:24px;font-size:.7rem;flex-shrink:0}
+  .an{font-size:12px}
+  .as{display:none}
+  .ptag{font-size:8px;padding:1px 5px}
+  .nfeat{font-size:1rem}
+  .lb-item{padding:9px 12px}
+  .lb-val{font-size:1.5rem}
+  .box-hdr{padding:11px 14px;flex-wrap:wrap;gap:6px}
+  .tbl-ctrl{padding:8px 10px;gap:6px}
+  .search-inp{font-size:12px;padding:5px 8px 5px 26px}
+  .fbtn{padding:4px 9px;font-size:10.5px}
+  .msel{font-size:10.5px;padding:4px 7px}
+  .stat-card{padding:14px 14px}
+  .sc-val{font-size:1.7rem}
+  .dual-col-art{grid-template-columns:1fr}
+}
+@media(max-width:480px){.hide-xs{display:none}}
+@media(max-width:380px){
+  .view{padding:10px}
+  .dtbl td{padding:7px 8px;font-size:11.5px}
+  .dtbl th{padding:7px 8px;font-size:8px}
+  .hero-title{font-size:2.2rem}
+  .stat-grid{gap:6px}
 }
 
 /* ─── Animações ──────────────────────────────────────────── */
@@ -551,7 +585,7 @@ svg.sparkline{width:100%;height:100%;overflow:visible}
             <th class="num desc" onclick="srtR('pontuacaoTotal',true)" id="th-pts">Pts</th>
             <th class="num" onclick="srtR('mediaPontuacao',true)">Média</th>
             <th class="num" onclick="srtR('qtdPartidas',true)">Dom.</th>
-            <th class="num">G+A</th>
+            <th class="num hide-xs">G+A</th>
           </tr></thead>
           <tbody id="tbody-r"></tbody>
         </table>
@@ -561,7 +595,7 @@ svg.sparkline{width:100%;height:100%;overflow:visible}
 
   <!-- ── ARTILHARIA ── -->
   <div id="view-artilharia" class="view">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div class="dual-col-art">
       <div class="box">
         <div class="box-hdr">
           <div class="box-hdr-l"><span class="box-title">Artilharia</span><span class="tag tag-dark">2026</span></div>
@@ -587,7 +621,7 @@ svg.sparkline{width:100%;height:100%;overflow:visible}
       <div class="box-hdr">
         <div class="box-hdr-l">
           <span class="box-title">Destaques Negativos</span>
-          <span class="tag tag-red">Resenha da pelada</span>
+          <span class="tag tag-red">Vergonha da pelada</span>
         </div>
       </div>
       <div class="awards-grid" id="aw-neg"></div>
@@ -927,7 +961,7 @@ function renderRanking() {
       '<td class="num">'+bar(a.pontuacaoTotal||0, mx)+'</td>'+
       '<td class="num"><span class="nmono">'+f1(a.mediaPontuacao||0)+'</span></td>'+
       '<td class="num"><span class="nmono">'+(a.qtdPartidas||0)+'</span></td>'+
-      '<td class="num">'+(ga>0?'<span class="gabadge">'+ga+'</span>':'<span class="nmono">—</span>')+'</td>'+
+      '<td class="num hide-xs">'+(ga>0?'<span class="gabadge">'+ga+'</span>':'<span class="nmono">—</span>')+'</td>'+
     '</tr>';
   }).join('');
 }
